@@ -1,30 +1,23 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view/>
+  <router-view class="router-view"/>
+  <the-statusbar class="the-statusbar"/>
 </template>
-
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import TheStatusbar from './components/TheStatusbar.vue'
+export default {
+  components: { TheStatusbar }
 }
+</script>
+<style lang="scss">
+@import "@/assets/style/base";
 
-#nav {
-  padding: 30px;
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+  .router-view {
+    flex: 1
   }
 }
 </style>

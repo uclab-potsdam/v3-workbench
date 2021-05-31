@@ -1,0 +1,16 @@
+@import "global";
+@import "typo";
+@import "themes";
+
+html {
+  font: 300 #{$font-size}/#{1.6} "Chivo", sans-serif;
+  box-sizing: border-box;
+  background: $background;
+  color: $text;
+  *, *:before, *:after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
+  }
+}
+

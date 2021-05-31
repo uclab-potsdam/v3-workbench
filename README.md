@@ -5,6 +5,11 @@
 npm install
 ```
 
+## Use specified node version (recommended, requires [nvm](https://github.com/nvm-sh/nvm))
+```
+nvm use
+```
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve

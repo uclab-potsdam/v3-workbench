@@ -8,4 +8,9 @@ $primary: var(--primary);
 $accent: var(--accent);
 $muted: var(--muted);
 
-$default-border: 1px solid $border;
+$base-border: 1px solid $border;
+$base-border-radius: $spacing;
+
+$narrow: 360px;
+$medium: 720px;
+$wide: 1080px;

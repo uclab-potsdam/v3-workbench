@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Canvas from '../views/Canvas.vue'
+import Main from '../views/Main.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'Canvas',
-    component: Canvas
+    name: 'Main',
+    component: Main
   },
   {
     path: '/about',

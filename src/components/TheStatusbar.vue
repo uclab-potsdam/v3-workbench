@@ -15,8 +15,8 @@ export default {
 
 <style scoped lang="scss">
 @import "@/assets/style/global";
-div {
-  border-top: $default-border;
+.statusbar {
+  border-top: $base-border;
   padding: $spacing * 0.5 $spacing;
   color: $muted;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="searchbar">
-    offline
+    <h2>Find or create cards</h2>
   </div>
 </template>
 
@@ -15,9 +15,14 @@ export default {
 
 <style scoped lang="scss">
 @import "@/assets/style/global";
-div {
-  border-top: $default-border;
-  padding: $spacing * 0.5 $spacing;
+.searchbar {
+  background: $background;
+  border: $base-border;
+  border-radius: $base-border-radius;
   color: $muted;
+  padding: $spacing * 0.5 $spacing;
+  margin-top: $spacing;
+  width: 100%;
+  max-width: $medium;
 }
 </style>

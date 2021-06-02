@@ -1,14 +1,39 @@
 <template>
   <div class="statusbar">
-    offline
+    <span>offline</span>
+    <span>
+      <select v-model="theme">
+        <option v-for="theme in themes" :key="theme">{{ theme }}</option>
+      </select>
+    </span>
   </div>
 </template>
 
 <script>
 export default {
   name: 'TheStatusbar',
-  props: {
-    msg: String
+  data () {
+    return {
+      themes: ['light', 'dark'],
+      theme: 'light'
+    }
+  },
+  methods: {
+    setTheme () {
+      const el = document.documentElement
+      this.themes.forEach(theme => {
+        el.classList.remove(theme)
+      })
+      el.classList.add(this.theme)
+    }
+  },
+  watch: {
+    theme: {
+      handler () {
+        this.setTheme()
+      },
+      immediate: true
+    }
   }
 }
 </script>
@@ -19,5 +44,7 @@ export default {
   border-top: $base-border;
   padding: $spacing * 0.5 $spacing;
   color: $muted;
+  display: flex;
+  justify-content: space-between;
 }
 </style>

@@ -6,3 +6,12 @@
   --accent: #{$orange-9};
   --muted: #{$gray-blue-7};
 }
+
+html.dark {
+  --background: #{$gray-0};
+  --text: #{$gray-blue-8};
+  --border: #{$gray-2};
+  --primary: #{$teal-1};
+  --accent: #{$orange-1};
+  --muted: #{$gray-blue-3};
+}

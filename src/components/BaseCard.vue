@@ -23,7 +23,16 @@
 
 <script>
 export default {
-  name: 'BaseCard'
+  name: 'BaseCard',
+  props: {
+    id: String,
+    label: String,
+    type: String,
+    description: String,
+    view: Object,
+    style: Object,
+    props: Array
+  }
 }
 </script>
 

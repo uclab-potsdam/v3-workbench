@@ -48,15 +48,15 @@ export default {
         .on('zoom', e => {
           this.transform = e.transform
         })
-        // .filter(e => {
-        //   console.log(e)
-        //   return !e.ctrlKey && !e.button
-        //   // return !(
-        //   //   e.ctrlKey ||
-        //   //   e.button // ||
-        //   //   // (e.type === 'wheel' && !e.shiftKey)
-        //   // )
-        // })
+        .filter(e => {
+          // console.log(e)
+          // return !e.ctrlKey && !e.button
+          return !(
+            e.ctrlKey ||
+            e.button ||
+            (e.type === 'wheel' && !e.shiftKey)
+          )
+        })
 
       z(select(this.$refs.svg))
     }

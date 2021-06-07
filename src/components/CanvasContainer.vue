@@ -7,10 +7,15 @@
         </pattern>
       </defs>
       <rect x="0" y="0" width="100%" height="100%" fill="url(#bg)"></rect>
-      <g :transform="transform"/>
+      <g :transform="transform">
+        <!-- edges -->
+      </g>
     </svg>
     <div class="cards" :style="{transform: transformString}">
-      <slot/>
+      <BaseCard
+        v-for="card in cards"
+        :key="card.id"
+        v-bind="card" />
     </div>
   </div>
 </template>
@@ -18,12 +23,21 @@
 <script>
 import { zoom } from 'd3-zoom'
 import { select } from 'd3-selection'
+
+import BaseCard from '@/components/BaseCard.vue'
+
+import cards from '@/assets/data/mock.json'
+
 export default {
   name: 'CanvasContainer',
+  components: {
+    BaseCard
+  },
   data () {
     return {
       size: { width: 0, height: 0 }, // not used atm, maybe necessary for a fit to view function
-      transform: { k: 1, x: 0, y: 0 }
+      transform: { k: 1, x: 0, y: 0 },
+      cards
     }
   },
   mounted () {

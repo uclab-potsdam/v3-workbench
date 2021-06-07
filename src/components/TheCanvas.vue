@@ -1,10 +1,5 @@
 <template>
-  <CanvasContainer>
-    <BaseCard
-      v-for="card in cards"
-      :key="card.id"
-      v-bind="card" />
-  </CanvasContainer>
+  <CanvasContainer/>
   <div class="floating">
     <TheSearchbar/>
     <CanvasControls/>
@@ -15,20 +10,16 @@
 import CanvasContainer from '@/components/CanvasContainer.vue'
 import CanvasControls from '@/components/CanvasControls.vue'
 import TheSearchbar from '@/components/TheSearchbar.vue'
-import BaseCard from '@/components/BaseCard.vue'
-import cards from '@/assets/data/mock.json'
 
 export default {
   name: 'Home',
   components: {
     CanvasContainer,
     CanvasControls,
-    TheSearchbar,
-    BaseCard
+    TheSearchbar
   },
   data () {
     return {
-      cards
     }
   }
 }

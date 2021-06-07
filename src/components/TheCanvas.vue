@@ -2,20 +2,17 @@
   <CanvasContainer/>
   <div class="floating">
     <TheSearchbar/>
-    <CanvasControls/>
   </div>
 </template>
 
 <script>
 import CanvasContainer from '@/components/CanvasContainer.vue'
-import CanvasControls from '@/components/CanvasControls.vue'
 import TheSearchbar from '@/components/TheSearchbar.vue'
 
 export default {
   name: 'Home',
   components: {
     CanvasContainer,
-    CanvasControls,
     TheSearchbar
   },
   data () {

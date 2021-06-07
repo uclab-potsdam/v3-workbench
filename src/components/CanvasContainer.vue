@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="svg">
+  <div class="container" v-resize="s => size = s" ref="container">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -17,30 +17,46 @@
         :key="card.id"
         v-bind="card" />
     </div>
+    <CanvasControls
+      @zoom-in="zoomIn()"
+      @zoom-out="zoomOut()"
+      @zoom-to-fit="zoomToFit()"
+      :min="transform.k === scaleExtent[0]"
+      :max="transform.k === scaleExtent[1]"/>
   </div>
 </template>
 
 <script>
-import { zoom } from 'd3-zoom'
+import { zoom, zoomIdentity } from 'd3-zoom'
 import { select } from 'd3-selection'
 
 import BaseCard from '@/components/BaseCard.vue'
+import CanvasControls from '@/components/CanvasControls.vue'
 
 import cards from '@/assets/data/mock.json'
 
 export default {
   name: 'CanvasContainer',
   components: {
+    CanvasControls,
     BaseCard
   },
   data () {
     return {
-      size: { width: 0, height: 0 }, // not used atm, maybe necessary for a fit to view function
-      transform: { k: 1, x: 0, y: 0 },
-      cards
+      size: { width: 0, height: 0 },
+      transform: zoomIdentity,
+      cards,
+      zoom: null,
+      scaleExtent: [0.1, 2],
+      cardWidth: 280,
+      cardHeight: 420,
+      safeArea: [82, 20, 20, 20],
+      transition: 400,
+      container: null
     }
   },
   mounted () {
+    this.container = select(this.$refs.container)
     this.initZoom()
   },
   computed: {
@@ -57,23 +73,51 @@ export default {
     transformString () {
       const { x, y, k } = this.transform
       return `translate(${x}px, ${y}px) scale(${k})`
+    },
+    boundingRect () {
+      const x = this.cards.map(card => card.view.x)
+      const y = this.cards.map(card => card.view.y)
+      return [
+        [Math.min(...x), Math.min(...y)],
+        [Math.max(...x), Math.max(...y)]
+      ]
     }
   },
   methods: {
     initZoom () {
-      // Init D3 zoom
-      const z = zoom()
-        .scaleExtent([0.2, 2])
-        .on('zoom', e => {
-          this.transform = e.transform
-        })
-        .filter((e) => {
-          return (
-            !e.button &&
-            !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
-          )
-        })
-      select(this.$refs.svg).call(z).on('dblclick.zoom', null)
+      this.zoom = zoom()
+        .scaleExtent(this.scaleExtent)
+        .on('zoom', e => { this.transform = e.transform })
+        .filter(e => !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey))
+      this.container.call(this.zoom).on('dblclick.zoom', null)
+    },
+    zoomIn () {
+      this.container.transition().duration(this.transition).call(this.zoom.scaleBy, 2)
+    },
+    zoomOut () {
+      this.container.transition().duration(this.transition).call(this.zoom.scaleBy, 0.5)
+    },
+    zoomToFit () {
+      const { boundingRect, size, cardWidth, cardHeight, safeArea, transition, scaleExtent } = this
+      const center = [
+        (boundingRect[0][0] + boundingRect[1][0] - cardWidth) / 2,
+        (boundingRect[0][1] + boundingRect[1][1] - cardHeight) / 2
+      ]
+      const dims = [
+        (boundingRect[1][0] + cardWidth - boundingRect[0][0]),
+        (boundingRect[1][1] + cardHeight - boundingRect[0][1])
+      ]
+      const safeHeight = size.height - safeArea[0] - safeArea[2]
+      const safeWidth = size.width - safeArea[1] - safeArea[3]
+      const scale = Math.max(Math.min(safeWidth / dims[0], safeHeight / dims[1], scaleExtent[1]), scaleExtent[0])
+
+      this.container.transition().duration(transition).call(
+        this.zoom.transform,
+        zoomIdentity
+          .translate(safeWidth / 2 + safeArea[3], safeHeight / 2 + safeArea[0])
+          .scale(scale)
+          .translate(...center)
+      )
     }
   }
 }

@@ -1,7 +1,8 @@
 <template>
   <div class="controls">
-    <BaseButton>+</BaseButton>
-    <BaseButton>-</BaseButton>
+    <BaseButton :disabled="max" @click="$emit('zoom-in')">+</BaseButton>
+    <BaseButton :disabled="min" @click="$emit('zoom-out')">-</BaseButton>
+    <BaseButton @click="$emit('zoom-to-fit')">fit</BaseButton>
   </div>
 </template>
 
@@ -9,13 +10,19 @@
 import BaseButton from './BaseButton.vue'
 export default {
   components: { BaseButton },
-  name: 'CanvasControls'
+  name: 'CanvasControls',
+  props: {
+    max: Boolean,
+    min: Boolean
+  }
 }
 </script>
 
 <style scoped lang="scss">
 .controls {
-  align-self: flex-end;
+  position: absolute;
+  bottom: var(--spacing);
+  right: var(--spacing);
   display: flex;
   flex-direction: column;
 }

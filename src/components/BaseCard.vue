@@ -1,10 +1,8 @@
 <template>
- <foreignObject :x="view.x" :y="view.y" width="280" height="400">
-    <div class="card" :style="colors">
-      <h1>{{ label }}</h1>
-      <h2>{{ type }}</h2>
-    </div>
-  </foreignObject>
+  <div class="card" :style="{...colors, ...transform}">
+    <h1>{{ label }}</h1>
+    <h2>{{ type }}</h2>
+  </div>
 </template>
 
 <script>
@@ -26,6 +24,12 @@ export default {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
       }
+    },
+    transform () {
+      const { x, y } = this.view
+      return {
+        transform: `translate(${x}px, ${y}px)`
+      }
     }
   }
 }
@@ -35,9 +39,10 @@ export default {
 .card {
   background: var(--background);
   color: var(--text);
-  height: 100%;
+  position: absolute;
+  width: 280px;
+  height: 420px;
   padding: var(--spacing);
   overflow: auto; // breaks things in desktop safari
-  // border-radius: $base-border-radius;
 }
 </style>

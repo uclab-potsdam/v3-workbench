@@ -43,6 +43,6 @@ export default {
   width: 280px;
   height: 420px;
   padding: var(--spacing);
-  overflow: auto; // breaks things in desktop safari
+  overflow: auto;
 }
 </style>

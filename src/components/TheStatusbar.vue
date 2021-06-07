@@ -39,11 +39,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/global";
 .statusbar {
-  border-top: $base-border;
-  padding: $spacing * 0.5 $spacing;
-  color: $muted;
+  border-top: var(--base-border);
+  padding: var(--spacing-s) var(--spacing);
+  color: var(--muted);
   display: flex;
   justify-content: space-between;
 }

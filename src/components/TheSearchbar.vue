@@ -14,15 +14,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/global";
 .searchbar {
-  background: $background;
-  border: $base-border;
-  border-radius: $base-border-radius;
-  color: $muted;
-  padding: $spacing * 0.5 $spacing;
-  margin-top: $spacing;
+  background: var(--background);
+  border: var(--base-border);
+  border-radius: var(--base-border-radius);
+  color: var(--muted);
+  padding: var(--spacing-s) var(--spacing);
+  margin-top: var(--spacing);
   width: 100%;
-  max-width: $medium;
+  max-width: var(--medium);
 }
 </style>

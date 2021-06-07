@@ -1,16 +1,16 @@
-$font-size: 12.5px;
-$spacing: 0.8rem;
+:root {
+  --font-size: 12.5px;
+  --spacing: 0.8rem;
+  --spacing-xs: 0.2rem;
+  --spacing-s: 0.4rem;
+  --spacing-m: var(--spacing);
+  --spacing-l: 1.6rem;
+  --spacing-xl: 3.2rem;
 
-$background: var(--background);
-$text: var(--text);
-$border: var(--border);
-$primary: var(--primary);
-$accent: var(--accent);
-$muted: var(--muted);
+  --base-border: 1px solid var(--border);
+  --base-border-radius: var(--spacing);
 
-$base-border: 1px solid $border;
-$base-border-radius: $spacing;
-
-$narrow: 360px;
-$medium: 720px;
-$wide: 1080px;
+  --narrow: 360px;
+  --medium: 720px;
+  --wide: 1080px;
+}

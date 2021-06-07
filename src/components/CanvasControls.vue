@@ -14,7 +14,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/global";
 .controls {
   align-self: flex-end;
   display: flex;

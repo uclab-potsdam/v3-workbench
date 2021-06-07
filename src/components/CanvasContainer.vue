@@ -62,7 +62,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/global";
 .container {
   flex-direction: column;
   width: 100%;
@@ -73,7 +72,7 @@ export default {
 
     #bg {
       .cross {
-        stroke: $border;
+        stroke: var(--border);
       }
     }
   }

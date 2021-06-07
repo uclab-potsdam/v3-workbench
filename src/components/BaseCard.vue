@@ -23,12 +23,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/global";
 .card {
-  background: $red-3;
-  color: $yellow-8;
+
+  background: var(--red-2);
+  color: var(--yellow-8);
   height: 100%;
-  padding: $spacing;
+  padding: var(--spacing);
   overflow: auto; // breaks things in desktop safari
   // border-radius: $base-border-radius;
 }

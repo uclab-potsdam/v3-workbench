@@ -1,12 +1,14 @@
 @import "global";
 @import "typo";
 @import "themes";
+@import "colors";
+@import "variables";
 
 html {
-  font: 300 #{$font-size}/#{1.6} "Chivo", sans-serif;
+  font: 300 var(--font-size)/1.6 "Chivo", sans-serif;
   box-sizing: border-box;
-  background: $background;
-  color: $text;
+  background: var(--background);
+  color: var(--text);
 
   *, *:before, *:after {
     box-sizing: inherit;
@@ -27,4 +29,3 @@ html {
     font-size: 1rem;
   }
 }
-

@@ -34,7 +34,6 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-@import "@/assets/style/global";
 .floating {
   position: absolute;
   top: 0;
@@ -43,7 +42,7 @@ export default {
   height: 100%;
   z-index: 10;
   pointer-events: none;
-  padding: $spacing;
+  padding: var(--spacing);
   display: flex;
   flex-direction: column;
   align-items: center;

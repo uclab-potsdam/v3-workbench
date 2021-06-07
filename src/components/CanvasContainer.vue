@@ -67,7 +67,7 @@ export default {
         .on('zoom', e => {
           this.transform = e.transform
         })
-        .filter((e, a, b) => {
+        .filter((e) => {
           return (
             !e.button &&
             !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)

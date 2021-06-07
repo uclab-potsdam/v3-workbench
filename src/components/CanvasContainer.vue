@@ -49,12 +49,9 @@ export default {
           this.transform = e.transform
         })
         .filter(e => {
-          // console.log(e)
-          // return !e.ctrlKey && !e.button
-          return !(
-            e.ctrlKey ||
-            e.button ||
-            (e.type === 'wheel' && !e.shiftKey)
+          return (
+            !e.button &&
+            !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
           )
         })
 

@@ -29,11 +29,10 @@
 <script>
 import { zoom, zoomIdentity } from 'd3-zoom'
 import { select } from 'd3-selection'
+import { mapState } from 'vuex'
 
 import BaseCard from '@/components/BaseCard.vue'
 import CanvasControls from '@/components/CanvasControls.vue'
-
-import cards from '@/assets/data/mock.json'
 
 export default {
   name: 'CanvasContainer',
@@ -45,7 +44,6 @@ export default {
     return {
       size: { width: 0, height: 0 },
       transform: zoomIdentity,
-      cards,
       zoom: null,
       scaleExtent: [0.1, 2],
       cardWidth: 280,
@@ -60,6 +58,9 @@ export default {
     this.initZoom()
   },
   computed: {
+    ...mapState('data', [
+      'cards'
+    ]),
     pattern () {
       if (this.transform == null) return
       const scale = this.transform.k

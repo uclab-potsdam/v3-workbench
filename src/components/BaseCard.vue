@@ -1,34 +1,29 @@
 <template>
-  <div class="card" :style="{...colors, ...transform}">
-    <h1>{{ label }}</h1>
-    <h2>{{ type }}</h2>
+  <div class="card" :style="colors">
+    <h1>{{ card.label }}</h1>
+    <h2>{{ card.type }}</h2>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'BaseCard',
   props: {
-    id: String,
-    label: String,
-    type: String,
-    description: String,
-    view: Object,
-    style: Object,
-    props: Object
+    id: String
   },
   computed: {
+    ...mapGetters('data', [
+      'getCard'
+    ]),
+    card () {
+      return this.getCard(this.id)
+    },
     colors () {
-      const { background, text, light } = this.style
+      const { background, text, light } = this.card.style
       return {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
-      }
-    },
-    transform () {
-      const { x, y } = this.view
-      return {
-        transform: `translate(${x}px, ${y}px)`
       }
     }
   }

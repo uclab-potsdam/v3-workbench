@@ -15,7 +15,8 @@
       <BaseCard
         v-for="card in cards"
         :key="card.id"
-        v-bind="card" />
+        v-bind="card"
+        :style="{transform: `translate(${card.x}px, ${card.y}px)`}" />
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -58,7 +59,7 @@ export default {
     this.initZoom()
   },
   computed: {
-    ...mapState('data', [
+    ...mapState('view', [
       'cards'
     ]),
     pattern () {
@@ -76,8 +77,8 @@ export default {
       return `translate(${x}px, ${y}px) scale(${k})`
     },
     boundingRect () {
-      const x = this.cards.map(card => card.view.x)
-      const y = this.cards.map(card => card.view.y)
+      const x = this.cards.map(card => card.x)
+      const y = this.cards.map(card => card.y)
       return [
         [Math.min(...x), Math.min(...y)],
         [Math.max(...x), Math.max(...y)]

@@ -10,7 +10,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'BaseCard',
   props: {
-    id: String
+    id: String,
+    collapsed: Boolean,
+    pane: String
   },
   computed: {
     ...mapGetters('data', [

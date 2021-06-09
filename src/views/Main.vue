@@ -10,12 +10,19 @@
 <script>
 import TheCanvas from '@/components/TheCanvas.vue'
 import TheSearchbar from '@/components/TheSearchbar.vue'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'Main',
   components: {
     TheCanvas,
     TheSearchbar
+  },
+  methods: {
+    ...mapActions(['init'])
+  },
+  mounted () {
+    this.init()
   }
 }
 </script>

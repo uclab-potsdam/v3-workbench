@@ -4,6 +4,9 @@ export default {
   mutations: {
   },
   actions: {
+    async init ({ dispatch }) {
+      await dispatch('api/connect', null, { root: true })
+    }
   },
   modules: {
   }

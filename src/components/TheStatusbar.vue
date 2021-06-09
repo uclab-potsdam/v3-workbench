@@ -1,6 +1,6 @@
 <template>
   <div class="statusbar">
-    <span>offline</span>
+    <span :class="{connected}">{{connected ? 'online' : 'offline'}}</span>
     <span>
       <select v-model="theme">
         <option v-for="theme in themes" :key="theme">{{ theme }}</option>
@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'TheStatusbar',
   data () {
@@ -17,6 +18,9 @@ export default {
       themes: ['light', 'dark'],
       theme: 'light'
     }
+  },
+  computed: {
+    ...mapGetters('api', ['connected'])
   },
   methods: {
     setTheme () {
@@ -45,5 +49,9 @@ export default {
   color: var(--muted);
   display: flex;
   justify-content: space-between;
+
+  .connected {
+    color: var(--status-ok);
+  }
 }
 </style>

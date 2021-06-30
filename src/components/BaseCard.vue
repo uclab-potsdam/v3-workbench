@@ -1,8 +1,11 @@
 <template>
-  <div class="card"  ref="my_card" :style="colors">
-    <div class="header">
-      <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard}">{{ card.label }}</h1>
-      <h2>{{ card.type }}</h2>
+  <div class="card"  ref="my_card" :style="colors" >
+    <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
+        <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
+        <h2>{{ card.type }}</h2>
+      <!-- <ol  class="falafel-menu">
+        <li v-for="index in 3" :key="index"></li>
+      </ol> -->
     </div>
     <div class="content" v-if="!isCollapsed" >
       <div class='carousel'>
@@ -10,19 +13,19 @@
         <div v-if="currentSlide === 1" class="image" key=1>Image</div>
         <div v-else-if="currentSlide === 2" class="properties" key=2>
           <div class="container" v-for="(value, name, index) in card.props" :key="`${ key }-${ index }`">
-            <p class="item">{{ name }}</p>
+            <p class="propName">{{ name }}</p>
             <p class="item">+</p>
-            <p class="item">{{ value }} </p>
+            <p class="propValue">{{ value }} </p>
           </div>
         </div>
         <div v-else class="description" key=3>{{ card.description }}</div>
         </transition>
       </div>
-      <ol class="carousel-indicators">
-        <li v-for="index in 3" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
-      </ol>
     </div>
     <div class="footer">
+      <ol v-if="!isCollapsed" class="carousel-indicators">
+        <li v-for="index in 3" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
+      </ol>
       <div class="toggleButton" @click="collapse">{{collapsedButton}}</div>
     </div>
   </div>
@@ -44,7 +47,8 @@ export default {
       isCollapsed: true,
       collapsedButton: 'expand',
       currentSlide: 1,
-      transitionName: 'slide-next'
+      transitionName: 'slide-next',
+      hover: false
     }
   },
   computed: {
@@ -91,26 +95,41 @@ export default {
   color: var(--text);
   position: absolute;
   width: 320px;
-  padding: var(--spacing);
+  padding: var(--spacing) 0px;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
   flex-direction: column;
 }
 .header {
+  justify-content: space-between;
   height: 80px;
   line-height: 1.1;
+  margin: 0 var(--spacing-xl) 0 var(--spacing);
   white-space: nowrap;
-
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.falafel-menu {
+  li {
+          margin: 3px 3px;
+      width: 0.4em;
+      height: 0.4em;
+      border-radius: 100%;
+      background-color: rgb(255, 255, 255);
+      display: flex;
+      cursor: default;
+  }
 }
 .label {
   display: inline;
   }
 .slide-right {
-  animation: 10s slide-right infinite;
+  animation: 10s -4.5s slide-right infinite;
+  animation-timing-function: linear;
 }
-@keyframes slide-right { from { margin-left: 100%;width: 300%; }
-  to {margin-left: -130%;width: 100%;} }
+@keyframes slide-right { from { margin-left: 100%; width: 100%; }
+  to {margin-left: -130%; width: 100%;} }
 
 .content {
   height: 300px;
@@ -120,11 +139,11 @@ export default {
   background: gray;
   height: 100px;
   width: 100%;
+  padding: 0px var(--spacing);
 }
 .description {
-  background: red;
   height: 100px;
-  width: 100%;
+  margin: 0px var(--spacing);
   }
 .properties {
   width: 100%;
@@ -132,47 +151,26 @@ export default {
     display:grid;
     grid-template-columns:30% 10% 60%;
     align-items: start;
-    border-bottom: 0.8px solid #fff;
-    padding: 2px;
+    border-bottom: 0.7px solid #fff;
+    padding: 5px var(--spacing);
   &:first-child {
-    border-top: 0.8px solid #fff;
+    border-top: 1px solid #fff;
   }
   }
 }
-.footer {
-  display: flex;
-}
-.toggleButton {
-  margin-left: auto;
-}
+.propValue {
+   background: rgba(255, 255, 255, 0.3);
+   padding: 0px 5px;
+   border-radius: 8px;
+ }
 .content {
   display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: start;
 }
 .carousel {
-  display: flex;
-  align-items: center;
   justify-content: center;
   width: 100%;
   position: relative;
-}
-
-.carousel-indicators {
-  li {
-      margin: 20px 3px 0px 3px;
-      width: 0.8em;
-      height: 0.8em;
-      border-radius: 100%;
-      border-color: white;
-      border-width: 1px;
-      border-style: solid;
-      display: inline-flex;
-      cursor: default;
-&.active, &:hover {
-      background-color: #fff;
-      }}
 }
 
 /* GO TO NEXT SLIDE */
@@ -200,5 +198,27 @@ export default {
 }
 .slide-prev-leave-to {
   transform: translate(100%);
+}
+.footer {
+  display: flex;
+  padding: 0px var(--spacing);
+  justify-content: space-between;
+  align-items: center;
+}
+.toggleButton {
+  margin-left: auto;
+}
+.carousel-indicators {
+  li {
+    margin: 0px 3px;
+      width: 1.1em;
+      height: 0.2em;
+      border-radius: 10%;
+      background-color: rgba(255, 255, 255, 0.5);
+      display: inline-flex;
+      cursor: default;
+&.active, &:hover {
+      background-color: #fff;
+      }}
 }
 </style>

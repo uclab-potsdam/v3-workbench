@@ -150,7 +150,7 @@ export default {
   .container {
     display:grid;
     grid-template-columns:30% 10% 60%;
-    align-items: start;
+    align-items: flex-start;
     border-bottom: 0.7px solid #fff;
     padding: 5px var(--spacing);
   &:first-child {
@@ -165,7 +165,7 @@ export default {
  }
 .content {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
 }
 .carousel {
   justify-content: center;

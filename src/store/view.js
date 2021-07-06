@@ -6,6 +6,11 @@ export default {
     cards
   },
   mutations: {
+    set (state, obj) {
+      Object.keys(obj).forEach(key => {
+        state[key] = obj[key]
+      })
+    }
   },
   actions: {
   },

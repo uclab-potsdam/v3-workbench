@@ -12,7 +12,7 @@
         <transition :name="transitionName">
         <div v-if="currentSlide === 1" class="image" key=1>Image</div>
         <div v-else-if="currentSlide === 2" class="properties" key=2>
-          <div class="container" v-for="(value, name, index) in card.props" :key="`${ key }-${ index }`">
+          <div class="container" v-for="(value, name, index) in card.props" :key="index">
             <p class="propName">{{ name }}</p>
             <p class="item">+</p>
             <p class="propValue">{{ value }} </p>
@@ -150,7 +150,7 @@ export default {
   .container {
     display:grid;
     grid-template-columns:30% 10% 60%;
-    align-items: start;
+    align-items: flex-start;
     border-bottom: 0.7px solid #fff;
     padding: 5px var(--spacing);
   &:first-child {
@@ -165,7 +165,7 @@ export default {
  }
 .content {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
 }
 .carousel {
   justify-content: center;

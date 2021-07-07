@@ -16,7 +16,7 @@
         v-for="card in cards"
         :key="card.id"
         v-bind="card"
-        :style="{transform: `translate(${card.x}px, ${card.y}px)`}" />
+        :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}" />
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -77,8 +77,8 @@ export default {
       return `translate(${x}px, ${y}px) scale(${k})`
     },
     boundingRect () {
-      const x = this.cards.map(card => card.x)
-      const y = this.cards.map(card => card.y)
+      const x = this.cards.map(card => card.pos[0])
+      const y = this.cards.map(card => card.pos[1])
       return [
         [Math.min(...x), Math.min(...y)],
         [Math.max(...x), Math.max(...y)]

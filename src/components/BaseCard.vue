@@ -1,5 +1,5 @@
 <template>
-  <div class="card"  ref="my_card" :style="colors" >
+  <div v-if="card" class="card" ref="my_card" :style="colors" >
     <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
         <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
         <h2>{{ card.type }}</h2>
@@ -12,10 +12,10 @@
         <transition :name="transitionName">
         <div v-if="currentSlide === 1" class="image" key=1>Image</div>
         <div v-else-if="currentSlide === 2" class="properties" key=2>
-          <div class="container" v-for="(value, name, index) in card.props" :key="index">
-            <p class="propName">{{ name }}</p>
+          <div class="container" v-for="(prop, i) in card.props" :key="i">
+            <p class="propName">{{ prop.propLabel }}</p>
             <p class="item">+</p>
-            <p class="propValue">{{ value }} </p>
+            <p class="propValue">{{ prop.value }} </p>
           </div>
         </div>
         <div v-else class="description" key=3>{{ card.description }}</div>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 export default {
   name: 'BaseCard',
   props: {
@@ -42,6 +42,7 @@ export default {
   },
   data () {
     return {
+      card: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
@@ -52,13 +53,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('data', [
-      'getCard'
-    ]),
-    card () {
-      return this.getCard(this.id)
-    },
     colors () {
+      if (this.card.style == null) return
       const { background, text, light } = this.card.style
       return {
         '--background': `var(--${background}-${light ? 8 : 2})`,
@@ -66,11 +62,17 @@ export default {
       }
     }
   },
-  mounted () {
-    this.calcWidthOfLabel()
-    this.calcWidthOfCard()
+  async mounted () {
+    this.card = await this.getCard(this.id)
+    this.$nextTick(() => {
+      this.calcWidthOfLabel()
+      this.calcWidthOfCard()
+    })
   },
   methods: {
+    ...mapActions('data', [
+      'getCard'
+    ]),
     calcWidthOfLabel () {
       this.widthLabel = this.$refs.my_label.getBoundingClientRect().width
     },
@@ -91,6 +93,8 @@ export default {
 
 <style scoped lang="scss">
 .card {
+  --background: var(--gray-2);
+  --text: var(--gray-8);
   background: var(--background);
   color: var(--text);
   position: absolute;

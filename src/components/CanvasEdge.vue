@@ -36,7 +36,9 @@ export default {
       const y1 = this.sourcePos[1] + 60
       const x2 = this.targetPos[0]
       const y2 = this.targetPos[1] + 60
-      return `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
+      return x1 < x2
+        ? `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
+        : `M${x2},${y2}C${x2 + 100},${y2},${x1 - 100},${y1},${x1},${y1}`
     }
   },
   methods: {

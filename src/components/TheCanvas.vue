@@ -16,7 +16,8 @@
         v-for="card in cards"
         :key="card.id"
         v-bind="card"
-        :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}" />
+        :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
+        @toggleCollapse="toggleCollapse(card.id)"/>
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -30,7 +31,7 @@
 <script>
 import { zoom, zoomIdentity } from 'd3-zoom'
 import { select } from 'd3-selection'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import BaseCard from '@/components/BaseCard.vue'
 import CanvasControls from '@/components/CanvasControls.vue'
@@ -86,6 +87,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('view', ['toggleCollapse']),
     initZoom () {
       this.zoom = zoom()
         .scaleExtent(this.scaleExtent)
@@ -121,6 +123,9 @@ export default {
           .translate(...center)
       )
     }
+    // toggleCollapse (id) {
+    //   console.log(id)
+    // }
   }
 }
 </script>

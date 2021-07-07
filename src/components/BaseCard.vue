@@ -7,7 +7,7 @@
         <li v-for="index in 3" :key="index"></li>
       </ol> -->
     </div>
-    <div class="content" v-if="!isCollapsed" >
+    <div class="content" v-if="!collapsed" >
       <div class='carousel'>
         <transition :name="transitionName">
         <div v-if="currentSlide === 1" class="image" key=1>Image</div>
@@ -15,7 +15,7 @@
           <div class="container" v-for="(prop, i) in card.props" :key="i">
             <p class="propName">{{ prop.propLabel }}</p>
             <p class="item">+</p>
-            <p class="propValue">{{ prop.value }} </p>
+            <p class="propValue">{{ prop.valueLabel || prop.value }} </p>
           </div>
         </div>
         <div v-else class="description" key=3>{{ card.description }}</div>
@@ -23,10 +23,10 @@
       </div>
     </div>
     <div class="footer">
-      <ol v-if="!isCollapsed" class="carousel-indicators">
+      <ol v-if="!collapsed" class="carousel-indicators">
         <li v-for="index in 3" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
       </ol>
-      <div class="toggleButton" @click="collapse">{{collapsedButton}}</div>
+      <div class="toggleButton" @click="$emit('toggleCollapse')">{{collapsedButton}}</div>
     </div>
   </div>
 </template>
@@ -46,7 +46,6 @@ export default {
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
-      collapsedButton: 'expand',
       currentSlide: 1,
       transitionName: 'slide-next',
       hover: false
@@ -60,6 +59,9 @@ export default {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
       }
+    },
+    collapsedButton () {
+      return this.collapsed ? 'expand' : 'collapse'
     }
   },
   async mounted () {
@@ -78,10 +80,6 @@ export default {
     },
     calcWidthOfCard () {
       this.widthCard = this.$refs.my_card.getBoundingClientRect().width
-    },
-    collapse () {
-      this.isCollapsed = !this.isCollapsed
-      this.collapsedButton = this.isCollapsed ? 'expand' : 'collapse'
     },
     slide (slides) {
       this.transitionName = slides < this.currentSlide ? 'slide-prev' : 'slide-next'

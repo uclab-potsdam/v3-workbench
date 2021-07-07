@@ -69,6 +69,7 @@ export default {
           .triple(id, 'v:prop', 'v:value')
           .quad('v:prop', 'rdfs:label', 'v:propLabel', 'schema/*')
           .quad('v:prop', 'rdfs:range', 'v:proptype', 'schema/*')
+          .opt(WOQL.triple('v:value', 'rdfs:label', 'v:valueLabel'))
       }))
       const card = {
         id,

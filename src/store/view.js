@@ -17,7 +17,8 @@ export default {
               sourcePos: card.pos,
               target: prop.value,
               targetPos: state.cards.find(({ id }) => id === prop.value)?.pos,
-              label: prop.propLabel
+              label: prop.propLabel,
+              prop: prop.prop
             }
           }).filter(({ targetPos }) => targetPos != null)
       })

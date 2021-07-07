@@ -10,7 +10,7 @@
       <g :transform="transform">
         <CanvasEdge
           v-for="edge in edges"
-          :key="`${edge.source}/${edge.target}`"
+          :key="`${edge.source}/${edge.target}/${edge.prop}`"
           v-bind="edge"
           :stroke-width="1 / transform.k" />
       </g>

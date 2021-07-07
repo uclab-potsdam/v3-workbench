@@ -16,11 +16,11 @@ export default {
     }
   },
   actions: {
-    async getCard ({ state, dispatch }, id) {
+    async getCard ({ state, dispatch, commit }, id) {
       let card = state.cards.find(card => card.id === id)
       if (card != null) return card
       card = await dispatch('api/getCard', id, { root: true })
-      console.log(card)
+      commit('storeCard', card)
       return card
     }
   },

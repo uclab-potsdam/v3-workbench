@@ -114,7 +114,7 @@ export default {
 }
 .falafel-menu {
   li {
-          margin: 3px 3px;
+      margin: 3px 3px;
       width: 0.4em;
       height: 0.4em;
       border-radius: 100%;

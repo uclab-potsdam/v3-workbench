@@ -8,7 +8,11 @@
       </defs>
       <rect x="0" y="0" width="100%" height="100%" fill="url(#bg)"></rect>
       <g :transform="transform">
-        <!-- edges -->
+        <CanvasEdge
+          v-for="edge in edges"
+          :key="`${edge.source}/${edge.target}`"
+          v-bind="edge"
+          :stroke-width="1 / transform.k" />
       </g>
     </svg>
     <div class="cards" :style="{transform: transformString}">
@@ -17,7 +21,7 @@
         :key="card.id"
         v-bind="card"
         :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
-        @toggleCollapse="toggleCollapse(card.id)"/>
+        @toggleCollapse="toggleCollapse(card.id)" />
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -31,16 +35,18 @@
 <script>
 import { zoom, zoomIdentity } from 'd3-zoom'
 import { select } from 'd3-selection'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import BaseCard from '@/components/BaseCard.vue'
 import CanvasControls from '@/components/CanvasControls.vue'
+import CanvasEdge from '@/components/CanvasEdge.vue'
 
 export default {
   name: 'CanvasContainer',
   components: {
     CanvasControls,
-    BaseCard
+    BaseCard,
+    CanvasEdge
   },
   data () {
     return {
@@ -62,6 +68,9 @@ export default {
   computed: {
     ...mapState('view', [
       'cards'
+    ]),
+    ...mapGetters('view', [
+      'edges'
     ]),
     pattern () {
       if (this.transform == null) return

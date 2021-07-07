@@ -55,6 +55,28 @@ export default {
           }
         })
       commit('view/set', { cards }, { root: true })
+    },
+    async getCard ({ dispatch, commit }, id) {
+      const bindings = (await dispatch('query', {
+        query: WOQL
+          .triple(id, 'rdf:type', 'v:typeId')
+          .quad('v:typeId', 'rdfs:label', 'v:type', 'schema/*')
+          .triple(id, 'rdfs:comment', 'v:description')
+          .triple(id, 'rdfs:label', 'v:label')
+      }))
+      const props = (await dispatch('query', {
+        query: WOQL
+          .triple(id, 'v:prop', 'v:value')
+          .quad('v:prop', 'rdfs:label', 'v:propLabel', 'schema/*')
+          .quad('v:prop', 'rdfs:range', 'v:proptype', 'schema/*')
+      }))
+      const card = {
+        id,
+        ...bindings[0],
+        props
+      }
+      // commit('view/set', { cards }, { root: true })
+      return card
     }
   },
   modules: {
@@ -78,5 +100,6 @@ const replacePrefixes = (value, prefixes) => {
       value = value.replace(prefix[1], `${prefix[0]}:`)
     }
   })
+  if (value === 'system:unknown') return null
   return value
 }

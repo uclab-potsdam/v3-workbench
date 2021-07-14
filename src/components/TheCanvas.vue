@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move'}">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -19,9 +19,11 @@
       <BaseCard
         v-for="card in cards"
         :key="card.id"
+        context="canvas"
         v-bind="card"
         :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
-        @toggleCollapse="toggleCollapse(card.id)" />
+        @toggleCollapse="toggleCollapse(card.id)"
+        @dragstart="onDragStart"/>
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -36,13 +38,16 @@
 import { zoom, zoomIdentity } from 'd3-zoom'
 import { select } from 'd3-selection'
 import { mapActions, mapGetters, mapState } from 'vuex'
-
+import drop from '@/assets/js/directives/drop'
 import BaseCard from '@/components/BaseCard.vue'
 import CanvasControls from '@/components/CanvasControls.vue'
 import CanvasEdge from '@/components/CanvasEdge.vue'
 
 export default {
   name: 'CanvasContainer',
+  directives: {
+    drop
+  },
   components: {
     CanvasControls,
     BaseCard,
@@ -58,7 +63,8 @@ export default {
       cardHeight: 420,
       safeArea: [82, 20, 20, 20],
       transition: 400,
-      container: null
+      container: null,
+      drag: null
     }
   },
   mounted () {
@@ -96,12 +102,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions('view', ['toggleCollapse']),
+    ...mapActions('view', ['toggleCollapse', 'translateCard']),
     initZoom () {
       this.zoom = zoom()
         .scaleExtent(this.scaleExtent)
         .on('zoom', e => { this.transform = e.transform })
-        .filter(e => !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey))
+        .filter(e => {
+          // console.log(e)
+          if (e.type === 'mousedown' && e.target.getAttribute('draggable')) return false
+          return !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
+        })
       this.container.call(this.zoom).on('dblclick.zoom', null)
     },
     zoomIn () {
@@ -131,6 +141,15 @@ export default {
           .scale(scale)
           .translate(...center)
       )
+    },
+    onDragStart (e) {
+      this.drag = e
+      this.translateCard({
+        id: e.id,
+        x: e.x / this.transform.k,
+        y: e.y / this.transform.k
+      })
+      // console.log(e)
     }
     // toggleCollapse (id) {
     //   console.log(id)
@@ -149,7 +168,6 @@ export default {
 
   svg {
     display: block;
-
     #bg {
       .cross {
         stroke: var(--border);

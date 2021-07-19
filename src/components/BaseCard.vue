@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import drag from '@/assets/js/directives/drag'
 export default {
   name: 'BaseCard',
@@ -49,6 +49,7 @@ export default {
   data () {
     return {
       card: null,
+      entityType: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
@@ -58,9 +59,12 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('data', [
+      'getType'
+    ]),
     colors () {
-      if (this.card.style == null) return
-      const { background, text, light } = this.card.style
+      if (this.entityType == null) return
+      const { background, text, light } = this.entityType
       return {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
@@ -72,6 +76,7 @@ export default {
   },
   async mounted () {
     this.card = await this.getCard(this.id)
+    this.entityType = this.getType(this.card.typeId)
     this.$nextTick(() => {
       this.calcWidthOfLabel()
       this.calcWidthOfCard()

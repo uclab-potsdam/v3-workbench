@@ -3,11 +3,25 @@
 export default {
   namespaced: true,
   state: {
-    cards: []
+    cards: [],
+    types: [{
+      id: 'scm:Place',
+      background: 'blue',
+      text: 'magenta',
+      light: true
+    }, {
+      id: 'scm:Person',
+      background: 'teal',
+      text: 'red',
+      light: false
+    }]
   },
   getters: {
     getCard: (state) => (id) => {
       return state.cards.find(card => card.id === id)
+    },
+    getType: (state) => (id) => {
+      return state.types.find(d => d.id === id)
     }
   },
   mutations: {

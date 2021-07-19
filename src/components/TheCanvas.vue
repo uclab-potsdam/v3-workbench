@@ -59,7 +59,7 @@ export default {
       transform: zoomIdentity,
       zoom: null,
       scaleExtent: [0.1, 2],
-      cardWidth: 280,
+      cardWidth: 320,
       cardHeight: 420,
       safeArea: [82, 20, 20, 20],
       transition: 400,
@@ -97,7 +97,7 @@ export default {
       const y = this.cards.map(card => card.pos[1])
       return [
         [Math.min(...x), Math.min(...y)],
-        [Math.max(...x), Math.max(...y)]
+        [Math.max(...x) + this.cardWidth, Math.max(...y) + this.cardHeight]
       ]
     }
   },
@@ -125,25 +125,24 @@ export default {
       this.container.transition().duration(this.transition).call(this.zoom.scaleBy, 0.5)
     },
     zoomToFit () {
-      const { boundingRect, size, cardWidth, cardHeight, safeArea, transition, scaleExtent } = this
+      const { boundingRect, size, safeArea, transition, scaleExtent } = this
       const center = [
-        (boundingRect[0][0] + boundingRect[1][0] - cardWidth) / 2,
-        (boundingRect[0][1] + boundingRect[1][1] - cardHeight) / 2
+        (boundingRect[0][0] + boundingRect[1][0]) / 2,
+        (boundingRect[0][1] + boundingRect[1][1]) / 2
       ]
       const dims = [
-        (boundingRect[1][0] + cardWidth - boundingRect[0][0]),
-        (boundingRect[1][1] + cardHeight - boundingRect[0][1])
+        (boundingRect[1][0] - boundingRect[0][0]),
+        (boundingRect[1][1] - boundingRect[0][1])
       ]
       const safeHeight = size.height - safeArea[0] - safeArea[2]
       const safeWidth = size.width - safeArea[1] - safeArea[3]
       const scale = Math.max(Math.min(safeWidth / dims[0], safeHeight / dims[1], scaleExtent[1]), scaleExtent[0])
-
       this.container.transition().duration(transition).call(
         this.zoom.transform,
         zoomIdentity
           .translate(safeWidth / 2 + safeArea[3], safeHeight / 2 + safeArea[0])
           .scale(scale)
-          .translate(...center)
+          .translate(-center[0], -center[1])
       )
     },
     onDragStart (e) {

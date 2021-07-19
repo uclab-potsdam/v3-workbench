@@ -106,7 +106,6 @@ export default {
   --text: var(--gray-8);
   background: var(--background);
   color: var(--text);
-  position: absolute;
   width: 320px;
   padding: var(--spacing) 0px;
   overflow: hidden;

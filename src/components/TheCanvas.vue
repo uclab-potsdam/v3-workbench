@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move'}">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move', handler: onDrop}">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -102,7 +102,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions('view', ['toggleCollapse', 'translateCard']),
+    ...mapActions('view', [
+      'toggleCollapse',
+      'translateCard',
+      'dropCard'
+    ]),
     initZoom () {
       this.zoom = zoom()
         .scaleExtent(this.scaleExtent)
@@ -150,10 +154,21 @@ export default {
         y: e.y / this.transform.k
       })
       // console.log(e)
+    },
+    onDrop (e) {
+      if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
+        this.drag = null
+        return
+      }
+      this.dropCard({
+        id: e.id,
+        pos: [
+          (e.x - this.transform.x) / this.transform.k,
+          (e.y - this.transform.y) / this.transform.k
+        ],
+        collapsed: false
+      })
     }
-    // toggleCollapse (id) {
-    //   console.log(id)
-    // }
   }
 }
 </script>

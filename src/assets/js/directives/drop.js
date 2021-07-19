@@ -4,7 +4,11 @@ function onDrop (el, options, e) {
 
   // e.dataTransfer.dropEffect = 'move'
   const value = e.dataTransfer.getData('text/plain')
-  console.log('drop', value, e)
+  // console.log('drop', value, e)
+  if (options.handler != null) {
+    e.dataTransfer.dropEffect = 'none'
+    options.handler({ x: e.clientX, y: e.clientY, id: value })
+  }
 }
 
 function onDragOver (el, options, e) {

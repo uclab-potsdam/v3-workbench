@@ -79,6 +79,22 @@ export default {
       }
       // commit('view/set', { cards }, { root: true })
       return card
+    },
+    async search ({ commit, dispatch }, { term, doctype = null }) {
+      const searchResults = await dispatch('query', {
+        query: WOQL
+          .select('v:label', 'v:id', 'v:doctype', 'v:dist')
+          .limit(10)
+          .order_by('v:dist', 'desc')
+          .and(
+            WOQL.triple('v:id', 'rdfs:label', 'v:label'),
+            WOQL.triple('v:id', 'rdf:type', doctype || 'v:doctype'),
+            WOQL.like(term, 'v:label', 'v:dist'),
+            WOQL.greater('v:dist', 0.1)
+          )
+      })
+      console.log(searchResults)
+      commit('data/set', { searchResults }, { root: true })
     }
   },
   modules: {

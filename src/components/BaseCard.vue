@@ -39,7 +39,7 @@ export default {
   directives: {
     drag
   },
-  emits: ['dragstart'],
+  emits: ['dragstart', 'toggleCollapse'],
   props: {
     id: String,
     collapsed: Boolean,

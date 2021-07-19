@@ -32,6 +32,9 @@ export default {
         state[key] = obj[key]
       })
     },
+    dropCard (state, card) {
+      state.cards.push(card)
+    },
     toggleCollapse (state, id) {
       const card = state.cards.find(card => card.id === id)
       card.collapsed = !card.collapsed
@@ -50,6 +53,11 @@ export default {
     translateCard ({ commit }, options) {
       commit('translateCard', options)
       // update view in db if drop event ended successfully
+    },
+    dropCard ({ commit }, options) {
+      console.log(options)
+      commit('dropCard', options)
+      // update view in db
     }
   },
   modules: {

@@ -4,6 +4,7 @@ export default {
   namespaced: true,
   state: {
     cards: [],
+    searchResults: [],
     types: [{
       id: 'scm:Place',
       background: 'blue',
@@ -25,6 +26,11 @@ export default {
     }
   },
   mutations: {
+    set (state, obj) {
+      Object.keys(obj).forEach(key => {
+        state[key] = obj[key]
+      })
+    },
     storeCard (state, card) {
       state.cards.push(card)
     }

@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move'}">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move', handler: onDrop}">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -23,7 +23,12 @@
         v-bind="card"
         :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
         @toggleCollapse="toggleCollapse(card.id)"
-        @dragstart="onDragStart"/>
+        @drag="onDrag"/>
+    </div>
+    <div class="notifications">
+      <div class="remove" v-if="drag != null" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
+        remove
+      </div>
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -59,7 +64,7 @@ export default {
       transform: zoomIdentity,
       zoom: null,
       scaleExtent: [0.1, 2],
-      cardWidth: 280,
+      cardWidth: 320,
       cardHeight: 420,
       safeArea: [82, 20, 20, 20],
       transition: 400,
@@ -97,18 +102,22 @@ export default {
       const y = this.cards.map(card => card.pos[1])
       return [
         [Math.min(...x), Math.min(...y)],
-        [Math.max(...x), Math.max(...y)]
+        [Math.max(...x) + this.cardWidth, Math.max(...y) + this.cardHeight]
       ]
     }
   },
   methods: {
-    ...mapActions('view', ['toggleCollapse', 'translateCard']),
+    ...mapActions('view', [
+      'toggleCollapse',
+      'translateCard',
+      'dropCard',
+      'removeCard'
+    ]),
     initZoom () {
       this.zoom = zoom()
         .scaleExtent(this.scaleExtent)
         .on('zoom', e => { this.transform = e.transform })
         .filter(e => {
-          // console.log(e)
           if (e.type === 'mousedown' && e.target.getAttribute('draggable')) return false
           return !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
         })
@@ -121,39 +130,52 @@ export default {
       this.container.transition().duration(this.transition).call(this.zoom.scaleBy, 0.5)
     },
     zoomToFit () {
-      const { boundingRect, size, cardWidth, cardHeight, safeArea, transition, scaleExtent } = this
+      const { boundingRect, size, safeArea, transition, scaleExtent } = this
       const center = [
-        (boundingRect[0][0] + boundingRect[1][0] - cardWidth) / 2,
-        (boundingRect[0][1] + boundingRect[1][1] - cardHeight) / 2
+        (boundingRect[0][0] + boundingRect[1][0]) / 2,
+        (boundingRect[0][1] + boundingRect[1][1]) / 2
       ]
       const dims = [
-        (boundingRect[1][0] + cardWidth - boundingRect[0][0]),
-        (boundingRect[1][1] + cardHeight - boundingRect[0][1])
+        (boundingRect[1][0] - boundingRect[0][0]),
+        (boundingRect[1][1] - boundingRect[0][1])
       ]
       const safeHeight = size.height - safeArea[0] - safeArea[2]
       const safeWidth = size.width - safeArea[1] - safeArea[3]
       const scale = Math.max(Math.min(safeWidth / dims[0], safeHeight / dims[1], scaleExtent[1]), scaleExtent[0])
-
       this.container.transition().duration(transition).call(
         this.zoom.transform,
         zoomIdentity
           .translate(safeWidth / 2 + safeArea[3], safeHeight / 2 + safeArea[0])
           .scale(scale)
-          .translate(...center)
+          .translate(-center[0], -center[1])
       )
     },
-    onDragStart (e) {
+    onDrag (e) {
       this.drag = e
       this.translateCard({
         id: e.id,
         x: e.x / this.transform.k,
         y: e.y / this.transform.k
       })
-      // console.log(e)
+    },
+    onDrop (e) {
+      if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
+        this.drag = null
+        return
+      }
+      this.dropCard({
+        id: e.id,
+        pos: [
+          (e.x - this.transform.x) / this.transform.k,
+          (e.y - this.transform.y) / this.transform.k
+        ],
+        collapsed: false
+      })
+    },
+    onRemoveCard (e) {
+      this.drag = null
+      this.removeCard(e.id)
     }
-    // toggleCollapse (id) {
-    //   console.log(id)
-    // }
   }
 }
 </script>
@@ -181,6 +203,34 @@ export default {
     top: 0;
     width: 100%;
     height: 100%;
+
+    .card {
+      position: absolute;
+    }
+  }
+
+  .notifications {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    margin: 0 0 var(--spacing) 0;
+    padding: 0 var(--spacing);
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+
+    & > * {
+      pointer-events: all;
+      padding: var(--spacing);
+      background: var(--background);
+      border: var(--base-border);
+      border-radius: var(--base-border-radius);
+      box-shadow: var(--base-box-shadow);
+
+      &:hover {
+        color: var(--accent);
+      }
+    }
   }
 }
 </style>

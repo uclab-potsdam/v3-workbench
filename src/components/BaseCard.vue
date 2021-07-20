@@ -1,5 +1,5 @@
 <template>
-  <div v-if="card" class="card" ref="my_card" :style="colors" v-drag="{id, hideDragImage: context === 'canvas', handler (e) {$emit('dragstart', e)}}" @mouseover="cardHover = true" @mouseleave="cardHover = false">
+  <div v-if="card" class="card" ref="my_card" :style="colors" v-drag="{id, hideDragImage: context === 'canvas', handler (e) {$emit('drag', e)}}" @mouseover="cardHover = true" @mouseleave="cardHover = false">
     <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
         <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
         <h2>{{ card.type }}</h2>
@@ -32,14 +32,14 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import drag from '@/assets/js/directives/drag'
 export default {
   name: 'BaseCard',
   directives: {
     drag
   },
-  emits: ['dragstart'],
+  emits: ['drag', 'toggleCollapse'],
   props: {
     id: String,
     collapsed: Boolean,
@@ -49,6 +49,7 @@ export default {
   data () {
     return {
       card: null,
+      entityType: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
@@ -59,9 +60,12 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('data', [
+      'getType'
+    ]),
     colors () {
-      if (this.card.style == null) return
-      const { background, text, light } = this.card.style
+      if (this.entityType == null) return
+      const { background, text, light } = this.entityType
       return {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
@@ -70,6 +74,7 @@ export default {
   },
   async mounted () {
     this.card = await this.getCard(this.id)
+    this.entityType = this.getType(this.card.typeId)
     this.$nextTick(() => {
       this.calcWidthOfLabel()
       this.calcWidthOfCard()
@@ -99,7 +104,6 @@ export default {
   --text: var(--gray-8);
   background: var(--background);
   color: var(--text);
-  position: absolute;
   width: 320px;
   padding: var(--spacing) 0px;
   overflow: hidden;

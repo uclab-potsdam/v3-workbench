@@ -1,5 +1,6 @@
 function onDrop (el, options, e) {
   e.preventDefault()
+  e.stopPropagation()
   // e.preventDefault()
 
   // e.dataTransfer.dropEffect = 'move'

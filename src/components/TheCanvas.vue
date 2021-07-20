@@ -23,7 +23,12 @@
         v-bind="card"
         :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
         @toggleCollapse="toggleCollapse(card.id)"
-        @dragstart="onDragStart"/>
+        @drag="onDrag"/>
+    </div>
+    <div class="notifications">
+      <div class="remove" v-if="drag != null" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
+        remove
+      </div>
     </div>
     <CanvasControls
       @zoom-in="zoomIn()"
@@ -105,14 +110,14 @@ export default {
     ...mapActions('view', [
       'toggleCollapse',
       'translateCard',
-      'dropCard'
+      'dropCard',
+      'removeCard'
     ]),
     initZoom () {
       this.zoom = zoom()
         .scaleExtent(this.scaleExtent)
         .on('zoom', e => { this.transform = e.transform })
         .filter(e => {
-          // console.log(e)
           if (e.type === 'mousedown' && e.target.getAttribute('draggable')) return false
           return !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
         })
@@ -145,16 +150,16 @@ export default {
           .translate(-center[0], -center[1])
       )
     },
-    onDragStart (e) {
+    onDrag (e) {
       this.drag = e
       this.translateCard({
         id: e.id,
         x: e.x / this.transform.k,
         y: e.y / this.transform.k
       })
-      // console.log(e)
     },
     onDrop (e) {
+      console.log('dropped')
       if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
         this.drag = null
         return
@@ -167,6 +172,11 @@ export default {
         ],
         collapsed: false
       })
+    },
+    onRemoveCard (e) {
+      console.log(e)
+      this.drag = null
+      this.removeCard(e.id)
     }
   }
 }
@@ -198,6 +208,30 @@ export default {
 
     .card {
       position: absolute;
+    }
+  }
+
+  .notifications {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    margin: 0 0 var(--spacing) 0;
+    padding: 0 var(--spacing);
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+
+    & > * {
+      pointer-events: all;
+      padding: var(--spacing);
+      background: var(--background);
+      border: var(--base-border);
+      border-radius: var(--base-border-radius);
+      box-shadow: var(--base-box-shadow);
+
+      &:hover {
+        color: var(--accent);
+      }
     }
   }
 }

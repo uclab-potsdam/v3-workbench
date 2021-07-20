@@ -43,6 +43,9 @@ export default {
       const card = state.cards.find(card => card.id === id)
       card.pos[0] += x
       card.pos[1] += y
+    },
+    removeCard (state, id) {
+      state.cards = state.cards.filter(card => card.id !== id)
     }
   },
   actions: {
@@ -54,10 +57,13 @@ export default {
       commit('translateCard', options)
       // update view in db if drop event ended successfully
     },
+    // refactor: rename method to avoid confusion with sql dropping
     dropCard ({ commit }, options) {
-      console.log(options)
       commit('dropCard', options)
       // update view in db
+    },
+    removeCard ({ commit }, id) {
+      commit('removeCard', id)
     }
   },
   modules: {

@@ -37,14 +37,12 @@ function onDragOver (el, options, e) {
 }
 
 function onDragEnd (el, options, e) {
-  console.log('end', e.dataTransfer.dropEffect)
   if (options.handler != null) {
-    options.handler({
-      x: e.dataTransfer.dropEffect === 'none' ? el.dragStartX - el.dragX : 0,
-      y: e.dataTransfer.dropEffect === 'none' ? el.dragStartY - el.dragY : 0,
-      id: options.id
-    })
-    // options.handler({ x: e.clientX, y: e.clientY, id: options.id })
+    // options.handler({
+    //   x: e.dataTransfer.dropEffect === 'none' ? el.dragStartX - el.dragX : 0,
+    //   y: e.dataTransfer.dropEffect === 'none' ? el.dragStartY - el.dragY : 0,
+    //   id: options.id
+    // })
     for (const l in el.activeListeners) {
       document.removeEventListener(l, el.activeListeners[l])
     }

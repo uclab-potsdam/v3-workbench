@@ -159,7 +159,6 @@ export default {
       })
     },
     onDrop (e) {
-      console.log('dropped')
       if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
         this.drag = null
         return
@@ -174,7 +173,6 @@ export default {
       })
     },
     onRemoveCard (e) {
-      console.log(e)
       this.drag = null
       this.removeCard(e.id)
     }

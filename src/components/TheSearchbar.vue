@@ -7,7 +7,7 @@
       <div class="container" v-if="searchResults.length > 0">
         <BaseCard
           v-for="card in searchResults"
-          :key="card.id"
+          :key="`result-${card.id}`"
           v-bind="card"
           collapsed/>
       </div>

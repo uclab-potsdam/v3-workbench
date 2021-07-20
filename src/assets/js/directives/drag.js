@@ -67,5 +67,8 @@ export default {
     for (const l in el.listeners) {
       el.removeEventListener(l, el.listeners[l])
     }
+    for (const l in el.activeListeners) {
+      document.removeEventListener(l, el.activeListeners[l])
+    }
   }
 }

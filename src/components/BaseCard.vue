@@ -76,6 +76,8 @@ export default {
   },
   async mounted () {
     this.card = await this.getCard(this.id)
+    // in some cases BaseCard is already unmounted here and getType is undefined
+    if (this.getType === undefined) return
     this.entityType = this.getType(this.card.typeId)
     this.$nextTick(() => {
       this.calcWidthOfLabel()

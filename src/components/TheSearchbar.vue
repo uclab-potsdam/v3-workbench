@@ -1,19 +1,35 @@
 <template>
-  <div class="searchbar">
+  <div class="search">
     <h2>
       <input v-model="searchterm" placeholder="Find or create cards">
     </h2>
-    <div class="results">
-      <div class="container" v-if="searchResults.length > 0">
-        <BaseCard
-          v-for="card in searchResults"
-          :key="`result-${card.id}`"
-          v-bind="card"
-          collapsed/>
-      </div>
-      <div class="no-results" v-else>
-        No Results
-      </div>
+    <div class="grid results" v-if="view === 'search' && searchterm?.length > 0">
+      <BaseCard
+        v-for="card in searchResults"
+        :key="card.id"
+        v-bind="card"
+        collapsed/>
+      <button class="new" @click="view = 'types'">
+        Create New Entity «{{ searchterm }}»
+      </button>
+    </div>
+    <div class="grid" v-if="view === 'types'">
+      <button v-for="t in types" :key="t.id" @click="create(t.id)">
+        {{t.label}}
+      </button>
+      <button
+        v-for="d in remoteSearchResults"
+        :key="d.wd" @click="importEntity(d)">
+        <b>{{ d.label }}</b><br> {{ d.description }}
+      </button>
+      <button class="cancel" @click="view = 'search'">
+        CANCEL
+      </button>
+      <!-- <BaseCard
+        v-for="card in remoteSearchResults"
+        :key="card.id"
+        v-bind="card"
+        collapsed/> -->
     </div>
   </div>
 </template>
@@ -30,19 +46,29 @@ export default {
   },
   data () {
     return {
-      // results: null,
+      view: 'search',
       searchterm: null
     }
   },
   computed: {
     ...mapState('data', [
-      'searchResults'
+      'searchResults',
+      'remoteSearchResults',
+      'types'
     ])
   },
   methods: {
     ...mapActions('api', [
-      'search'
-    ])
+      'search',
+      'remoteSearch',
+      'insert'
+    ]),
+    create (t) {
+      this.remoteSearch({ doctype: t, term: this.searchterm })
+    },
+    importEntity (item) {
+      this.insert(item)
+    }
   },
   watch: {
     searchterm (term) {
@@ -53,7 +79,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.searchbar {
+.search {
   background: var(--background);
   border: var(--base-border);
   border-radius: var(--base-border-radius);
@@ -68,7 +94,7 @@ export default {
     box-shadow: var(--base-box-shadow);
 
     .results {
-      display: block;
+      display: grid;
     }
   }
 
@@ -87,19 +113,19 @@ export default {
       color: var(--muted);
     }
   }
+  .grid {
+    display: grid;
+    margin: var(--spacing);
+    gap: var(--spacing);
+    grid-template-columns: 1fr 1fr;
+
+    button {
+      padding: var(--spacing);
+      border: var(--base-border);
+    }
+  }
   .results {
     display: none;
-    margin: var(--spacing);
-
-    .container {
-      display: grid;
-      gap: var(--spacing);
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .no-results {
-      text-align: center;
-    }
   }
 }
 </style>

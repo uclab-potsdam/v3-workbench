@@ -1,4 +1,5 @@
 import { WOQLClient, WOQL } from '@terminusdb/terminusdb-client'
+import { WikidataSearch, QueryWikidata, WikidataProps } from '@/assets/js/query/wikidata'
 
 export default {
   namespaced: true,
@@ -93,8 +94,77 @@ export default {
             WOQL.greater('v:dist', 0.1)
           )
       })
-      console.log(searchResults)
       commit('data/set', { searchResults }, { root: true })
+    },
+    async remoteSearch ({ commit, dispatch }, { term, doctype }) {
+      const domain = await dispatch('query', {
+        query: WOQL.from('schema/*', WOQL
+          .triple(doctype, 'scm:wd', 'v:wd')
+          .triple(doctype, 'rdfs:label', 'v:label'))
+      })
+      const props = await dispatch('query', {
+        query: WOQL.from('schema/*', WOQL
+          .triple('v:id', 'rdfs:domain', doctype)
+          .triple('v:id', 'rdfs:label', 'v:label')
+          .triple('v:id', 'scm:wdt', 'v:wdt')
+          .triple('v:id', 'rdfs:range', 'v:type'))
+      })
+      const data = await QueryWikidata(WikidataSearch(term, domain[0].wd))
+      const remoteSearchResults = await Promise.all(data.map(async d => {
+        return {
+          ...d,
+          type: doctype,
+          props: (await QueryWikidata(WikidataProps(d.wd, props))).map(prop => ({
+            ...props.find(p => p.wdt === prop.wdt),
+            ...prop
+          }))
+        }
+      }))
+
+      commit('data/set', { remoteSearchResults }, { root: true })
+    },
+    async insert ({ commit, dispatch }, data) {
+      console.log(data)
+      await dispatch('query', {
+        query: WOQL.and(
+          ...data.props.map(p => {
+            return WOQL.insert_data({
+              id: `item_${p.wd.replace('wd:', '')}`,
+              label: p.label,
+              wd: p.wd,
+              description: p.description,
+              type: p.type
+            })
+          }),
+          WOQL.insert_data({
+            id: `item_${data.wd.replace('wd:', '')}`,
+            label: data.label,
+            wd: data.wd,
+            description: data.description,
+            type: data.type,
+            ...Object.fromEntries(data.props.map(p => [p.id, `doc:item_${p.wd.replace('wd:', '')}`]))
+          })
+        )
+      })
+
+      dispatch('view/dropCard', {
+        pos: [0, 0],
+        collapsed: true,
+        id: `item_${data.wd.replace('wd:', '')}`
+      }, { root: true })
+      //   query: WOQL.from('schema/*', WOQL
+      //     .triple(doctype, 'scm:wd', 'v:wd')
+      //     .triple(doctype, 'rdfs:label', 'v:label'))
+      // })
+      // // const props = await dispatch('query', {
+      // //   query: WOQL.from('schema/*', WOQL
+      // //     .triple('v:id', 'rdfs:domain', doctype)
+      // //     .triple('v:id', 'rdfs:label', 'v:label')
+      // //     .triple('v:id', 'scm:wdt', 'v:wdt')
+      // //     .triple('v:id', 'rdfs:range', 'v:type'))
+      // // })
+      // const remoteSearchResults = await QueryWikidata(WikidataSearch(term, domain[0].wd))
+      // commit('data/set', { remoteSearchResults }, { root: true })
     }
   },
   modules: {

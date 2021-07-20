@@ -5,13 +5,16 @@ export default {
   state: {
     cards: [],
     searchResults: [],
+    remoteSearchResults: [],
     types: [{
       id: 'scm:Place',
+      label: 'Place',
       background: 'blue',
       text: 'magenta',
       light: true
     }, {
       id: 'scm:Person',
+      label: 'Person',
       background: 'teal',
       text: 'red',
       light: false

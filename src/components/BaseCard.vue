@@ -1,5 +1,5 @@
 <template>
-  <div v-if="card" class="card" ref="my_card" :style="colors" v-drag="{id, hideDragImage: context === 'canvas', handler (e) {$emit('dragstart', e)}}">
+  <div v-if="card" class="card" ref="my_card" :style="colors" v-drag="{id, hideDragImage: context === 'canvas', handler (e) {$emit('dragstart', e)}}" @mouseover="cardHover = true" @mouseleave="cardHover = false">
     <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
         <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
         <h2>{{ card.type }}</h2>
@@ -23,10 +23,10 @@
       </div>
     </div>
     <div class="footer">
+      <svg @click="$emit('toggleCollapse')" :class="{ collapsed, visible: cardHover }" class="toggleButton" ><g><path d="M-8,5.5 L0,-2.5 L8,5.5" /></g></svg>
       <ol v-if="!collapsed" class="carousel-indicators">
         <li v-for="index in 3" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
       </ol>
-      <div class="toggleButton" @click="$emit('toggleCollapse')">{{collapsedButton}}</div>
     </div>
   </div>
 </template>
@@ -54,7 +54,8 @@ export default {
       isCollapsed: true,
       currentSlide: 1,
       transitionName: 'slide-next',
-      hover: false
+      hover: false,
+      cardHover: false
     }
   },
   computed: {
@@ -65,9 +66,6 @@ export default {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
       }
-    },
-    collapsedButton () {
-      return this.collapsed ? 'expand' : 'collapse'
     }
   },
   async mounted () {
@@ -210,23 +208,57 @@ export default {
 .footer {
   display: flex;
   padding: 0px var(--spacing);
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 .toggleButton {
   margin-left: auto;
 }
 .carousel-indicators {
+  height:18px;
   li {
     margin: 0px 3px;
-      width: 1.1em;
-      height: 0.2em;
-      border-radius: 10%;
-      background-color: rgba(255, 255, 255, 0.5);
-      display: inline-flex;
-      cursor: default;
+    width: 7.5em;
+    height: 0.15em;
+    border-radius: 10%;
+    background-color: rgba(255, 255, 255, 0.5);
+    display: inline-flex;
+    cursor: default;
 &.active, &:hover {
-      background-color: #fff;
-      }}
+    background-color: #fff;
+     }}
 }
+
+        svg {
+          width: 20px;
+          height: 12px;
+          margin-right: 3px;
+          g {
+            transform: translate(11px, 6px);
+            path {
+              opacity: 0;
+              transition: opacity 1s;
+              stroke: white;
+              stroke-width: 1.5;
+              fill: none;
+              transform: rotate(0deg);
+              transition: transform 0.5s, stroke 0.5s;
+            }
+          }
+          &.visible {
+            g {
+              path {
+              opacity: 1;
+              transition:opacity 1s;
+          }}}
+           &.collapsed {
+            g {
+              path {
+                transform: rotate(180deg);
+              }
+            }
+        }
+        }
+
 </style>

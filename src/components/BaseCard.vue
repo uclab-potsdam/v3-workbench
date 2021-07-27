@@ -1,5 +1,7 @@
 <template>
-  <div v-if="card" class="card" ref="my_card" :style="colors" v-drag="{id, hideDragImage: context === 'canvas', handler (e) {$emit('drag', e)}}" @mouseover="cardHover = true" @mouseleave="cardHover = false">
+  <div v-if="card" class="card" ref="my_card" :style="colors"
+    v-drag="{id, customDragImage: context === 'canvas', handler (e) {$emit('drag', e)}, width: scale * 320, height: scale * (collapsed ? 112 : 420)}"
+    @mouseover="cardHover = true" @mouseleave="cardHover = false">
     <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
         <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
         <h2>{{ card.type }}</h2>
@@ -44,7 +46,8 @@ export default {
     id: String,
     collapsed: Boolean,
     pane: String,
-    context: String
+    context: String,
+    scale: Number
   },
   data () {
     return {

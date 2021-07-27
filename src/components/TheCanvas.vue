@@ -22,6 +22,7 @@
         context="canvas"
         v-bind="card"
         :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
+        :scale="transform.k"
         @toggleCollapse="toggleCollapse(card.id)"
         @drag="onDrag"/>
     </div>
@@ -152,11 +153,11 @@ export default {
     },
     onDrag (e) {
       this.drag = e
-      this.translateCard({
-        id: e.id,
-        x: e.x / this.transform.k,
-        y: e.y / this.transform.k
-      })
+      // this.translateCard({
+      //   id: e.id,
+      //   x: e.x / this.transform.k,
+      //   y: e.y / this.transform.k
+      // })
     },
     onDrop (e) {
       // console.log('drop', this.drag)
@@ -167,8 +168,8 @@ export default {
       this.dropCard({
         id: e.id,
         pos: [
-          (e.x - this.transform.x) / this.transform.k,
-          (e.y - this.transform.y) / this.transform.k
+          (e.x - this.drag.x - this.transform.x) / this.transform.k,
+          (e.y - this.drag.y - this.transform.y) / this.transform.k
         ],
         collapsed: false
       })

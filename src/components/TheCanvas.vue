@@ -159,10 +159,11 @@ export default {
       })
     },
     onDrop (e) {
-      if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
-        this.drag = null
-        return
-      }
+      // console.log('drop', this.drag)
+      // if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
+      //   this.drag = null
+      //   return
+      // }
       this.dropCard({
         id: e.id,
         pos: [
@@ -171,6 +172,7 @@ export default {
         ],
         collapsed: false
       })
+      this.drag = null
     },
     onRemoveCard (e) {
       this.drag = null

@@ -32,12 +32,16 @@ export default {
         state[key] = obj[key]
       })
     },
-    dropCard (state, card) {
+    insertCard (state, card) {
       state.cards.push(card)
     },
     toggleCollapse (state, id) {
       const card = state.cards.find(card => card.id === id)
       card.collapsed = !card.collapsed
+    },
+    moveCard (state, { id, pos }) {
+      const card = state.cards.find(card => card.id === id)
+      card.pos = pos
     },
     translateCard (state, { id, x, y }) {
       const card = state.cards.find(card => card.id === id)
@@ -58,8 +62,12 @@ export default {
       // update view in db if drop event ended successfully
     },
     // refactor: rename method to avoid confusion with sql dropping
-    dropCard ({ commit }, options) {
-      commit('dropCard', options)
+    dropCard ({ commit, state }, options) {
+      if (state.cards.find(card => card.id === options.id) != null) {
+        commit('moveCard', options)
+      } else {
+        commit('insertCard', options)
+      }
       // update view in db
     },
     removeCard ({ commit }, id) {

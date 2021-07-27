@@ -10,8 +10,8 @@
     <div class="content" v-if="!collapsed" >
       <div class='carousel'>
         <transition :name="transitionName">
-        <div v-if="currentSlide === 1" class="image" key=1>Image</div>
-        <div v-else-if="currentSlide === 2" class="properties" key=2>
+        <div v-if="currentSlide === 0" class="image" key=1>Image</div>
+        <div v-else-if="currentSlide === 1" class="properties" key=2>
           <div class="container" v-for="(prop, i) in card.props" :key="i">
             <p class="propName">{{ prop.propLabel }}</p>
             <p class="item">+</p>
@@ -25,7 +25,7 @@
     <div class="footer">
       <svg @click="$emit('toggleCollapse')" :class="{ collapsed, visible: cardHover }" class="toggleButton" ><g><path d="M-8,5.5 L0,-2.5 L8,5.5" /></g></svg>
       <ol v-if="!collapsed" class="carousel-indicators">
-        <li v-for="index in 3" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
+        <li v-for="(item, index) in ['a', 'b', 'c']" :key="index" @click="slide(index)" :class="{ active: currentSlide === index }"></li>
       </ol>
     </div>
   </div>

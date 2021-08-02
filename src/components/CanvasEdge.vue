@@ -18,8 +18,10 @@
 export default {
   name: 'CanvasEdge',
   props: {
-    sourcePos: Array,
-    targetPos: Array,
+    x1: Number,
+    y1: Number,
+    x2: Number,
+    y2: Number,
     label: String,
     source: String,
     target: String,
@@ -32,10 +34,10 @@ export default {
   },
   computed: {
     path () {
-      const x1 = this.sourcePos[0] + 320
-      const y1 = this.sourcePos[1] + 60
-      const x2 = this.targetPos[0]
-      const y2 = this.targetPos[1] + 60
+      const x1 = this.x1 + 320
+      const y1 = this.y1 + 60
+      const x2 = this.x2
+      const y2 = this.y2 + 60
       return x1 < x2
         ? `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
         : `M${x2},${y2}C${x2 - 100},${y2},${x1 + 100},${y1},${x1},${y1}`

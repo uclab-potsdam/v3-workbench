@@ -21,14 +21,19 @@
         :key="card.id"
         context="canvas"
         v-bind="card"
-        :style="{transform: `translate(${card.pos[0]}px, ${card.pos[1]}px)`}"
+        :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
         @toggleCollapse="toggleCollapse(card.id)"
         @drag="onDrag"/>
     </div>
     <div class="notifications">
-      <div class="remove" v-if="drag != null" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
-        remove
+      <div class="options" v-if="drag != null" >
+        <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
+          remove card
+        </div>
+        <div class="delete danger" v-drop="{dropEffect: 'move', handler: onDeleteEntity}">
+          delete entity
+        </div>
       </div>
     </div>
     <CanvasControls
@@ -99,8 +104,8 @@ export default {
       return `translate(${x}px, ${y}px) scale(${k})`
     },
     boundingRect () {
-      const x = this.cards.map(card => card.pos[0])
-      const y = this.cards.map(card => card.pos[1])
+      const x = this.cards.map(card => card.x)
+      const y = this.cards.map(card => card.y)
       return [
         [Math.min(...x), Math.min(...y)],
         [Math.max(...x) + this.cardWidth, Math.max(...y) + this.cardHeight]
@@ -113,6 +118,9 @@ export default {
       'translateCard',
       'dropCard',
       'removeCard'
+    ]),
+    ...mapActions('api', [
+      'deleteObject'
     ]),
     initZoom () {
       this.zoom = zoom()
@@ -167,17 +175,22 @@ export default {
       // }
       this.dropCard({
         id: e.id,
-        pos: [
-          (e.x - this.drag.x - this.transform.x) / this.transform.k,
-          (e.y - this.drag.y - this.transform.y) / this.transform.k
-        ],
+        x: (e.x - (this.drag?.x || 0) - this.transform.x) / this.transform.k,
+        y: (e.y - (this.drag?.y || 0) - this.transform.y) / this.transform.k,
         collapsed: false
       })
       this.drag = null
     },
     onRemoveCard (e) {
       this.drag = null
-      this.removeCard(e.id)
+      // find a card with matching ids
+      this.removeCard(this.cards.find(c => c.id === e.id).card)
+    },
+    onDeleteEntity (e) {
+      this.drag = null
+      // find a card with matching ids
+      this.removeCard(this.cards.find(c => c.id === e.id).card)
+      this.deleteObject(e.id)
     }
   }
 }
@@ -222,16 +235,24 @@ export default {
     display: flex;
     justify-content: center;
 
-    & > * {
-      pointer-events: all;
-      padding: var(--spacing);
-      background: var(--background);
-      border: var(--base-border);
-      border-radius: var(--base-border-radius);
-      box-shadow: var(--base-box-shadow);
+    .options {
+      display: flex;
+      justify-content: center;
+      & > div {
+        pointer-events: all;
+        padding: var(--spacing);
+        background: var(--background);
+        border: var(--base-border);
+        border-radius: var(--base-border-radius);
+        box-shadow: var(--base-box-shadow);
 
-      &:hover {
-        color: var(--accent);
+        &.danger {
+          color: var(--danger);
+        }
+
+        & + div {
+          margin-left: var(--spacing);
+        }
       }
     }
   }

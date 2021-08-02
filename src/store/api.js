@@ -1,5 +1,6 @@
 import { WOQLClient, WOQL } from '@terminusdb/terminusdb-client'
 import { WikidataSearch, QueryWikidata, WikidataProps } from '@/assets/js/query/wikidata'
+import { v4 as uuid } from 'uuid'
 
 export default {
   namespaced: true,
@@ -45,19 +46,23 @@ export default {
         query: WOQL
           .triple(id, 'scm:cards', 'v:card')
           .triple('v:card', 'scm:entity', 'v:id')
-          .triple('v:card', 'scm:position', 'v:pos')
           .triple('v:card', 'scm:collapsed', 'v:collapsed')
+          .opt(WOQL
+            .triple('v:card', 'scm:x', 'v:x')
+            .triple('v:card', 'scm:y', 'v:y')
+          )
       }))
-        // REFACTOR: position should be parsed in flattenBindings
-        .map(card => {
-          return {
-            ...card,
-            pos: JSON.parse(card.pos)
-          }
-        })
+      // REFACTOR: position should be parsed in flattenBindings
+      // .map(card => {
+      //   return {
+      //     ...card,
+      //     pos: JSON.parse(card.pos)
+      //   }
+      // })
       commit('view/set', { cards }, { root: true })
     },
-    async getCard ({ dispatch, commit }, id) {
+    // refactor: rename to getEntity
+    async getCard ({ dispatch }, id) {
       const bindings = (await dispatch('query', {
         query: WOQL
           .triple(id, 'rdf:type', 'v:typeId')
@@ -123,8 +128,8 @@ export default {
 
       commit('data/set', { remoteSearchResults }, { root: true })
     },
-    async insert ({ commit, dispatch }, data) {
-      console.log(data)
+    // refactor: rename to createEntity?
+    async insert ({ dispatch }, data) {
       await dispatch('query', {
         query: WOQL.and(
           ...data.props.map(p => {
@@ -148,23 +153,32 @@ export default {
       })
 
       dispatch('view/dropCard', {
-        pos: [0, 0],
+        x: 0,
+        y: 0,
         collapsed: true,
-        id: `item_${data.wd.replace('wd:', '')}`
+        card: `doc:Card_${uuid()}`,
+        id: `doc:item_${data.wd.replace('wd:', '')}`
       }, { root: true })
-      //   query: WOQL.from('schema/*', WOQL
-      //     .triple(doctype, 'scm:wd', 'v:wd')
-      //     .triple(doctype, 'rdfs:label', 'v:label'))
-      // })
-      // // const props = await dispatch('query', {
-      // //   query: WOQL.from('schema/*', WOQL
-      // //     .triple('v:id', 'rdfs:domain', doctype)
-      // //     .triple('v:id', 'rdfs:label', 'v:label')
-      // //     .triple('v:id', 'scm:wdt', 'v:wdt')
-      // //     .triple('v:id', 'rdfs:range', 'v:type'))
-      // // })
-      // const remoteSearchResults = await QueryWikidata(WikidataSearch(term, domain[0].wd))
-      // commit('data/set', { remoteSearchResults }, { root: true })
+    },
+    async updateCard ({ dispatch }, data) {
+      const view = 'View_demo1'
+      const id = data.card || `doc:Card_${uuid()}`
+      await dispatch('query', {
+        query: WOQL
+          // using fourth paramter because of https://github.com/terminusdb/terminusdb/issues/380
+          .update_triple(id, 'type', 'scm:Card', 'v:temp1')
+          .update_triple(id, 'scm:entity', data.id, 'v:temp2')
+          // boolean annoyingly require typecasting at the moment
+          .update_triple(id, 'scm:collapsed', { '@type': 'xsd:boolean', '@value': data.collapsed }, 'v:temp3')
+          .update_triple(id, 'scm:y', data.y, 'v:temp4')
+          .update_triple(id, 'scm:x', data.x, 'v:temp5')
+          .add_triple(view, 'scm:cards', { '@id': id })
+      })
+    },
+    async deleteObject ({ dispatch }, id) {
+      await dispatch('query', {
+        query: WOQL.delete_object(id)
+      })
     }
   },
   modules: {

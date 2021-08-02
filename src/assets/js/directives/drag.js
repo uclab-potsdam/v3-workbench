@@ -68,7 +68,8 @@ function onDragOver (el, options, e) {
 }
 
 function onDragEnd (el, options, e) {
-  el.dragImage.remove()
+  // eslint-disable-next-line no-unused-expressions
+  if (el.dragImage) el.dragImage.remove()
   // if (img?.remove) img.remove()
   // if (options.handler != null) {
   //   // options.handler({
@@ -101,7 +102,7 @@ export default {
     el.options = binding.value
   },
   unmounted (el) {
-    if (el.dragImage?.remove) el.dragImage.remove()
+    if (el.dragImage) el.dragImage.remove()
     for (const l in el.listeners) {
       el.removeEventListener(l, el.listeners[l])
     }

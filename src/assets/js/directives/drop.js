@@ -2,6 +2,7 @@ function onDrop (el, options, e) {
   e.preventDefault()
   e.stopPropagation()
   // e.preventDefault()
+  el.classList.remove('drag-over')
 
   // e.dataTransfer.dropEffect = 'move'
   const value = e.dataTransfer.getData('text/plain')
@@ -15,6 +16,11 @@ function onDrop (el, options, e) {
 function onDragOver (el, options, e) {
   e.dataTransfer.dropEffect = options.dropEffect
   e.preventDefault()
+  el.classList.add('drag-over')
+}
+
+function onDragLeave (el) {
+  el.classList.remove('drag-over')
 }
 
 // function onDragOverROOT (el, options, e) {
@@ -47,7 +53,8 @@ export default {
   mounted (el, binding) {
     el.listeners = {
       drop: onDrop.bind(null, el, binding.value),
-      dragover: onDragOver.bind(null, el, binding.value)
+      dragover: onDragOver.bind(null, el, binding.value),
+      dragleave: onDragLeave.bind(null, el, binding.value)
     }
     for (const l in el.listeners) {
       el.addEventListener(l, el.listeners[l])

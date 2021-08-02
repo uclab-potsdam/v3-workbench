@@ -9,6 +9,7 @@ html {
   box-sizing: border-box;
   background: var(--background);
   color: var(--text);
+  overflow: hidden;
 
   *, *:before, *:after {
     box-sizing: inherit;

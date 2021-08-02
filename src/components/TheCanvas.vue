@@ -27,7 +27,7 @@
         @drag="onDrag"/>
     </div>
     <div class="notifications">
-      <div class="options" v-if="drag != null" >
+      <div class="drag-options" v-if="drag != null" >
         <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
           remove card
         </div>
@@ -235,7 +235,7 @@ export default {
     display: flex;
     justify-content: center;
 
-    .options {
+    .drag-options {
       display: flex;
       justify-content: center;
       & > div {
@@ -245,9 +245,23 @@ export default {
         border: var(--base-border);
         border-radius: var(--base-border-radius);
         box-shadow: var(--base-box-shadow);
+        transition:
+          transform var(--transition),
+          background var(--transition),
+          color var(--transition);
 
         &.danger {
           color: var(--danger);
+        }
+
+        &.drag-over {
+          background: var(--accent);
+          transform: scale(1.1);
+          color: var(--background);
+
+          &.danger {
+            background: var(--danger);
+          }
         }
 
         & + div {

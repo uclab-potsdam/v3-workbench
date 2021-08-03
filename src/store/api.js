@@ -34,6 +34,7 @@ export default {
     },
     async query ({ state, dispatch }, { query, msg }) {
       await dispatch('connect')
+      msg = msg != null ? `WB - ${msg}` : null
       return await state.Client.query(query, msg)
         .then((res) => {
           return flattenBindings(res.bindings, state.prefixes)
@@ -61,8 +62,7 @@ export default {
       // })
       commit('view/set', { cards }, { root: true })
     },
-    // refactor: rename to getEntity
-    async getCard ({ dispatch }, id) {
+    async getEntity ({ dispatch }, id) {
       const bindings = (await dispatch('query', {
         query: WOQL
           .triple(id, 'rdf:type', 'v:typeId')
@@ -178,6 +178,20 @@ export default {
     async deleteObject ({ dispatch }, id) {
       await dispatch('query', {
         query: WOQL.delete_object(id)
+      })
+    },
+    async addTriple ({ state, commit, dispatch }, triple) {
+      console.log('addTriple')
+      const res = await dispatch('query', {
+        query: WOQL.add_triple(...triple),
+        msg: 'add prop'
+      })
+      console.log(res)
+    },
+    async removeTriple ({ state, commit, dispatch }, triple) {
+      await dispatch('query', {
+        query: WOQL.delete_triple(...triple),
+        msg: 'remove prop'
       })
     }
   },

@@ -1,6 +1,10 @@
 function onDragStart (el, options, e) {
-  e.dataTransfer.setData('text/uri-list', options.id)
-  e.dataTransfer.setData('text/plain', options.id)
+  // e.preventDefault()
+  e.stopPropagation()
+  if (options.id != null) {
+    e.dataTransfer.setData('text/uri-list', options.id)
+    e.dataTransfer.setData('text/plain', options.id)
+  }
 
   const clientRect = el.getBoundingClientRect()
   const offsetX = (e.clientX - clientRect.left)
@@ -50,7 +54,7 @@ function onDragStart (el, options, e) {
     // el.dragStartY = e.clientY
     // el.dragX = e.clientX
     // el.dragY = e.clientY
-    options.handler({ x: offsetX, y: offsetY, id: options.id })
+    options.handler({ options, x: offsetX, y: offsetY })
     // for (const l in el.activeListeners) {
     //   document.addEventListener(l, el.activeListeners[l])
     // }

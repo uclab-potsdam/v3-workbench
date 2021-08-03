@@ -9,7 +9,12 @@ function onDrop (el, options, e) {
   // console.log('drop', value, e)
   if (options.handler != null) {
     e.dataTransfer.dropEffect = 'none'
-    options.handler({ x: e.clientX, y: e.clientY, id: value })
+    options.handler({
+      options,
+      x: e.clientX,
+      y: e.clientY,
+      id: value
+    })
   }
 }
 
@@ -56,8 +61,10 @@ export default {
       dragover: onDragOver.bind(null, el, binding.value),
       dragleave: onDragLeave.bind(null, el, binding.value)
     }
-    for (const l in el.listeners) {
-      el.addEventListener(l, el.listeners[l])
+    if (!binding.value.disabled) {
+      for (const l in el.listeners) {
+        el.addEventListener(l, el.listeners[l])
+      }
     }
     // if (binding.value.root) {
     //   el.docListeners = {
@@ -67,6 +74,11 @@ export default {
     //     document.addEventListener(l, el.docListeners[l])
     //   }
     // }
+  },
+  updated (el, binding) {
+    for (const l in el.listeners) {
+      el[binding.value.disabled ? 'removeEventListener' : 'addEventListener'](l, el.listeners[l])
+    }
   },
   unmounted (el, binding) {
     for (const l in el.listeners) {

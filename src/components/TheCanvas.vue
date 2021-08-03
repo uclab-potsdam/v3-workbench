@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{root: true, dropEffect: 'move', handler: onDrop}">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{dropEffect: 'move', handler: onDrop}">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -21,13 +21,16 @@
         :key="card.id"
         context="canvas"
         v-bind="card"
+        :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
         @toggleCollapse="toggleCollapse(card.id)"
-        @drag="onDrag"/>
+        @drag="onDrag"
+        @addProp="onAddProp"
+        @removeProp="onRemoveProp"/>
     </div>
     <div class="notifications">
-      <div class="drag-options" v-if="drag != null" >
+      <div class="drag-options" v-if="drag?.options?.mode === 'move'" >
         <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
           remove card
         </div>
@@ -119,6 +122,10 @@ export default {
       'dropCard',
       'removeCard'
     ]),
+    ...mapActions('data', [
+      'addProp',
+      'removeProp'
+    ]),
     ...mapActions('api', [
       'deleteObject'
     ]),
@@ -168,11 +175,7 @@ export default {
       // })
     },
     onDrop (e) {
-      // console.log('drop', this.drag)
-      // if (this.drag != null || this.cards.find(c => c.id === e.id) != null) {
-      //   this.drag = null
-      //   return
-      // }
+      if (this.drag?.options?.mode === 'connect') return
       this.dropCard({
         id: e.id,
         x: (e.x - (this.drag?.x || 0) - this.transform.x) / this.transform.k,
@@ -191,6 +194,16 @@ export default {
       // find a card with matching ids
       this.removeCard(this.cards.find(c => c.id === e.id).card)
       this.deleteObject(e.id)
+    },
+    onAddProp (e) {
+      if (this.drag?.options?.mode !== 'connect') return
+      const doc = this.drag.options.doc
+      const prop = this.drag.options.prop
+      const value = e.options?.value
+      this.addProp([doc, prop, value])
+    },
+    onRemoveProp (e) {
+      this.removeProp([e.doc, e.prop, e.value])
     }
   }
 }

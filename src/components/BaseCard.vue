@@ -1,6 +1,7 @@
 <template>
   <div v-if="card" class="card" ref="my_card" :style="colors"
-    v-drag="{id, customDragImage: context === 'canvas', handler (e) {$emit('drag', e)}, width: scale * 320, height: scale * (collapsed ? 112 : 420)}"
+    v-drag="{id, mode: 'move', customDragImage: context === 'canvas', handler (e) {$emit('drag', e)}, width: scale * 320, height: scale * (collapsed ? 112 : 420)}"
+    v-drop="{disabled: !allowDrop, value: id, dropEffect: 'move', handler (e) {$emit('addProp', e)}}"
     @mouseover="cardHover = true" @mouseleave="cardHover = false">
     <div class="header" @mouseover="hover = true" @mouseleave="hover = false">
         <h1 class="label" ref="my_label" v-bind:class = "{ 'slide-right' : widthLabel > widthCard - 20 && hover === true}">{{ card.label }}</h1>
@@ -16,8 +17,8 @@
         <div v-else-if="currentSlide === 1" class="properties" key=2>
           <div class="container" v-for="(prop, i) in card.props" :key="i">
             <p class="propName">{{ prop.propLabel }}</p>
-            <p class="item">+</p>
-            <p class="propValue">{{ prop.valueLabel || prop.value }} </p>
+            <p class="item" v-drag="{mode: 'connect', doc: id, prop: prop.prop, handler (e) {$emit('drag', e)}}">+</p>
+            <p class="propValue" @click="$emit('removeProp', {doc: id, prop: prop.prop, value: prop.value})">{{ prop.valueLabel || prop.value }} </p>
           </div>
         </div>
         <div v-else class="description" key=3>{{ card.description }}</div>
@@ -36,23 +37,26 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import drag from '@/assets/js/directives/drag'
+import drop from '@/assets/js/directives/drop'
 export default {
   name: 'BaseCard',
   directives: {
-    drag
+    drag,
+    drop
   },
-  emits: ['drag', 'toggleCollapse'],
+  emits: ['drag', 'toggleCollapse', 'addProp', 'removeProp'],
   props: {
     id: String,
     collapsed: Boolean,
     pane: String,
     context: String,
-    scale: Number
+    scale: Number,
+    allowDrop: Boolean
   },
   data () {
     return {
-      card: null,
-      entityType: null,
+      // card: null,
+      // entityType: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
@@ -64,7 +68,7 @@ export default {
   },
   computed: {
     ...mapGetters('data', [
-      'getType'
+      'getType', 'getEntity'
     ]),
     colors () {
       if (this.entityType == null) return
@@ -73,13 +77,18 @@ export default {
         '--background': `var(--${background}-${light ? 8 : 2})`,
         '--text': `var(--${text}-${light ? 2 : 8})`
       }
+    },
+    card () {
+      return this.getEntity(this.id)
+    },
+    entityType () {
+      return this.getType(this.card.typeId)
     }
   },
   async mounted () {
-    this.card = await this.getCard(this.id)
+    await this.fetchEntity(this.id)
     // in some cases BaseCard is already unmounted here and getType is undefined
     if (this.getType === undefined) return
-    this.entityType = this.getType(this.card.typeId)
     this.$nextTick(() => {
       this.calcWidthOfLabel()
       this.calcWidthOfCard()
@@ -87,7 +96,7 @@ export default {
   },
   methods: {
     ...mapActions('data', [
-      'getCard'
+      'fetchEntity'
     ]),
     calcWidthOfLabel () {
       this.widthLabel = this.$refs.my_label.getBoundingClientRect().width

@@ -53,13 +53,6 @@ export default {
             .triple('v:card', 'scm:y', 'v:y')
           )
       }))
-      // REFACTOR: position should be parsed in flattenBindings
-      // .map(card => {
-      //   return {
-      //     ...card,
-      //     pos: JSON.parse(card.pos)
-      //   }
-      // })
       commit('view/set', { cards }, { root: true })
     },
     async getEntity ({ dispatch }, id) {

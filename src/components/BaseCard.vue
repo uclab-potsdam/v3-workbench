@@ -71,7 +71,7 @@ export default {
       'getType', 'getEntity'
     ]),
     colors () {
-      if (this.entityType == null) return
+      if (this.entityType?.background == null) return
       const { background, text, light } = this.entityType
       return {
         '--background': `var(--${background}-${light ? 8 : 2})`,

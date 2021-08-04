@@ -21,7 +21,7 @@ export default {
     }
   },
   actions: {
-    async connect ({ commit, getters, rootState }) {
+    async connect ({ commit, getters, rootState, dispatch }) {
       if (getters.connected) return
       const { server, credentials, database } = rootState.config
       const Client = new WOQLClient(server, {})
@@ -31,6 +31,8 @@ export default {
       const info = Client.databaseInfo()
       commit('set', { Client })
       commit('set', { prefixes: Object.entries({ ...info.prefix_pairs, ...info.jsonld_context }) })
+      // do things that should happen after connecting (e.g. get doctypes)
+      dispatch('data/init', null, { root: true })
     },
     async query ({ state, dispatch }, { query, msg }) {
       await dispatch('connect')
@@ -43,7 +45,7 @@ export default {
         })
     },
     async getView ({ dispatch, commit }, id) {
-      const cards = (await dispatch('query', {
+      const cards = await dispatch('query', {
         query: WOQL
           .triple(id, 'scm:cards', 'v:card')
           .triple('v:card', 'scm:entity', 'v:id')
@@ -52,8 +54,24 @@ export default {
             .triple('v:card', 'scm:x', 'v:x')
             .triple('v:card', 'scm:y', 'v:y')
           )
-      }))
+      })
       commit('view/set', { cards }, { root: true })
+    },
+    async getTypes ({ dispatch }) {
+      const types = await dispatch('query', {
+        query: WOQL
+          .from('schema/*', WOQL
+            .triple('v:id', 'rdf:type', 'owl:Class')
+            .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:Path')
+            .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+            .opt(WOQL
+              .triple('v:id', 'scm:background', 'v:background')
+              .triple('v:id', 'scm:text', 'v:text')
+              .triple('v:id', 'scm:light', 'v:light')
+            )
+          )
+      })
+      return types
     },
     async getEntity ({ dispatch }, id) {
       const bindings = (await dispatch('query', {
@@ -174,12 +192,10 @@ export default {
       })
     },
     async addTriple ({ state, commit, dispatch }, triple) {
-      console.log('addTriple')
-      const res = await dispatch('query', {
+      await dispatch('query', {
         query: WOQL.add_triple(...triple),
         msg: 'add prop'
       })
-      console.log(res)
     },
     async removeTriple ({ state, commit, dispatch }, triple) {
       await dispatch('query', {

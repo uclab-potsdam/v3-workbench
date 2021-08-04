@@ -16,178 +16,202 @@
 
 scm:Card
   a owl:Class ;
-  rdfs:label "Card"@en .
+  rdfs:label "Card" .
 
 scm:Concept
   a owl:Class ;
-  rdfs:label "Concept"@en ;
+  rdfs:label "Concept" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Entity .
 
 scm:Entity
   a owl:Class ;
-  rdfs:label "Entity"@en ;
+  rdfs:label "Entity" ;
   rdfs:subClassOf terminus:Document .
 
 scm:Event
   a owl:Class ;
-  rdfs:label "Event"@en ;
+  rdfs:label "Event" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Entity .
 
 scm:File
   a owl:Class ;
-  rdfs:label "File"@en ;
+  rdfs:label "File" ;
   rdfs:subClassOf terminus:Document .
 
 scm:GND
   a owl:DatatypeProperty ;
   rdfs:domain scm:Person ;
-  rdfs:label "GND"@en ;
+  rdfs:label "GND" ;
   rdfs:range xdd:url .
 
 scm:Image
   a owl:Class ;
-  rdfs:label "Image"@en ;
+  rdfs:label "Image" ;
   rdfs:subClassOf terminus:Document ,
                   scm:File .
 
 scm:Material
   a owl:Class ;
-  rdfs:label "Material"@en ;
+  rdfs:label "Material" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Concept .
 
 scm:Object
   a owl:Class ;
-  rdfs:label "Object"@en ;
+  rdfs:label "Object" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Concept .
 
 scm:Person
   a owl:Class ;
-  rdfs:label "Person"@en ;
+  rdfs:label "Person" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Entity ;
-  scm:wd "wd:Q5"@en .
+  scm:background "teal" ;
+  scm:light false ;
+  scm:text "red" ;
+  scm:wd "wd:Q5" .
 
 scm:Place
   a owl:Class ;
-  rdfs:label "Place"@en ;
+  rdfs:label "Place" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Entity ;
-  scm:wd "wd:Q2221906"@en .
+  scm:background "blue" ;
+  scm:light true ;
+  scm:text "magenta" ;
+  scm:wd "wd:Q2221906" .
 
 scm:Production
   a owl:Class ;
-  rdfs:label "Production"@en ;
+  rdfs:label "Production" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Event .
 
 scm:Ressource
   a owl:Class ;
-  rdfs:label "Ressource"@en ;
+  rdfs:label "Ressource" ;
   rdfs:subClassOf terminus:Document ,
                   scm:Concept .
 
 scm:View
   a owl:Class ;
-  rdfs:label "View"@en ;
+  rdfs:label "View" ;
   rdfs:subClassOf terminus:Document .
+
+scm:background
+  a owl:DatatypeProperty ;
+  rdfs:domain scm:Entity ;
+  rdfs:label "Card background color" ;
+  rdfs:range xsd:string .
 
 scm:broader
   a owl:ObjectProperty ;
   rdfs:domain scm:Entity ;
-  rdfs:label "broader"@en ;
+  rdfs:label "broader" ;
   rdfs:range scm:Entity .
 
 scm:cards
   a owl:ObjectProperty ;
   rdfs:domain scm:View ;
-  rdfs:label "cards"@en ;
+  rdfs:label "cards" ;
   rdfs:range scm:Card .
 
 scm:collapsed
   a owl:DatatypeProperty ;
   rdfs:domain scm:Card ;
-  rdfs:label "collapsed"@en ;
+  rdfs:label "collapsed" ;
   rdfs:range xsd:boolean .
 
 scm:entity
   a owl:ObjectProperty ;
   rdfs:domain scm:Card ;
-  rdfs:label "entity"@en ;
+  rdfs:label "entity" ;
   rdfs:range scm:Entity .
 
 scm:image
   a owl:ObjectProperty ;
   rdfs:domain scm:Entity ;
-  rdfs:label "image"@en ;
+  rdfs:label "image" ;
   rdfs:range scm:Image .
 
 scm:inputs
   a owl:ObjectProperty ;
   rdfs:domain scm:Production ;
-  rdfs:label "inputs"@en ;
+  rdfs:label "inputs" ;
   rdfs:range scm:Concept .
+
+scm:light
+  a owl:DatatypeProperty ;
+  rdfs:domain scm:Entity ;
+  rdfs:label "Card theme" ;
+  rdfs:range xsd:boolean .
 
 scm:outputs
   a owl:ObjectProperty ;
   rdfs:domain scm:Production ;
-  rdfs:label "outputs"@en ;
+  rdfs:label "outputs" ;
   rdfs:range scm:Concept .
 
 scm:placeOfBirth
   a owl:ObjectProperty ;
   rdfs:domain scm:Person ;
-  rdfs:label "place of birth"@en ;
+  rdfs:label "place of birth" ;
   rdfs:range scm:Place ;
-  scm:wdt "wdt:P19"@en .
+  scm:wdt "wdt:P19" .
 
 scm:placeOfDeath
   a owl:ObjectProperty ;
   rdfs:domain scm:Person ;
-  rdfs:label "place of death"@en ;
+  rdfs:label "place of death" ;
   rdfs:range scm:Place ;
-  scm:wdt "wdt:P20"@en .
+  scm:wdt "wdt:P20" .
 
 scm:takesPlaceIn
   a owl:ObjectProperty ;
   rdfs:domain scm:Production ;
-  rdfs:label "takes place in"@en ;
+  rdfs:label "takes place in" ;
   rdfs:range scm:Place .
+
+scm:text
+  a owl:DatatypeProperty ;
+  rdfs:domain scm:Entity ;
+  rdfs:label "Card text color" ;
+  rdfs:range xsd:string .
 
 scm:url
   a owl:DatatypeProperty ;
   rdfs:domain scm:File ;
-  rdfs:label "url"@en ;
+  rdfs:label "url" ;
   rdfs:range xdd:url .
 
 scm:uses
   a owl:ObjectProperty ;
   rdfs:domain scm:Production ;
-  rdfs:label "uses"@en ;
+  rdfs:label "uses" ;
   rdfs:range scm:Object .
 
 scm:wd
   a owl:DatatypeProperty ;
   rdfs:domain scm:Entity ;
-  rdfs:label "Wikidata Item"@en ;
+  rdfs:label "Wikidata Item" ;
   rdfs:range xsd:string .
 
 scm:wdt
   a owl:DatatypeProperty ;
-  rdfs:label "Wikidata Property"@en ;
+  rdfs:label "Wikidata Property" ;
   rdfs:range xsd:string .
 
 scm:x
   a owl:DatatypeProperty ;
   rdfs:domain scm:Card ;
-  rdfs:label "x"@en ;
+  rdfs:label "x" ;
   rdfs:range xsd:decimal .
 
 scm:y
   a owl:DatatypeProperty ;
   rdfs:domain scm:Card ;
-  rdfs:label "y"@en ;
+  rdfs:label "y" ;
   rdfs:range xsd:decimal .

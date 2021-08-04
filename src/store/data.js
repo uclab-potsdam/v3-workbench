@@ -6,19 +6,7 @@ export default {
     cards: [],
     searchResults: [],
     remoteSearchResults: [],
-    types: [{
-      id: 'scm:Place',
-      label: 'Place',
-      background: 'blue',
-      text: 'magenta',
-      light: true
-    }, {
-      id: 'scm:Person',
-      label: 'Person',
-      background: 'teal',
-      text: 'red',
-      light: false
-    }]
+    types: []
   },
   getters: {
     getEntity: (state) => (id) => {
@@ -43,6 +31,10 @@ export default {
     }
   },
   actions: {
+    async init ({ dispatch, commit }, id) {
+      const types = await dispatch('api/getTypes', id, { root: true })
+      commit('set', { types })
+    },
     async fetchEntity ({ state, dispatch, commit }, id) {
       let card = state.cards.find(card => card.id === id)
       if (card != null) return card

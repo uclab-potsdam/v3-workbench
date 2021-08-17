@@ -59,19 +59,56 @@ export default {
     },
     async getTypes ({ dispatch }) {
       const types = await dispatch('query', {
+        // 'group_by' fails when used with 'opt'
+        // query: WOQL
+        //   .from('schema/*', WOQL
+        //     .group_by(['v:id', 'v:background', 'v:text', 'v:light'], ['v:prop'], 'v:group')
+        //     .triple('v:id', 'rdf:type', 'owl:Class')
+        //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:Path')
+        //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+        //     .opt(WOQL
+        //       .triple('v:id', 'scm:background', 'v:background')
+        //       .triple('v:id', 'scm:text', 'v:text')
+        //       .triple('v:id', 'scm:light', 'v:light')
+        //     )
+        //     .opt(WOQL.triple('v:prop', 'rdfs:domain', 'v:id'))
+        //   )
+        // query: WOQL
+        //   .from('schema/*', WOQL
+        //     .triple('v:id', 'rdf:type', 'owl:Class')
+        //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:path')
+        //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+        //     .opt(WOQL
+        //       .triple('v:id', 'scm:background', 'v:background')
+        //       .triple('v:id', 'scm:text', 'v:text')
+        //       .triple('v:id', 'scm:light', 'v:light')
+        //     )
+        //     .opt(WOQL
+        //       .triple('v:prop', 'rdfs:domain', 'v:id')
+        //       .triple('v:prop', 'rdfs:range', 'v:propType')
+        //       .triple('v:prop', 'rdfs:label', 'v:propLabel')
+        //     )
+        //   )
         query: WOQL
           .from('schema/*', WOQL
             .triple('v:id', 'rdf:type', 'owl:Class')
-            .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:Path')
+            // .path('scm:Entity', '<rdfs:subClassOf+', 'v:id', 'v:pathA')
             .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
             .opt(WOQL
               .triple('v:id', 'scm:background', 'v:background')
               .triple('v:id', 'scm:text', 'v:text')
               .triple('v:id', 'scm:light', 'v:light')
             )
+            .opt(WOQL
+              .path('v:prop', 'rdfs:domain|(rdfs:domain,<rdfs:subClassOf+)', 'v:id', 'v:pathB')
+              // .triple('v:prop', 'rdfs:domain', 'v:id')
+              .triple('v:prop', 'rdfs:range', 'v:propType')
+              .triple('v:prop', 'rdfs:label', 'v:propLabel')
+            )
           )
       })
-      return types
+      console.log(groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label']))
+      return groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label'])
     },
     async getEntity ({ dispatch }, id) {
       const bindings = (await dispatch('query', {
@@ -227,4 +264,43 @@ const replacePrefixes = (value, prefixes) => {
   })
   if (value === 'system:unknown') return null
   return value
+}
+
+// const groupBy = (input, keys, ignoreKeys = [], groupKey = 'values') => {
+//   const output = []
+//   input.forEach(obj => {
+//     let outputObj = output.find(outputObj => keys.map(key => obj[key] === outputObj[key]).every(Boolean))
+//     if (outputObj === undefined) {
+//       outputObj = Object.fromEntries([...[...keys, ...ignoreKeys].map(key => [key, obj[key]]), [groupKey, []]]) //, [groupKey, []])
+//       output.push(outputObj)
+//     }
+//     const remainingKeys = Object.keys(obj).filter(key => [...keys, ...ignoreKeys].find(k => k === key) === undefined)
+//     outputObj.props.push(Object.fromEntries(remainingKeys.map(key => [key, obj[key]])))
+//   })
+//   return output
+// }
+
+const groupBy = (input, key = 'id', groupKey = 'values', distinct = [], rename = []) => {
+  const output = []
+  input.forEach(obj => {
+    let outputObj = output.find(outputObj => obj[key] === outputObj[key])
+    if (outputObj === undefined) {
+      const keys = Object.keys(obj).filter(k => !(distinct.find(d => d === k)))
+      outputObj = Object.fromEntries([...keys.map(key => [key, obj[key]]), [groupKey, []]]) //, [groupKey, []])
+      output.push(removeNull(outputObj))
+    }
+    // const remainingKeys = Object.keys(obj).filter(key => [key, ...ignoreKeys].find(k => k === key) === undefined)
+    if (distinct.map(key => obj[key] != null).some(Boolean)) {
+      outputObj.props.push(Object.fromEntries(distinct.map((key, i) => [rename[i], obj[key]])))
+    }
+  })
+  return output
+}
+
+const removeNull = (obj) => {
+  Object.entries(obj).forEach(([key, val]) =>
+    (val && typeof val === 'object' && removeNull(val)) ||
+    ((val === null) && delete obj[key])
+  )
+  return obj
 }

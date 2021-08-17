@@ -15,10 +15,11 @@
         <transition :name="transitionName">
         <div v-if="currentSlide === 0" class="image" key=1>Image</div>
         <div v-else-if="currentSlide === 1" class="properties" key=2>
-          <div class="container" v-for="(prop, i) in card.props" :key="i">
-            <p class="propName">{{ prop.propLabel }}</p>
-            <p class="item" v-drag="{mode: 'connect', doc: id, prop: prop.prop, handler (e) {$emit('drag', e)}}">+</p>
-            <p class="propValue" @click="$emit('removeProp', {doc: id, prop: prop.prop, value: prop.value})">{{ prop.valueLabel || prop.value }} </p>
+          <div class="container" v-for="(prop, i) in props" :key="i">
+            <p class="propName">{{ prop.label }}</p>
+            <p class="item" v-drag="{mode: 'connect', doc: id, prop: prop.id, handler (e) {$emit('drag', e)}}">+</p>
+            <p class="propValue" v-for="(value, i) in prop.values" :key="i"
+            @click="$emit('removeProp', {doc: id, prop: prop.id, value: value.raw})">{{ value.label }} </p>
           </div>
         </div>
         <div v-else class="description" key=3>{{ card.description }}</div>
@@ -83,6 +84,18 @@ export default {
     },
     entityType () {
       return this.getType(this.card.typeId)
+    },
+    props () {
+      if (this.entityType == null) return []
+      return this.entityType.props.map(prop => {
+        return {
+          ...prop,
+          values: this.card.props.filter(p => p.prop === prop.id).map(v => ({
+            raw: v.value,
+            label: v.valueLabel || v.value
+          }))
+        }
+      })
     }
   },
   async mounted () {
@@ -158,6 +171,7 @@ export default {
 .content {
   height: 300px;
   padding-top: 25px;
+  overflow: auto;
 }
 .image {
   background: gray;

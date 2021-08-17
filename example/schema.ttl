@@ -103,7 +103,6 @@ scm:View
 
 scm:background
   a owl:DatatypeProperty ;
-  rdfs:domain scm:Entity ;
   rdfs:label "Card background color" ;
   rdfs:range xsd:string .
 
@@ -112,6 +111,11 @@ scm:broader
   rdfs:domain scm:Entity ;
   rdfs:label "broader" ;
   rdfs:range scm:Entity .
+
+scm:wd
+  a owl:DatatypeProperty ;
+  rdfs:label "Wikidata Item" ;
+  rdfs:range xsd:string .
 
 scm:cards
   a owl:ObjectProperty ;
@@ -145,7 +149,6 @@ scm:inputs
 
 scm:light
   a owl:DatatypeProperty ;
-  rdfs:domain scm:Entity ;
   rdfs:label "Card theme" ;
   rdfs:range xsd:boolean .
 
@@ -177,7 +180,6 @@ scm:takesPlaceIn
 
 scm:text
   a owl:DatatypeProperty ;
-  rdfs:domain scm:Entity ;
   rdfs:label "Card text color" ;
   rdfs:range xsd:string .
 
@@ -192,12 +194,6 @@ scm:uses
   rdfs:domain scm:Production ;
   rdfs:label "uses" ;
   rdfs:range scm:Object .
-
-scm:wd
-  a owl:DatatypeProperty ;
-  rdfs:domain scm:Entity ;
-  rdfs:label "Wikidata Item" ;
-  rdfs:range xsd:string .
 
 scm:wdt
   a owl:DatatypeProperty ;

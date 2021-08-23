@@ -1,5 +1,5 @@
 export default {
-  server: 'https://127.0.0.1:6363/',
+  server: process.env.VUE_APP_SERVER,
   credentials: { user: 'admin', key: 'root' },
-  database: 'amazonasfuturelab'
+  database: process.env.VUE_APP_DB
 }

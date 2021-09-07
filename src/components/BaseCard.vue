@@ -75,8 +75,8 @@ export default {
       if (this.entityType?.background == null) return
       const { background, text, light } = this.entityType
       return {
-        '--background': `var(--${background}-${light ? 8 : 2})`,
-        '--text': `var(--${text}-${light ? 2 : 8})`
+        '--background': `var(--${background}-${light ? 8 : 4})`,
+        '--text': `var(--${text}-${light ? 3 : 9})`
       }
     },
     card () {

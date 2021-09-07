@@ -144,7 +144,7 @@ export default {
             WOQL.triple('v:id', 'rdfs:label', 'v:label'),
             WOQL.triple('v:id', 'rdf:type', doctype || 'v:doctype'),
             WOQL.like(term, 'v:label', 'v:dist'),
-            WOQL.greater('v:dist', 0.1)
+            WOQL.greater('v:dist', 0.8)
           )
       })
       commit('data/set', { searchResults }, { root: true })

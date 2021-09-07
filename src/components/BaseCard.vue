@@ -19,6 +19,7 @@
             <p class="propName">{{ prop.label }}</p>
             <p class="item" v-drag="{mode: 'connect', doc: id, prop: prop.id, handler (e) {$emit('drag', e)}}">+</p>
             <p class="propValue" v-for="(value, i) in prop.values" :key="i"
+            v-drag="{ id: value.raw, mode: 'move', customDragImage: false, handler (e) {$emit('drag', e)} }"
             @click="$emit('removeProp', {doc: id, prop: prop.id, value: value.raw})">{{ value.label }} </p>
           </div>
         </div>

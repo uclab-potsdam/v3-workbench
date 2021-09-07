@@ -115,7 +115,7 @@ export default {
         query: WOQL
           .triple(id, 'rdf:type', 'v:typeId')
           .quad('v:typeId', 'rdfs:label', 'v:type', 'schema/*')
-          .triple(id, 'rdfs:comment', 'v:description')
+          .opt(WOQL.triple(id, 'rdfs:comment', 'v:description'))
           .triple(id, 'rdfs:label', 'v:label')
       }))
       const props = (await dispatch('query', {

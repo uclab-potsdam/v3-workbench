@@ -107,7 +107,6 @@ export default {
             )
           )
       })
-      console.log(groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label']))
       return groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label'])
     },
     async getEntity ({ dispatch }, id) {

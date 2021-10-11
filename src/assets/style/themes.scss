@@ -5,6 +5,7 @@
   --primary: var(--teal-9);
   --accent: var(--blue-7);
   --muted: var(--gray-blue-7);
+  --edges: var(--blue-9);
 
   --status-ok: var(--teal-6);
   --danger: var(--red-6);
@@ -17,4 +18,5 @@ html.dark {
   --primary: var(--teal-1);
   --accent: var(--blue-3);
   --muted: var(--gray-blue-3);
+  --edges: var(--blue-2);
 }

@@ -2,15 +2,15 @@
   <g class="edge">
     <path class="shadow" :d="path" :stroke-width="10"
       @mouseenter="showLabel = true" @mouseleave="showLabel = false"/>
-    <path :d="path" :stroke-width="strokeWidth * 2"/>
-    <text v-if="showLabel">
+    <path :d="path" :stroke-width="strokeWidth * 1.5"/>
+    <!-- <text v-if="showLabel">
       <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="strokeWidth * 4">
         {{ label }}
       </textPath>
       <textPath :path="path" startOffset="50%" dominant-baseline="middle">
         {{ label }}
       </textPath>
-    </text>
+    </text> -->
   </g>
 </template>
 
@@ -52,7 +52,7 @@ export default {
 .edge {
   pointer-events: none;
   path {
-    stroke: var(--gray-6);
+    stroke: var(--edges);
     fill: none;
     &.shadow {
       stroke: transparent;

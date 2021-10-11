@@ -115,6 +115,7 @@ export default {
           .triple(id, 'rdf:type', 'v:typeId')
           .quad('v:typeId', 'rdfs:label', 'v:type', 'schema/*')
           .opt(WOQL.triple(id, 'rdfs:comment', 'v:description'))
+          .opt(WOQL.triple(id, 'scm:cover', 'v:coverId').triple('v:coverId', 'scm:path', 'v:cover'))
           .triple(id, 'rdfs:label', 'v:label')
       }))
       const props = (await dispatch('query', {
@@ -143,7 +144,7 @@ export default {
             WOQL.triple('v:id', 'rdfs:label', 'v:label'),
             WOQL.triple('v:id', 'rdf:type', doctype || 'v:doctype'),
             WOQL.like(term, 'v:label', 'v:dist'),
-            WOQL.greater('v:dist', 0.8)
+            WOQL.greater('v:dist', 0.6)
           )
       })
       commit('data/set', { searchResults }, { root: true })

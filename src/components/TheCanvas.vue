@@ -13,6 +13,10 @@
           :key="`${edge.source}/${edge.target}/${edge.prop}`"
           v-bind="edge"
           :stroke-width="1 / transform.k" />
+        <!-- <CanvasEdge
+          v-if="tempEdge"
+          v-bind="tempEdge"
+          :stroke-width="1 / transform.k" /> -->
       </g>
     </svg>
     <div class="cards" :style="{transform: transformString}">
@@ -79,6 +83,7 @@ export default {
       transition: 400,
       container: null,
       drag: null
+      // tempEdge: null
     }
   },
   mounted () {
@@ -205,6 +210,17 @@ export default {
     onRemoveProp (e) {
       this.removeProp([e.doc, e.prop, e.value])
     }
+    // onSetTempEdge (e) {
+    //   this.tempEdge = {
+    //     x1: e.x0,
+    //     y1: e.y0,
+    //     x2: e.x,
+    //     y2: e.y
+    //   }
+    // },
+    // onClearTempEdge (e) {
+    //   // this.tempEdge = null
+    // }
   }
 }
 </script>

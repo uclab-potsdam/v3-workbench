@@ -20,6 +20,7 @@ function onDragStart (el, options, e) {
 
     const width = el.options.width
     const height = el.options.height
+    const color = el.options.color
 
     /* 'img' → this does not work in safari, which requires the image to be created
     before the event; see https://stackoverflow.com/a/22610927 */
@@ -42,7 +43,8 @@ function onDragStart (el, options, e) {
     el.dragImage = document.createElement('div')
     el.dragImage.style.height = `${height}px`
     el.dragImage.style.width = `${width}px`
-    el.dragImage.style.background = getComputedStyle(el)['background-color']
+    el.dragImage.style['border-radius'] = `${el.options.circle ? 50 : 0}%`
+    el.dragImage.style.background = color ? getComputedStyle(document.documentElement).getPropertyValue(color) : getComputedStyle(el)['background-color']
 
     /* add element to document, required for Chrome and Safari */
     document.getElementsByTagName('body')[0].appendChild(el.dragImage)
@@ -50,8 +52,8 @@ function onDragStart (el, options, e) {
     e.dataTransfer.setDragImage(el.dragImage, offsetX, offsetY)
   }
   if (options.handler != null) {
-    // el.dragStartX = e.clientX
-    // el.dragStartY = e.clientY
+    // el.dragX0 = e.clientX
+    // el.dragY0 = e.clientY
     // el.dragX = e.clientX
     // el.dragY = e.clientY
     options.handler({ options, x: offsetX, y: offsetY })
@@ -59,12 +61,25 @@ function onDragStart (el, options, e) {
     //   document.addEventListener(l, el.activeListeners[l])
     // }
   }
+  // if (options.dragOverHandler != null) {
+  //   // el.dragStartX = e.clientX
+  //   // el.dragStartY = e.clientY
+  //   // el.dragX = e.clientX
+  //   // el.dragY = e.clientY
+  //   // options.dragOverHandler({ options, x: offsetX, y: offsetY })~
+  //   for (const l in el.activeListeners) {
+  //     document.addEventListener(l, el.activeListeners[l])
+  //   }
+  // }
 }
 
 function onDragOver (el, options, e) {
-  // options.handler({
-  //   x: e.clientX - el.dragX,
-  //   y: e.clientY - el.dragY,
+  // console.log('dragover')
+  // options.dragOverHandler({
+  //   x: e.clientX,
+  //   y: e.clientY,
+  //   x0: el.dragX0,
+  //   y0: el.dragY0,
   //   id: options.id
   // })
   // el.dragX = e.clientX
@@ -74,6 +89,13 @@ function onDragOver (el, options, e) {
 function onDragEnd (el, options, e) {
   // eslint-disable-next-line no-unused-expressions
   if (el.dragImage) el.dragImage.remove()
+  // if (options.dragEndHandler != null) {
+  //   options.dragEndHandler({
+  //     x: e.clientX,
+  //     y: e.clientY,
+  //     id: options.id
+  //   })
+  // }
   // if (img?.remove) img.remove()
   // if (options.handler != null) {
   //   // options.handler({

@@ -10,10 +10,10 @@ export default {
   },
   getters: {
     getEntity: (state) => (id) => {
-      return state.cards.find(card => card.id === id)
+      return state.cards.find(card => card._id === id)
     },
     getType: (state) => (id) => {
-      return state.types.find(d => d.id === id)
+      return state.types.find(d => d._id === id)
     }
   },
   mutations: {
@@ -25,9 +25,9 @@ export default {
     storeEntity (state, card) {
       state.cards.push(card)
     },
-    replaceEntity (state, card) {
-      state.cards = state.cards.filter(({ id }) => id !== card.id)
-      state.cards.push(card)
+    updateDocument (state, entity) {
+      state.cards = state.cards.filter(({ _id }) => _id !== entity._id)
+      state.cards.push(entity)
     }
   },
   actions: {
@@ -36,7 +36,8 @@ export default {
       commit('set', { types })
     },
     async fetchEntity ({ state, dispatch, commit }, id) {
-      let card = state.cards.find(card => card.id === id)
+      let card = state.cards.find(card => card._id === id)
+      console.log(id)
       if (card != null) return card
       card = await dispatch('api/getEntity', id, { root: true })
       commit('storeEntity', card)
@@ -44,15 +45,22 @@ export default {
     },
     async refreshEntity ({ state, dispatch, commit }, id) {
       const card = await dispatch('api/getEntity', id, { root: true })
-      commit('replaceEntity', card)
+      commit('updateDocument', card)
     },
     async addProp ({ dispatch }, triple) {
       await dispatch('api/addTriple', triple, { root: true })
       await dispatch('refreshEntity', triple[0])
     },
-    async removeProp ({ dispatch }, triple) {
-      await dispatch('api/removeTriple', triple, { root: true })
-      await dispatch('refreshEntity', triple[0])
+    async removeProp ({ dispatch, getters, commit }, { _id, prop, value }) {
+      const document = { ...getters.getEntity(_id) }
+      if (Array.isArray(document[prop])) {
+        document[prop] = document[prop].filter(d => d !== value)
+      } else {
+        delete document[prop]
+      }
+      commit('updateDocument', document)
+      await dispatch('api/updateDocument', document, { root: true })
+      // await dispatch('refreshEntity', triple[0])
     }
   },
   modules: {

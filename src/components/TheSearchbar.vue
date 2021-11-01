@@ -6,7 +6,7 @@
     <div class="grid results" v-if="view === 'search' && searchterm?.length > 0">
       <BaseCard
         v-for="card in searchResults"
-        :key="card.id"
+        :key="card._id"
         v-bind="card"
         collapsed/>
       <button class="new" @click="view = 'types'">

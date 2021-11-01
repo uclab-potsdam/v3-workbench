@@ -1,0 +1,159 @@
+[
+  {
+    "@base": "terminusdb:///data/",
+    "@schema": "terminusdb:///schema#",
+    "@type": "@context"
+  },
+  {
+    "@id": "Actor",
+    "@inherits": "Entity",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class"
+  },
+  {
+    "@id": "Concept",
+    "@inherits": "Entity",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "hasBroaderTerm": {
+      "@class": "Concept",
+      "@type": "Set"
+    }
+  },
+  {
+    "@id": "Entity",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "cover": {
+      "@class": "Image",
+      "@type": "Optional"
+    },
+    "eqGND": "xsd:string",
+    "eqWD": "xsd:string",
+    "genericallyRelatedTo": {
+      "@class": "Entity",
+      "@type": "Set"
+    }
+  },
+  {
+    "@id": "HumanMadeObject",
+    "@inherits": "PhysicalThing",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "eqEM": "xsd:string"
+  },
+  {
+    "@id": "Material",
+    "@inherits": "Concept",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class"
+  },
+  {
+    "@id": "Person",
+    "@inherits": "Actor",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "placeOfBirth": {
+      "@class": "Place",
+      "@type": "Optional"
+    },
+    "placeOfDeath": {
+      "@class": "Place",
+      "@type": "Optional"
+    }
+  },
+  {
+    "@id": "PhysicalThing",
+    "@inherits": "Entity",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "consistsOf": {
+      "@class": "Material",
+      "@type": "Set"
+    },
+    "exemplifies": {
+      "@class": "Concept",
+      "@type": "Set"
+    },
+    "hasFormerOrCurrentLocation": {
+      "@class": "Place",
+      "@type": "Set"
+    },
+    "hasFormerOrCurrentOwner": {
+      "@class": "Actor",
+      "@type": "Set"
+    }
+  },
+  {
+    "@id": "Place",
+    "@inherits": "Entity",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class"
+  },
+  {
+    "@id": "ProductType",
+    "@inherits": "Concept",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class"
+  },
+  {
+    "@id": "Image",
+    "@inherits": "Media",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class"
+  },
+  {
+    "@id": "Media",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "path": "xsd:string"
+  },
+  {
+    "@id": "Card",
+    "@key": {
+      "@type": "Random"
+    },
+    "@subdocument": [],
+    "@type": "Class",
+    "collapased": "xsd:boolean",
+    "entity": {
+      "@class": "Entity",
+      "@type": "Optional"
+    },
+    "x": "xsd:decimal",
+    "y": "xsd:decimal"
+  },
+  {
+    "@id": "View",
+    "@key": {
+      "@type": "Random"
+    },
+    "@type": "Class",
+    "cards": {
+      "@class": "Card",
+      "@type": "Set"
+    }
+  }
+]

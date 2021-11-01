@@ -5,7 +5,7 @@
     ref="my_card"
     :style="colors"
     v-drag="{
-      id,
+      _id,
       mode: 'move',
       customDragImage: context === 'canvas',
       handler(e) {
@@ -16,7 +16,7 @@
     }"
     v-drop="{
       disabled: !allowDrop,
-      value: id,
+      value: _id,
       dropEffect: 'move',
       handler(e) {
         $emit('addProp', e);
@@ -35,7 +35,7 @@
       >
         {{ card.label }}
       </h1>
-      <h2>{{ card.type }}</h2>
+      <h2>{{ entityType?._metadata?.label }}</h2>
       <!-- <ol  class="falafel-menu">
         <li v-for="index in 3" :key="index"></li>
       </ol> -->
@@ -45,10 +45,10 @@
         <transition :name="transitionName">
           <div v-if="currentSlide === 0" class="image" key="1">
             <div
-              v-if="card.cover"
+              v-if="cover"
               class="cover"
               :style="{
-                'background-image': `url('${fileServer}${card.cover}')`,
+                'background-image': `url('${fileServer}${cover.path}')`,
               }"
             />
           </div>
@@ -59,8 +59,8 @@
                 class="item"
                 v-drag="{
                   mode: 'connect',
-                  doc: id,
-                  prop: prop.id,
+                  doc: _id,
+                  prop: prop._id,
                   customDragImage: true,
                   handler(e) {
                     $emit('drag', e);
@@ -79,31 +79,56 @@
               >
                 +
               </p>
-              <p
-                class="propValue"
-                v-for="(value, i) in prop.values"
-                :key="i"
-                v-drag="{
-                  id: value.raw,
-                  mode: 'move',
-                  customDragImage: true,
-                  handler(e) {
-                    $emit('drag', e);
-                  },
-                  width: scale * 320,
-                  color: '--gray-blue-8',
-                  height: scale * (collapsed ? 112 : 420)
-                }"
-                @click="
-                  $emit('removeProp', {
-                    doc: id,
-                    prop: prop.id,
-                    value: value.raw,
-                  })
-                "
-              >
-                {{ value.label }}
-              </p>
+              <template v-if="prop._type === 'Set' || prop._type === 'List'">
+                <p
+                  class="propValue"
+                  v-for="(value, i) in prop.value"
+                  :key="i"
+                  v-drag="{
+                    _id: value,
+                    mode: 'move',
+                    customDragImage: true,
+                    handler(e) {
+                      $emit('drag', e);
+                    },
+                    width: scale * 320,
+                    color: '--gray-blue-8',
+                    height: scale * (collapsed ? 112 : 420)
+                  }"
+                  @click="
+                    $emit('removeProp', {
+                      _id,
+                      prop: prop._id,
+                      value: value
+                    })
+                  "
+                >
+                  {{ value }}
+                </p>
+              </template>
+              <p v-else
+                  class="propValue"
+                  v-drag="{
+                    _id: prop.value,
+                    mode: 'move',
+                    customDragImage: true,
+                    handler(e) {
+                      $emit('drag', e);
+                    },
+                    width: scale * 320,
+                    color: '--gray-blue-8',
+                    height: scale * (collapsed ? 112 : 420)
+                  }"
+                  @click="
+                    $emit('removeProp', {
+                      _id,
+                      prop: prop._id,
+                      value: prop.value
+                    })
+                  "
+                >
+                  {{ prop.value }}
+                </p>
             </div>
           </div>
           <div v-else class="description" key="3">{{ card.description }}</div>
@@ -142,7 +167,7 @@ export default {
   },
   emits: ['drag', 'toggleCollapse', 'addProp', 'removeProp', 'setTempEdge', 'clearTempEdge'],
   props: {
-    id: String,
+    _id: String,
     collapsed: Boolean,
     pane: String,
     context: String,
@@ -152,6 +177,7 @@ export default {
   data () {
     return {
       // card: null,
+      cover: null,
       // entityType: null,
       widthLabel: 0,
       widthCard: 0,
@@ -166,45 +192,65 @@ export default {
     ...mapState('config', ['fileServer']),
     ...mapGetters('data', ['getType', 'getEntity']),
     colors () {
-      if (this.entityType?.background == null) return
-      const { background, text, light } = this.entityType
+      if (this.entityType?._metadata?.background == null) return
+      const { background, text, light } = this.entityType._metadata
       return {
         '--background': `var(--${background}-${light ? 8 : 4})`,
         '--text': `var(--${text}-${light ? 3 : 9})`
       }
     },
     card () {
-      return this.getEntity(this.id)
+      const card = this.getEntity(this._id)
+      // console.log('fetched', card)
+      return card
     },
+    // cover () {
+    //   if (this.card.cover == null) return null
+    //   console.log('getting image', this.card.cover)
+    //   return this.getEntity(this.card.cover)
+    // },
     entityType () {
-      return this.getType(this.card.typeId)
+      return this.getType(this.card._type)
     },
+    // cover () {
+    //   this
+    // },
     props () {
+      // console.log(this.entityType)
       if (this.entityType == null) return []
-      return this.entityType.props.map((prop) => {
-        return {
-          ...prop,
-          values: this.card.props
-            .filter((p) => p.prop === prop.id)
-            .map((v) => ({
-              raw: v.value,
-              label: v.valueLabel || v.value
-            }))
+      const props = []
+      for (const prop in this.entityType) {
+        if (prop.match(/^_/) == null) {
+          props.push({
+            _id: prop,
+            label: prop, // TODO replace with actual label
+            value: this.card[prop],
+            ...this.entityType[prop]
+          })
         }
-      })
+      }
+      return props
+      // return this.entityType.props.map((prop) => {
+      //   return {
+      //     ...prop,
+      //     values: this.card.props
+      //       .filter((p) => p.prop === prop.id)
+      //       .map((v) => ({
+      //         raw: v.value,
+      //         label: v.valueLabel || v.value
+      //       }))
+      //   }
+      // })
     }
   },
   async mounted () {
-    await this.fetchEntity(this.id)
-    // in some cases BaseCard is already unmounted here and getType is undefined
-    if (this.getType === undefined) return
-    this.$nextTick(() => {
-      this.calcWidthOfLabel()
-      this.calcWidthOfCard()
-    })
+    const card = await this.fetchEntity(this._id)
+    // this.card = await this.fetchEntity(this._id)
+    this.cover = card.cover ? await this.fetchEntity(card.cover) : null
   },
   methods: {
     ...mapActions('data', ['fetchEntity']),
+    // ...mapActions('api', ['getEntity']),
     calcWidthOfLabel () {
       this.widthLabel = this.$refs.my_label.getBoundingClientRect().width
     },

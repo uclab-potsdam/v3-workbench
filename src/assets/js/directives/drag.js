@@ -1,9 +1,9 @@
 function onDragStart (el, options, e) {
   // e.preventDefault()
   e.stopPropagation()
-  if (options.id != null) {
-    e.dataTransfer.setData('text/uri-list', options.id)
-    e.dataTransfer.setData('text/plain', options.id)
+  if (options._id != null) {
+    e.dataTransfer.setData('text/uri-list', options._id)
+    e.dataTransfer.setData('text/plain', options._id)
   }
 
   const clientRect = el.getBoundingClientRect()

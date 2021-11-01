@@ -13,7 +13,7 @@ function onDrop (el, options, e) {
       options,
       x: e.clientX,
       y: e.clientY,
-      id: value
+      _id: value
     })
   }
 }

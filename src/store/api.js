@@ -27,10 +27,10 @@ export default {
       const Client = new WOQLClient(server, {})
       await Client.connect(credentials)
       await Client.db(database)
-      await Client._load_db_prefixes()
-      const info = Client.databaseInfo()
+      // await Client._load_db_prefixes()
       commit('set', { Client })
-      commit('set', { prefixes: Object.entries({ ...info.prefix_pairs, ...info.jsonld_context }) })
+      // const info = Client.databaseInfo()
+      // commit('set', { prefixes: Object.entries({ ...info.prefix_pairs, ...info.jsonld_context }) })
       // do things that should happen after connecting (e.g. get doctypes)
       dispatch('data/init', null, { root: true })
     },
@@ -39,110 +39,132 @@ export default {
       msg = msg != null ? `WB - ${msg}` : null
       return await state.Client.query(query, msg)
         .then((res) => {
-          return flattenBindings(res.bindings, state.prefixes)
+          return flattenBindings(res.bindings)
         }).catch((err) => {
           throw err.data
         })
     },
-    async getView ({ dispatch, commit }, id) {
-      const cards = await dispatch('query', {
-        query: WOQL
-          .triple(id, 'scm:cards', 'v:card')
-          .triple('v:card', 'scm:entity', 'v:id')
-          .triple('v:card', 'scm:collapsed', 'v:collapsed')
-          .opt(WOQL
-            .triple('v:card', 'scm:x', 'v:x')
-            .triple('v:card', 'scm:y', 'v:y')
-          )
-      })
-      commit('view/set', { cards }, { root: true })
+    async getView ({ dispatch, commit, state }, id) {
+      const view = await state.Client.getDocument({ id })
+      // const cards = await dispatch('query', {
+      //   query: WOQL
+      //     .triple(id, 'cards', 'v:card')
+      //     .triple('v:card', 'entity', 'v:id')
+      //     .triple('v:card', 'collapased', 'v:collapsed')
+      //     .opt(WOQL
+      //       .triple('v:card', 'x', 'v:x')
+      //       .triple('v:card', 'y', 'v:y')
+      //     )
+      // })
+      commit('view/set', { cards: atTo_(view.cards) || [] }, { root: true })
     },
-    async getTypes ({ dispatch }) {
-      const types = await dispatch('query', {
-        // 'group_by' fails when used with 'opt'
-        // query: WOQL
-        //   .from('schema/*', WOQL
-        //     .group_by(['v:id', 'v:background', 'v:text', 'v:light'], ['v:prop'], 'v:group')
-        //     .triple('v:id', 'rdf:type', 'owl:Class')
-        //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:Path')
-        //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
-        //     .opt(WOQL
-        //       .triple('v:id', 'scm:background', 'v:background')
-        //       .triple('v:id', 'scm:text', 'v:text')
-        //       .triple('v:id', 'scm:light', 'v:light')
-        //     )
-        //     .opt(WOQL.triple('v:prop', 'rdfs:domain', 'v:id'))
-        //   )
-        // query: WOQL
-        //   .from('schema/*', WOQL
-        //     .triple('v:id', 'rdf:type', 'owl:Class')
-        //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:path')
-        //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
-        //     .opt(WOQL
-        //       .triple('v:id', 'scm:background', 'v:background')
-        //       .triple('v:id', 'scm:text', 'v:text')
-        //       .triple('v:id', 'scm:light', 'v:light')
-        //     )
-        //     .opt(WOQL
-        //       .triple('v:prop', 'rdfs:domain', 'v:id')
-        //       .triple('v:prop', 'rdfs:range', 'v:propType')
-        //       .triple('v:prop', 'rdfs:label', 'v:propLabel')
-        //     )
-        //   )
-        query: WOQL
-          .from('schema/*', WOQL
-            .triple('v:id', 'rdf:type', 'owl:Class')
-            // .path('scm:Entity', '<rdfs:subClassOf+', 'v:id', 'v:pathA')
-            .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
-            .opt(WOQL
-              .triple('v:id', 'scm:background', 'v:background')
-              .triple('v:id', 'scm:text', 'v:text')
-              .triple('v:id', 'scm:light', 'v:light')
-            )
-            .opt(WOQL
-              .path('v:prop', 'rdfs:domain|(rdfs:domain,<rdfs:subClassOf+)', 'v:id', 'v:pathB')
-              // .triple('v:prop', 'rdfs:domain', 'v:id')
-              .triple('v:prop', 'rdfs:range', 'v:propType')
-              .triple('v:prop', 'rdfs:label', 'v:propLabel')
-            )
-          )
+    async getTypes ({ state }) {
+      const types = (await state.Client.getClassDocuments())
+        .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
+
+      // // const schema = await Client.getClasses();
+      // return schema.map((doctype, i, doctypes) =>
+      //   makeSchemaFrame(doctype, doctypes)
+      // )
+      // https://github.com/terminusdb/terminusdb/issues/668
+      // currently not possible to store arbitrary data in schema
+      // → We misuse the @documentation/@comment field to contain
+      //   a stringified json
+      return types.map(t => {
+        if (t._documentation && t._documentation._comment) {
+          t._metadata = JSON.parse(t._documentation._comment)
+        }
+        return t
       })
-      return groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label'])
+      // const types = await dispatch('query', {
+      //   // 'group_by' fails when used with 'opt'
+      //   // query: WOQL
+      //   //   .from('schema/*', WOQL
+      //   //     .group_by(['v:id', 'v:background', 'v:text', 'v:light'], ['v:prop'], 'v:group')
+      //   //     .triple('v:id', 'rdf:type', 'owl:Class')
+      //   //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:Path')
+      //   //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+      //   //     .opt(WOQL
+      //   //       .triple('v:id', 'scm:background', 'v:background')
+      //   //       .triple('v:id', 'scm:text', 'v:text')
+      //   //       .triple('v:id', 'scm:light', 'v:light')
+      //   //     )
+      //   //     .opt(WOQL.triple('v:prop', 'rdfs:domain', 'v:id'))
+      //   //   )
+      //   // query: WOQL
+      //   //   .from('schema/*', WOQL
+      //   //     .triple('v:id', 'rdf:type', 'owl:Class')
+      //   //     .path('v:id', 'rdfs:subClassOf+', 'scm:Entity', 'v:path')
+      //   //     .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+      //   //     .opt(WOQL
+      //   //       .triple('v:id', 'scm:background', 'v:background')
+      //   //       .triple('v:id', 'scm:text', 'v:text')
+      //   //       .triple('v:id', 'scm:light', 'v:light')
+      //   //     )
+      //   //     .opt(WOQL
+      //   //       .triple('v:prop', 'rdfs:domain', 'v:id')
+      //   //       .triple('v:prop', 'rdfs:range', 'v:propType')
+      //   //       .triple('v:prop', 'rdfs:label', 'v:propLabel')
+      //   //     )
+      //   //   )
+      //   query: WOQL
+      //     // .from('schema/*', WOQL
+      //     .quad('v:id', 'rdf:type', 'owl:Class', 'schema')
+      //   // // .path('scm:Entity', '<rdfs:subClassOf+', 'v:id', 'v:pathA')
+      //   // .opt(WOQL.triple('v:id', 'rdfs:label', 'v:label'))
+      //   // .opt(WOQL
+      //   //   .triple('v:id', 'scm:background', 'v:background')
+      //   //   .triple('v:id', 'scm:text', 'v:text')
+      //   //   .triple('v:id', 'scm:light', 'v:light')
+      //   // )
+      //   // .opt(WOQL
+      //   //   .path('v:prop', 'rdfs:domain|(rdfs:domain,<rdfs:subClassOf+)', 'v:id', 'v:pathB')
+      //   //   // .triple('v:prop', 'rdfs:domain', 'v:id')
+      //   //   .triple('v:prop', 'rdfs:range', 'v:propType')
+      //   //   .triple('v:prop', 'rdfs:label', 'v:propLabel')
+      //   // )
+      //     // )
+      // })
+      // console.log(types)
+      // return groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label'])
     },
-    async getEntity ({ dispatch }, id) {
-      const bindings = (await dispatch('query', {
-        query: WOQL
-          .triple(id, 'rdf:type', 'v:typeId')
-          .quad('v:typeId', 'rdfs:label', 'v:type', 'schema/*')
-          .opt(WOQL.triple(id, 'rdfs:comment', 'v:description'))
-          .opt(WOQL.triple(id, 'scm:cover', 'v:coverId').triple('v:coverId', 'scm:path', 'v:cover'))
-          .triple(id, 'rdfs:label', 'v:label')
-      }))
-      const props = (await dispatch('query', {
-        query: WOQL
-          .triple(id, 'v:prop', 'v:value')
-          .quad('v:prop', 'rdfs:label', 'v:propLabel', 'schema/*')
-          .quad('v:prop', 'rdf:type', 'v:propType', 'schema/*')
-          .quad('v:prop', 'rdfs:range', 'v:propRange', 'schema/*')
-          .opt(WOQL.triple('v:value', 'rdfs:label', 'v:valueLabel'))
-      }))
-      const card = {
-        id,
-        ...bindings[0],
-        props
-      }
+    async getEntity ({ dispatch, state }, id) {
+      const card = atTo_(await state.Client.getDocument({ id: id }))
+      // console.log(card._id, id)
+      // const bindings = (await dispatch('query', {
+      //   query: WOQL
+      //     .triple(id, 'rdf:type', 'v:typeId')
+      //     .quad('v:typeId', 'rdfs:label', 'v:type', 'schema/*')
+      //     .opt(WOQL.triple(id, 'rdfs:comment', 'v:description'))
+      //     .opt(WOQL.triple(id, 'scm:cover', 'v:coverId').triple('v:coverId', 'scm:path', 'v:cover'))
+      //     .triple(id, 'rdfs:label', 'v:label')
+      // }))
+      // const props = (await dispatch('query', {
+      //   query: WOQL
+      //     .triple(id, 'v:prop', 'v:value')
+      //     .quad('v:prop', 'rdfs:label', 'v:propLabel', 'schema/*')
+      //     .quad('v:prop', 'rdf:type', 'v:propType', 'schema/*')
+      //     .quad('v:prop', 'rdfs:range', 'v:propRange', 'schema/*')
+      //     .opt(WOQL.triple('v:value', 'rdfs:label', 'v:valueLabel'))
+      // }))
+      // const card = {
+      //   id,
+      //   ...bindings[0],
+      //   props
+      // }
       // commit('view/set', { cards }, { root: true })
+      // console.log(card)
       return card
     },
     async search ({ commit, dispatch }, { term, doctype = null }) {
       const searchResults = await dispatch('query', {
         query: WOQL
-          .select('v:label', 'v:id', 'v:doctype', 'v:dist')
+          .select('v:label', 'v:_id', 'v:doctype', 'v:dist')
           .limit(10)
           .order_by('v:dist', 'desc')
           .and(
-            WOQL.triple('v:id', 'rdfs:label', 'v:label'),
-            WOQL.triple('v:id', 'rdf:type', doctype || 'v:doctype'),
+            WOQL.triple('v:_id', 'label', 'v:label'),
+            // WOQL.triple('v:id', '@type', doctype || 'v:doctype'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
           )
@@ -208,25 +230,57 @@ export default {
         id: `doc:item_${data.wd.replace('wd:', '')}`
       }, { root: true })
     },
-    async updateCard ({ dispatch }, data) {
-      const view = 'View_demo1'
-      const id = data.card || `doc:Card_${uuid()}`
+    async addCard ({ state, dispatch }, data) {
+      const view = 'View/Demo'
+      await state.Client.addDocument(atFrom_({
+        _type: 'Card',
+        ...data
+      }))
       await dispatch('query', {
-        query: WOQL
-          // using fourth paramter because of https://github.com/terminusdb/terminusdb/issues/380
-          .update_triple(id, 'type', 'scm:Card', 'v:temp1')
-          .update_triple(id, 'scm:entity', data.id, 'v:temp2')
-          // boolean annoyingly require typecasting at the moment
-          .update_triple(id, 'scm:collapsed', { '@type': 'xsd:boolean', '@value': data.collapsed }, 'v:temp3')
-          .update_triple(id, 'scm:y', data.y, 'v:temp4')
-          .update_triple(id, 'scm:x', data.x, 'v:temp5')
-          .add_triple(view, 'scm:cards', { '@id': id })
+        query: WOQL.add_triple(view, 'cards', data._id)
       })
+
+      // await dispatch('query', {
+      //   query: WOQL
+      //     // using fourth paramter because of https://github.com/terminusdb/terminusdb/issues/380
+      //     .update_triple(id, 'type', 'scm:Card', 'v:temp1')
+      //     .update_triple(id, 'scm:entity', data.id, 'v:temp2')
+      //     // boolean annoyingly require typecasting at the moment
+      //     .update_triple(id, 'scm:collapsed', { '@type': 'xsd:boolean', '@value': data.collapsed }, 'v:temp3')
+      //     .update_triple(id, 'scm:y', data.y, 'v:temp4')
+      //     .update_triple(id, 'scm:x', data.x, 'v:temp5')
+      //     .add_triple(view, 'scm:cards', { '@id': id })
+      // })
     },
-    async deleteObject ({ dispatch }, id) {
+    async updateDocument ({ state }, document) {
+      await state.Client.updateDocument(atFrom_(document))
+    },
+    async updateCard ({ state, dispatch }, data) {
+      const view = 'View/Demo'
+      // const id = data.card || `Card/${uuid()}`
+
+      await state.Client.updateDocument(atFrom_({
+        _type: 'Card',
+        ...data
+      }))
       await dispatch('query', {
-        query: WOQL.delete_object(id)
+        query: WOQL.add_triple(view, 'cards', data._id)
       })
+
+      // await dispatch('query', {
+      //   query: WOQL
+      //     // using fourth paramter because of https://github.com/terminusdb/terminusdb/issues/380
+      //     .update_triple(id, 'type', 'scm:Card', 'v:temp1')
+      //     .update_triple(id, 'scm:entity', data.id, 'v:temp2')
+      //     // boolean annoyingly require typecasting at the moment
+      //     .update_triple(id, 'scm:collapsed', { '@type': 'xsd:boolean', '@value': data.collapsed }, 'v:temp3')
+      //     .update_triple(id, 'scm:y', data.y, 'v:temp4')
+      //     .update_triple(id, 'scm:x', data.x, 'v:temp5')
+      //     .add_triple(view, 'scm:cards', { '@id': id })
+      // })
+    },
+    async deleteObject ({ state }, id) {
+      await state.Client.deleteDocument({ id })
     },
     async addTriple ({ state, commit, dispatch }, triple) {
       await dispatch('query', {
@@ -239,6 +293,21 @@ export default {
         query: WOQL.delete_triple(...triple),
         msg: 'remove prop'
       })
+    },
+    async getDocumentBasics ({ state }, _id) {
+      const res = await state.Client.query(
+        WOQL.triple(_id, 'rdf:type', 'v:_type').triple(
+          _id,
+          '@schema:label',
+          'v:label'
+        )
+      ).catch((err) => {
+        throw err
+      })
+      const bindings = flattenBindings(res.bindings)[0]
+      bindings._type = bindings._type.replace(/^@schema:/, '')
+
+      return bindings
     }
   },
   modules: {
@@ -246,61 +315,77 @@ export default {
 }
 
 // Utilities (maybe to be moved into separate file)
-const flattenBindings = (bindings, prefixes) => {
+const flattenBindings = (bindings) => {
   if (bindings == null) return []
   return bindings.map(b => {
     return Object.fromEntries(Object.keys(b).map(key => {
       const value = b[key]['@value'] != null ? b[key]['@value'] : b[key]
-      return [key, replacePrefixes(value, prefixes)]
+      return [key, value]
     }))
   })
 }
 
-const replacePrefixes = (value, prefixes) => {
-  prefixes.forEach(prefix => {
-    if (typeof value === 'string') {
-      value = value.replace(prefix[1], `${prefix[0]}:`)
-    }
-  })
-  if (value === 'system:unknown') return null
-  return value
-}
-
-// const groupBy = (input, keys, ignoreKeys = [], groupKey = 'values') => {
-//   const output = []
-//   input.forEach(obj => {
-//     let outputObj = output.find(outputObj => keys.map(key => obj[key] === outputObj[key]).every(Boolean))
-//     if (outputObj === undefined) {
-//       outputObj = Object.fromEntries([...[...keys, ...ignoreKeys].map(key => [key, obj[key]]), [groupKey, []]]) //, [groupKey, []])
-//       output.push(outputObj)
+// const replacePrefixes = (value, prefixes) => {
+//   prefixes.forEach(prefix => {
+//     if (typeof value === 'string') {
+//       value = value.replace(prefix[1], `${prefix[0]}:`)
 //     }
-//     const remainingKeys = Object.keys(obj).filter(key => [...keys, ...ignoreKeys].find(k => k === key) === undefined)
-//     outputObj.props.push(Object.fromEntries(remainingKeys.map(key => [key, obj[key]])))
 //   })
-//   return output
+//   if (value === 'system:unknown') return null
+//   return value
 // }
 
-const groupBy = (input, key = 'id', groupKey = 'values', distinct = [], rename = []) => {
-  const output = []
-  input.forEach(obj => {
-    let outputObj = output.find(outputObj => obj[key] === outputObj[key])
-    if (outputObj === undefined) {
-      const keys = Object.keys(obj).filter(k => !(distinct.find(d => d === k)))
-      outputObj = Object.fromEntries([...keys.map(key => [key, obj[key]]), [groupKey, []]]) //, [groupKey, []])
-      output.push(removeNull(outputObj))
-    }
-    // const remainingKeys = Object.keys(obj).filter(key => [key, ...ignoreKeys].find(k => k === key) === undefined)
-    if (distinct.map(key => obj[key] != null).some(Boolean)) {
-      outputObj.props.push(Object.fromEntries(distinct.map((key, i) => [rename[i], obj[key]])))
-    }
-  })
-  return output
+function atTo_ (data) {
+  if (Array.isArray(data)) {
+    return data.map(d => atTo_(d))
+  } else if (typeof data === 'object' && data != null) {
+    return Object.fromEntries(Object.entries(data).map(d => {
+      d[0] = d[0].replace(/^@/, '_')
+      return atTo_(d)
+    }))
+  }
+  return data
 }
 
-const removeNull = (obj) => {
-  Object.entries(obj).forEach(([key, val]) =>
-    (val && typeof val === 'object' && removeNull(val)) ||
-    ((val === null) && delete obj[key])
-  )
-  return obj
+function atFrom_ (data) {
+  if (Array.isArray(data)) {
+    return data.map(d => atFrom_(d))
+  } else if (typeof data === 'object' && data != null) {
+    return Object.fromEntries(Object.entries(data).map(d => {
+      d[0] = d[0].replace(/^_/, '@')
+      return atFrom_(d)
+    }))
+  }
+  return data
+}
+
+function makeSchemaFrame (doctype, doctypes) {
+  if (doctype['@inherits']) {
+    const superClasses = [doctype['@inherits']].flat().map((sc) =>
+      makeSchemaFrame(
+        doctypes.find((d) => d['@id'] === sc),
+        doctypes
+      )
+    )
+    const superClassProps = superClasses.map((sc) =>
+      Object.fromEntries(
+        Object.entries(sc).filter((entry) => entry[0].indexOf('@') !== 0)
+      )
+    )
+    const superClassDocs = superClasses.map(
+      (sc) => sc['@documentation']?.['@properties']
+    )
+    return {
+      ...superClassProps.reduce((a, b) => ({ ...a, ...b }), {}),
+      ...doctype,
+      '@documentation': {
+        ...doctype['@documentation'],
+        '@properties': {
+          ...superClassDocs.reduce((a, b) => ({ ...a, ...b }), {}),
+          ...doctype['@documentation']?.['@properties']
+        }
+      }
+    }
+  }
+  return doctype
 }

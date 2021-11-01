@@ -22,13 +22,14 @@
     <div class="cards" :style="{transform: transformString}">
       <BaseCard
         v-for="card in cards"
-        :key="card.id"
+        :key="card._id"
         context="canvas"
-        v-bind="card"
+        :_id="card.entity"
+        :collapsed="card.collapsed"
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
-        @toggleCollapse="toggleCollapse(card.id)"
+        @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"
         @removeProp="onRemoveProp"/>
@@ -182,7 +183,7 @@ export default {
     onDrop (e) {
       if (this.drag?.options?.mode === 'connect') return
       this.dropCard({
-        id: e.id,
+        entity: e._id,
         x: (e.x - (this.drag?.x || 0) - this.transform.x) / this.transform.k,
         y: (e.y - (this.drag?.y || 0) - this.transform.y) / this.transform.k,
         collapsed: false
@@ -192,13 +193,15 @@ export default {
     onRemoveCard (e) {
       this.drag = null
       // find a card with matching ids
-      this.removeCard(this.cards.find(c => c.id === e.id).card)
+      // console.log(e, this.cards)
+      // console.log(this.cards.find(c => c.entity === e._id))
+      this.removeCard(this.cards.find(c => c.entity === e._id)._id)
     },
     onDeleteEntity (e) {
       this.drag = null
       // find a card with matching ids
-      this.removeCard(this.cards.find(c => c.id === e.id).card)
-      this.deleteObject(e.id)
+      this.removeCard(this.cards.find(c => c.entity === e._id)._id)
+      this.deleteObject(e._id)
     },
     onAddProp (e) {
       if (this.drag?.options?.mode !== 'connect') return
@@ -208,7 +211,8 @@ export default {
       this.addProp([doc, prop, value])
     },
     onRemoveProp (e) {
-      this.removeProp([e.doc, e.prop, e.value])
+      // console.log([e.doc, e.prop, e.value])
+      this.removeProp(e)
     }
     // onSetTempEdge (e) {
     //   this.tempEdge = {

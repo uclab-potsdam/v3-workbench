@@ -35,14 +35,13 @@ export default {
       const types = await dispatch('api/getTypes', id, { root: true })
       commit('set', { types })
     },
-    fetchEntity ({ state, dispatch, commit }, id) {
-      const card = state.cards.find(card => card._id === id)
-      // console.log(card?._id)
+    async fetchEntity ({ state, dispatch, commit }, id) {
+      let card = state.cards.find(card => card._id === id)
+      console.log(id)
       if (card != null) return card
-      dispatch('api/getEntity', id, { root: true }).then(card => {
-        commit('storeEntity', card)
-      })
-      return null
+      card = await dispatch('api/getEntity', id, { root: true })
+      commit('storeEntity', card)
+      return card
     },
     async refreshEntity ({ state, dispatch, commit }, id) {
       const card = await dispatch('api/getEntity', id, { root: true })

@@ -204,6 +204,11 @@ export default {
       // console.log('fetched', card)
       return card
     },
+    // cover () {
+    //   if (this.card.cover == null) return null
+    //   console.log('getting image', this.card.cover)
+    //   return this.getEntity(this.card.cover)
+    // },
     entityType () {
       return this.getType(this.card._type)
     },
@@ -239,9 +244,9 @@ export default {
     }
   },
   async mounted () {
-    await this.fetchEntity(this._id)
+    const card = await this.fetchEntity(this._id)
     // this.card = await this.fetchEntity(this._id)
-    // this.cover = this.card.cover ? await this.getEntity(this.card.cover) : null
+    this.cover = card.cover ? await this.fetchEntity(card.cover) : null
   },
   methods: {
     ...mapActions('data', ['fetchEntity']),

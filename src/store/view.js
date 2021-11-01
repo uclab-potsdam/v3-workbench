@@ -102,7 +102,7 @@ export default {
     // refactor: rename method to avoid confusion with sql dropping
     async dropCard ({ commit, state, dispatch }, options) {
       let card = state.cards.find(card => card.entity === options.entity)
-      console.log(options, card?.entity)
+      // console.log(options, card?.entity)
       if (card != null) {
         commit('moveCard', { ...card, ...options })
         await dispatch('api/updateCard', card, { root: true })
@@ -114,7 +114,7 @@ export default {
     },
     async removeCard ({ commit, dispatch }, _id) {
       commit('removeCard', _id)
-      console.log(_id)
+      // console.log(_id)
       await dispatch('api/deleteObject', _id, { root: true })
     },
     async updateCard ({ dispatch, state }, _id) {

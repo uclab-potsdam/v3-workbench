@@ -201,7 +201,7 @@ export default {
     },
     card () {
       const card = this.getEntity(this._id)
-      console.log('fetched', card)
+      // console.log('fetched', card)
       return card
     },
     entityType () {

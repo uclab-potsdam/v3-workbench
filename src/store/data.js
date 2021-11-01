@@ -37,7 +37,7 @@ export default {
     },
     fetchEntity ({ state, dispatch, commit }, id) {
       const card = state.cards.find(card => card._id === id)
-      console.log(card?._id)
+      // console.log(card?._id)
       if (card != null) return card
       dispatch('api/getEntity', id, { root: true }).then(card => {
         commit('storeEntity', card)

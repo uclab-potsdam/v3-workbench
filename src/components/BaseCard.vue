@@ -11,7 +11,7 @@
       handler(e) {
         $emit('drag', e);
       },
-      width: scale * 320,
+      width: scale * 180,
       height: scale * (collapsed ? 112 : 420),
     }"
     v-drop="{
@@ -91,8 +91,8 @@
                     handler(e) {
                       $emit('drag', e);
                     },
-                    width: scale * 320,
-                    color: '--gray-blue-8',
+                    width: scale * 180,
+                    color: '--blue-gray-8',
                     height: scale * (collapsed ? 112 : 420)
                   }"
                   @click="
@@ -115,8 +115,8 @@
                     handler(e) {
                       $emit('drag', e);
                     },
-                    width: scale * 320,
-                    color: '--gray-blue-8',
+                    width: scale * 180,
+                    color: '--blue-gray-8',
                     height: scale * (collapsed ? 112 : 420)
                   }"
                   @click="
@@ -195,7 +195,7 @@ export default {
       if (this.entityType?._metadata?.background == null) return
       const { background, text, light } = this.entityType._metadata
       return {
-        '--background': `var(--${background}-${light ? 8 : 4})`,
+        '--background': `var(--${background}-${light ? 10 : 3})`,
         '--text': `var(--${text}-${light ? 3 : 9})`
       }
     },
@@ -272,7 +272,7 @@ export default {
   --text: var(--gray-8);
   background: var(--background);
   color: var(--text);
-  width: 320px;
+  width: 180px;
   padding: var(--spacing) 0px;
   overflow: hidden;
   display: flex;
@@ -291,7 +291,7 @@ export default {
 }
 .header {
   justify-content: space-between;
-  height: 80px;
+  height: 60px;
   line-height: 1.1;
   margin: 0 var(--spacing) 0 var(--spacing);
   white-space: nowrap;

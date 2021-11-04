@@ -2,7 +2,8 @@
   <g class="edge">
     <path class="shadow" :d="path" :stroke-width="10"
       @mouseenter="showLabel = true" @mouseleave="showLabel = false"/>
-    <path :d="path" :stroke-width="strokeWidth * 1.5"/>
+    <!-- <path :d="path" :stroke-width="strokeWidth * 15"/> -->
+    <path :d="path" :stroke-width="20"/>
     <!-- <text v-if="showLabel">
       <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="strokeWidth * 4">
         {{ label }}
@@ -34,10 +35,10 @@ export default {
   },
   computed: {
     path () {
-      const x1 = this.x1 + 320
-      const y1 = this.y1 + 60
+      const x1 = this.x1 + 180
+      const y1 = this.y1 + 30
       const x2 = this.x2
-      const y2 = this.y2 + 60
+      const y2 = this.y2 + 30
       return x1 < x2
         ? `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
         : `M${x2},${y2}C${x2 - 100},${y2},${x1 + 100},${y1},${x1},${y1}`
@@ -51,6 +52,7 @@ export default {
 <style scoped lang="scss">
 .edge {
   pointer-events: none;
+  mix-blend-mode: darken;
   path {
     stroke: var(--edges);
     fill: none;

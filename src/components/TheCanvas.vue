@@ -3,7 +3,8 @@
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
-          <path class="cross" d="M-4,-4L4,4M-4,4L4,-4" :transform="`translate(${pattern.width / 2} ${pattern.height / 2})`"/>
+          <!-- <path class="cross" d="M-4,-4L4,4M-4,4L4,-4" :transform="`translate(${pattern.width / 2} ${pattern.height / 2})`"/> -->
+          <circle class="point" r="0.75" :transform="`translate(${pattern.width / 2} ${pattern.height / 2})`"/>
         </pattern>
       </defs>
       <rect x="0" y="0" width="100%" height="100%" fill="url(#bg)"></rect>
@@ -78,8 +79,8 @@ export default {
       transform: zoomIdentity,
       zoom: null,
       scaleExtent: [0.1, 2],
-      cardWidth: 320,
-      cardHeight: 420,
+      cardWidth: 180,
+      cardHeight: 360,
       safeArea: [82, 20, 20, 20],
       transition: 400,
       container: null,
@@ -102,8 +103,8 @@ export default {
       if (this.transform == null) return
       const scale = this.transform.k
       return {
-        width: 140 * scale,
-        height: 140 * scale,
+        width: 60 * scale,
+        height: 60 * scale,
         x: this.transform.x,
         y: this.transform.y
       }
@@ -242,6 +243,9 @@ export default {
     #bg {
       .cross {
         stroke: var(--border);
+      }
+      .point {
+        fill: var(--border);
       }
     }
   }

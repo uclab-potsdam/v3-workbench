@@ -1,19 +1,26 @@
 <template>
   <div class="controls">
-    <BaseButton :disabled="max" @click="$emit('zoom-in')">+</BaseButton>
-    <BaseButton :disabled="min" @click="$emit('zoom-out')">-</BaseButton>
-    <BaseButton @click="$emit('zoom-to-fit')">fit</BaseButton>
+    <BaseButton :disabled="max" @click="$emit('zoom-in')">
+      <inline-svg :src="require('@/assets/icons/btn-zoom_in.svg')"/>
+    </BaseButton>
+    <!-- <BaseButton :disabled="min" @click="$emit('zoom-out')"><IconZoomOut/></BaseButton> -->
+    <BaseButton @click="$emit('zoom-to-fit')"> <icon original :data="IconZoomOut" /></BaseButton>
   </div>
 </template>
 
 <script>
 import BaseButton from './BaseButton.vue'
+// import IconZoomOut from '@/assets/icons/btn-zoom_out.svg'
+import IconZoomOut from '@/assets/icons/btn-zoom-fit.svg'
 export default {
   components: { BaseButton },
   name: 'CanvasControls',
   props: {
     max: Boolean,
     min: Boolean
+  },
+  data () {
+    return { IconZoomOut }
   }
 }
 </script>

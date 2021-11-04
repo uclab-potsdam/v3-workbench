@@ -27,3 +27,12 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Authentication
+currently credentials need to be set in localstorage
+```
+localStorage.setItem('USER', '[user]')
+localStorage.setItem('ORGANIZATION', 'V3')
+localStorage.setItem('JWT', '[token]')
+location.reload()
+```

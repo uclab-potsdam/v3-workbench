@@ -1,10 +1,10 @@
 <template>
   <div class="controls">
     <BaseButton :disabled="max" @click="$emit('zoom-in')">
-      <inline-svg :src="require('@/assets/icons/btn-zoom_in.svg')"/>
+      <!-- <inline-svg :src="require('@/assets/icons/btn-zoom_in.svg')"/> -->
     </BaseButton>
-    <!-- <BaseButton :disabled="min" @click="$emit('zoom-out')"><IconZoomOut/></BaseButton> -->
-    <BaseButton @click="$emit('zoom-to-fit')"> <icon original :data="IconZoomOut" /></BaseButton>
+    <BaseButton :disabled="min" @click="$emit('zoom-out')"><icon original data="@icon/btn-zoom-fit.svg"/></BaseButton>
+    <BaseButton @click="$emit('zoom-to-fit')"><icon original :data="IconZoomOut"/></BaseButton>
   </div>
 </template>
 

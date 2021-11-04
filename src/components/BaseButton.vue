@@ -23,7 +23,7 @@ button {
   border-radius: var(--border-radius);
   width: 100%;
 
-  :deep svg {
+  :deep(svg) {
     display: block;
   }
 }

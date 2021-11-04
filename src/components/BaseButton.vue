@@ -22,9 +22,5 @@ button {
   font-size: inherit;
   border-radius: var(--border-radius);
   width: 100%;
-
-  :deep(svg) {
-    display: block;
-  }
 }
 </style>

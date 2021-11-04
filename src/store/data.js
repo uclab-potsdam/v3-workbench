@@ -37,7 +37,6 @@ export default {
     },
     async fetchEntity ({ state, dispatch, commit }, id) {
       let card = state.cards.find(card => card._id === id)
-      console.log(id)
       if (card != null) return card
       card = await dispatch('api/getEntity', id, { root: true })
       commit('storeEntity', card)

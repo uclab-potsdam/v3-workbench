@@ -1,14 +1,17 @@
 :root {
   --background: var(--blue-gray-11);
-  --text: var(--blue-gray-2);
-  --border: var(--gray-8);
+  --text: var(--blue-gray-4);
+  --border: var(--blue-gray-4);
+  --muted-border: var(--blue-gray-9);
   --primary: var(--teal-9);
-  --accent: var(--blue-7);
+  --accent: var(--indigo-5);
   --muted: var(--blue-gray-7);
-  --edges: var(--blue-9);
+  --edges: var(--indigo-9);
 
   --status-ok: var(--teal-6);
   --danger: var(--red-6);
+
+  --shadow: rgba(1,6,43,0.62);
 }
 
 // html.dark {
@@ -24,11 +27,12 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: var(--blue-gray-1);
-    --text: var(--blue-gray-8);
-    --border: var(--blue-gray-3);
+    --text: var(--blue-gray-7);
+    --border: var(--blue-gray-7);
     --primary: var(--teal-1);
-    --accent: var(--blue-3);
+    --accent: var(--indigo-4);
     --muted: var(--blue-gray-3);
     --edges: var(--blue-2);
+    --shadow: rgba(214,216,254,0.68);
   }
 }

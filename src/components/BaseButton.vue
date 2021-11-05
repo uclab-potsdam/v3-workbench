@@ -12,15 +12,15 @@ export default {
 
 <style scoped lang="scss">
 button {
-  --border-radius: 5px;
-  box-sizing: border-box;
-  background-color: transparent;
-  border: 1px solid var(--blue-4);
-  color: var(--blue-4);
-  padding: 0.5em;
-  margin: 0;
+  background: var(--background);
+  border: none;
+  color: var(--text);
+  padding: var(--spacing);
   font-size: inherit;
-  border-radius: var(--border-radius);
   width: 100%;
+  &:hover {
+    color: var(--background);
+    background: var(--accent);
+  }
 }
 </style>

@@ -21,21 +21,27 @@ export default {
     }
   },
   actions: {
-    async connect ({ commit, getters, rootState, dispatch }) {
+    async connect ({ commit, getters, rootState, dispatch }, credentials) {
       if (getters.connected) return
-      const { server, credentials, database } = rootState.config
+      const { server, database } = rootState.config
       const Client = new WOQLClient(server, {})
-      await Client.connect(credentials)
-      await Client.db(database)
-      // await Client._load_db_prefixes()
+
+      try {
+        await Client.connect(credentials)
+      } catch (error) {
+        console.error(error)
+        return false
+      }
+      Client.db(database)
       commit('set', { Client })
-      // const info = Client.databaseInfo()
-      // commit('set', { prefixes: Object.entries({ ...info.prefix_pairs, ...info.jsonld_context }) })
-      // do things that should happen after connecting (e.g. get doctypes)
       dispatch('data/init', null, { root: true })
+      return true
+    },
+    disconnect ({ commit }) {
+      commit('set', { Client: null })
     },
     async query ({ state, dispatch }, { query, msg }) {
-      await dispatch('connect')
+      // await dispatch('connect')
       msg = msg != null ? `WB - ${msg}` : null
       return await state.Client.query(query, msg)
         .then((res) => {
@@ -44,7 +50,8 @@ export default {
           throw err.data
         })
     },
-    async getView ({ dispatch, commit, state }, id) {
+    async getView ({ commit, state, rootState }) {
+      const id = rootState.view.canvas
       const view = await state.Client.getDocument({ id })
       // const cards = await dispatch('query', {
       //   query: WOQL
@@ -230,8 +237,8 @@ export default {
         id: `doc:item_${data.wd.replace('wd:', '')}`
       }, { root: true })
     },
-    async addCard ({ state, dispatch }, data) {
-      const view = 'View/Demo'
+    async addCard ({ state, dispatch, rootState }, data) {
+      const view = rootState.view.canvas
       await state.Client.addDocument(atFrom_({
         _type: 'Card',
         ...data
@@ -255,8 +262,8 @@ export default {
     async updateDocument ({ state }, document) {
       await state.Client.updateDocument(atFrom_(document))
     },
-    async updateCard ({ state, dispatch }, data) {
-      const view = 'View/Demo'
+    async updateCard ({ state, dispatch, rootState }, data) {
+      const view = rootState.view.canvas
       // const id = data.card || `Card/${uuid()}`
 
       await state.Client.updateDocument(atFrom_({
@@ -308,6 +315,16 @@ export default {
       bindings._type = bindings._type.replace(/^@schema:/, '')
 
       return bindings
+    },
+    async getCanvases ({ dispatch, state }) {
+      return atTo_(await state.Client.getDocument({ type: 'View', unfold: false, as_list: true }))
+    },
+    async createCanvas ({ dispatch, state }, name) {
+      const res = await state.Client.addDocument(atFrom_({
+        _type: 'View',
+        _id: `View/${name.replace(/ /g, '-')}`
+      }))
+      return res
     }
   },
   modules: {

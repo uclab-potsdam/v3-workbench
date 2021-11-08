@@ -3,7 +3,8 @@ import { v4 as uuid } from 'uuid'
 export default {
   namespaced: true,
   state: {
-    cards: []
+    cards: [],
+    canvas: null
   },
   getters: {
     getCard: (state) => (id) => {
@@ -120,6 +121,10 @@ export default {
     async updateCard ({ dispatch, state }, _id) {
       const card = state.cards.find(card => card._id === _id)
       await dispatch('api/updateCard', card, { root: true })
+    },
+    async init ({ dispatch, commit, state }, canvas) {
+      commit('set', { canvas: `View/${canvas}` })
+      await dispatch('api/getView', null, { root: true })
     }
   },
   modules: {

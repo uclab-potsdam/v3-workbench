@@ -26,7 +26,7 @@
     @mouseleave="cardHover = false"
   >
     <div class="header" draggable="true" @mouseover="hover = true" @mouseleave="hover = false" @click="$emit('toggleCollapse')">
-      <h1
+      <h2
         class="label"
         ref="my_label"
         v-bind:class="{
@@ -34,8 +34,8 @@
         }"
       >
         {{ card.label }}
-      </h1>
-      <h2>{{ entityType?._metadata?.label }}</h2>
+      </h2>
+      <h3>{{ entityType?._metadata?.label }}</h3>
       <!-- <ol  class="falafel-menu">
         <li v-for="index in 3" :key="index"></li>
       </ol> -->

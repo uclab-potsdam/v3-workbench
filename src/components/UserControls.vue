@@ -1,22 +1,27 @@
 <template>
-  <div class="controls shadow">
-    <BaseButton class="no-outline" :disabled="max" @click="$emit('zoom-in')">
-      <icon :scale="1" data="@icon/zoom-in.svg"/>
+  <div v-if="isAuthenticated" class="controls shadow">
+    <BaseButton class="no-outline" :disabled="max" @click="signOut">
+      <icon :scale="1" data="@icon/sign-out.svg"/>
       <!-- <inline-svg :src="require('@/assets/icons/btn-zoom_in.svg')"/> -->
     </BaseButton>
-    <BaseButton class="no-outline" :disabled="min" @click="$emit('zoom-out')"><icon :scale="1" data="@icon/zoom-out.svg"/></BaseButton>
-    <BaseButton class="no-outline" @click="$emit('zoom-to-fit')"><icon data="@icon/zoom-fit.svg"/></BaseButton>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import BaseButton from './BaseButton.vue'
 export default {
   components: { BaseButton },
   name: 'CanvasControls',
-  props: {
-    max: Boolean,
-    min: Boolean
+  computed: {
+    ...mapGetters('auth', ['isAuthenticated'])
+  },
+  methods: {
+    // ...mapActions('auth', ['signOut']),
+    signOut () {
+      this.$store.dispatch('auth/signOut')
+      this.$router.push({ name: 'Sign in' })
+    }
   }
 }
 </script>
@@ -26,7 +31,7 @@ export default {
   background: var(--background);
   border: var(--base-border);
   position: absolute;
-  bottom: var(--spacing);
+  top: var(--spacing);
   right: var(--spacing);
   display: flex;
   flex-direction: column;

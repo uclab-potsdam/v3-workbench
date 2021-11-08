@@ -5,6 +5,7 @@ import view from './view'
 import device from './device'
 import main from './main'
 import config from './config'
+import auth from './auth'
 
 export default createStore({
   modules: {
@@ -13,6 +14,7 @@ export default createStore({
     data,
     view,
     device,
-    config
+    config,
+    auth
   }
 })

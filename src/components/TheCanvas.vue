@@ -89,6 +89,7 @@ export default {
     }
   },
   mounted () {
+    this.init(this.$route.params.id)
     this.container = select(this.$refs.container)
     this.initZoom()
   },
@@ -127,7 +128,8 @@ export default {
       'toggleCollapse',
       'translateCard',
       'dropCard',
-      'removeCard'
+      'removeCard',
+      'init'
     ]),
     ...mapActions('data', [
       'addProp',

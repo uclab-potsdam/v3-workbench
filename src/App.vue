@@ -1,12 +1,13 @@
 <template>
   <router-view class="router-view"/>
-  <the-statusbar class="the-statusbar"/>
+  <user-controls/>
 </template>
 <script>
-import TheStatusbar from './components/TheStatusbar.vue'
+import UserControls from './components/UserControls.vue'
 export default {
-  components: { TheStatusbar }
+  components: { UserControls }
 }
+
 </script>
 <style lang="scss">
 @import "@/assets/style/base";

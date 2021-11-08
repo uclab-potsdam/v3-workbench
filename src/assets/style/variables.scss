@@ -1,11 +1,16 @@
 :root {
-  --font-size: 12.5px;
-  --spacing: 0.8rem;
-  --spacing-xs: 0.2rem;
-  --spacing-s: 0.4rem;
+  --font-size: 12px;
+  --font-size-l: 20px;
+
+  --regular: 350;
+  --bold: 600;
+
+  --spacing: 10px;
+  --spacing-xs: 2.5px;
+  --spacing-s: 5px;
   --spacing-m: var(--spacing);
-  --spacing-l: 1.6rem;
-  --spacing-xl: 3.2rem;
+  --spacing-l: 20px;
+  --spacing-xl: 40px;
 
   --base-border: 1px solid var(--border);
   --base-border-radius: var(--spacing);

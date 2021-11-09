@@ -14,7 +14,10 @@
 
   --base-border: 1px solid var(--border);
   --base-border-radius: var(--spacing);
-  --base-box-shadow: 0px 0px 10px var(--muted);
+
+  --base-shadow: -5px 5px 0 0 var(--shadow);
+  --base-shadow-l: -10px 10px 0 0 var(--shadow);
+  --shadow-l-offset: translate(5px, -5px);
 
   --transition: 0.2s;
 

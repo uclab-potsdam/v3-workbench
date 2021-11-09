@@ -42,7 +42,8 @@ html {
   }
 
   .shadow {
-    box-shadow: -5px 5px 0 0 var(--shadow);
+    box-shadow: var(--base-shadow);
+    transition: box-shadow var(--transition), transform var(--transition);
   }
   .border {
     border: var(--base-border);
@@ -51,7 +52,6 @@ html {
   input {
     appearance: none;
     height: calc(var(--spacing-xl));
-    margin-top: var(--spacing-s);
     background: var(--background);
     box-sizing: border-box;
     border: none;
@@ -65,6 +65,10 @@ html {
       color: var(--muted);
       border-color: var(--muted);
     }
+  }
+
+  label + input {
+    margin-top: var(--spacing-s);
   }
 
   input, button {

@@ -1,8 +1,6 @@
 <template>
-  <div class="search">
-    <h2>
-      <input v-model="searchterm" placeholder="Find or create cards">
-    </h2>
+  <div class="search shadow">
+    <input class="bar" v-model="searchterm" placeholder="Find or create cards">
     <div class="grid results" v-if="view === 'search' && searchterm?.length > 0">
       <BaseCard
         v-for="card in searchResults"
@@ -82,16 +80,17 @@ export default {
 .search {
   background: var(--background);
   border: var(--base-border);
-  border-radius: var(--base-border-radius);
+  // border-radius: var(--base-border-radius);
   color: var(--text);
-  margin-top: var(--spacing);
+  // margin-top: var(--spacing);
   width: 100%;
   max-width: var(--medium);
-  transition: box-shadow var(--transition);
+  // transition: box-shadow var(--transition);
 
   &:focus-within, &:hover  {
     --base-border: 1px solid var(--accent);
-    box-shadow: var(--base-box-shadow);
+    // box-shadow: var(--base-shadow-l);
+    // transform: var(--shadow-l-offset);
 
     .results {
       display: grid;
@@ -99,14 +98,15 @@ export default {
   }
 
   input {
-    appearance: none;
+    // appearance: none;
     outline: none;
     border: none;
-    display: block;
-    font-size: inherit;
-    color: var(--accent);
+    font-weight: var(--regular);
+    // display: block;
+    // font-size: inherit;
+    // color: var(--accent);
     padding: var(--spacing-s) var(--spacing);
-    background: none;
+    // background: none;
     width: 100%;
 
     &::placeholder {

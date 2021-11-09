@@ -14,6 +14,8 @@
 
   --shadow: rgba(1,6,43,0.62); // eq --blue-gray-4 on --blue-gray-11
   --selection: rgba(228,213,255,0.95); // eq --indigo-10 on --blue-gray-11
+
+  --blend-mode: multiply
 }
 
 // html.dark {
@@ -39,5 +41,7 @@
 
     --shadow: rgba(214,216,254,0.68); // eq --blue-gray-7 on --blue-gray-1
     --selection: rgba(29,55,126,0.8); // eq --indigo-2 on --blue-gray-1
+
+    --blend-mode: screen
   }
 }

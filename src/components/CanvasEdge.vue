@@ -52,7 +52,7 @@ export default {
 <style scoped lang="scss">
 .edge {
   pointer-events: none;
-  mix-blend-mode: darken;
+  mix-blend-mode: var(--blend-mode);
   path {
     stroke: var(--edges);
     fill: none;

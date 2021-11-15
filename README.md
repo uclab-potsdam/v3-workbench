@@ -1,5 +1,10 @@
 # v3-workbench
 
+## Storybook
+```
+npm run storybook -- --ci
+```
+
 ## Project setup
 ```
 npm install

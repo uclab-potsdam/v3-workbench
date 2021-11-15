@@ -75,12 +75,22 @@ export default {
       // )
       // https://github.com/terminusdb/terminusdb/issues/668
       // currently not possible to store arbitrary data in schema
-      // → We misuse the @documentation/@comment field to contain
+      // → We misuse the @documentation field to contain
       //   a stringified json
       return types.map(t => {
-        if (t._documentation && t._documentation._comment) {
-          t._metadata = JSON.parse(t._documentation._comment)
+        t._metadata = {
+          ...JSON.parse(t._documentation?._comment || null),
+          _properties: Object.fromEntries(Object.entries(t._documentation?._properties || {}).map(d => {
+            return [d[0], JSON.parse(d[1])]
+          }))
         }
+        // console.log(t._metadata)
+        // if (t._documentation?._comment) {
+        //   t._metadata = JSON.parse(t._documentation._comment)
+        // }
+        // if (t._documentation?._properties) {
+        //   t._metadata = JSON.parse(t._documentation._properties)
+        // }
         return t
       })
       // const types = await dispatch('query', {

@@ -15,7 +15,11 @@
   --shadow: rgba(1,6,43,0.62); // eq --blue-gray-4 on --blue-gray-11
   --selection: rgba(228,213,255,0.95); // eq --indigo-10 on --blue-gray-11
 
-  --blend-mode: multiply
+  --blend-mode: multiply;
+
+  // card defaults
+  --primary: var(--blue-gray-3);
+  --secondary: var(--blue-gray-10);
 }
 
 // html.dark {
@@ -42,6 +46,12 @@
     --shadow: rgba(214,216,254,0.68); // eq --blue-gray-7 on --blue-gray-1
     --selection: rgba(29,55,126,0.8); // eq --indigo-2 on --blue-gray-1
 
-    --blend-mode: screen
+    --blend-mode: screen;
+
+    // card defaults
+    --primary: var(--blue-gray-10);
+    --secondary: var(--blue-gray-3);
+    // --primary-dark: var(--blue-gray-10);
+    // --secondary-dark: var(--blue-gray-3);
   }
 }

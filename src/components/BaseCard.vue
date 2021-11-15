@@ -12,7 +12,7 @@
         $emit('drag', e);
       },
       width: scale * 180,
-      height: scale * (collapsed ? 112 : 420),
+      height: scale * (collapsed ? 60 : 300),
     }"
     v-drop="{
       disabled: !allowDrop,
@@ -25,7 +25,7 @@
     @mouseover="cardHover = true"
     @mouseleave="cardHover = false"
   >
-    <div class="header" draggable="true" @mouseover="hover = true" @mouseleave="hover = false" @click="$emit('toggleCollapse')">
+    <header draggable="true" @mouseover="hover = true" @mouseleave="hover = false" @click="$emit('toggleCollapse')">
       <h2
         class="label"
         ref="my_label"
@@ -33,125 +33,93 @@
           'slide-right': widthLabel > widthCard - 20 && hover === true,
         }"
       >
-        {{ card.label }}
+        <span>{{ card.label }}</span>
       </h2>
       <h3>{{ entityType?._metadata?.label }}</h3>
-      <!-- <ol  class="falafel-menu">
-        <li v-for="index in 3" :key="index"></li>
-      </ol> -->
-    </div>
-    <div class="content" v-if="!collapsed">
-      <div class="carousel">
-        <transition :name="transitionName">
-          <div v-if="currentSlide === 0" class="image" key="1">
-            <div
-              v-if="cover"
-              class="cover"
-              :style="{
-                'background-image': `url('${fileServer}${cover.path}')`,
-              }"
-            />
-          </div>
-          <div v-else-if="currentSlide === 1" class="properties" key="2">
-            <div class="container" v-for="(prop, i) in props" :key="i">
-              <p class="propName">{{ prop.label }}</p>
-              <p
-                class="item"
-                v-drag="{
-                  mode: 'connect',
-                  doc: _id,
-                  prop: prop._id,
-                  customDragImage: true,
-                  handler(e) {
-                    $emit('drag', e);
-                  },
-                  dragOverHandler(e) {
-                    $emit('setTempEdge', e);
-                  },
-                  dragEndHandler(e) {
-                    $emit('clearTempEdge');
-                  },
-                  width: scale * 32,
-                  color: '--blue-9',
-                  height: scale * 32,
-                  circle: true
-                }"
-              >
-                +
-              </p>
-              <template v-if="prop._type === 'Set' || prop._type === 'List'">
-                <p
-                  class="propValue"
-                  v-for="(value, i) in prop.value"
-                  :key="i"
-                  v-drag="{
-                    _id: value,
-                    mode: 'move',
-                    customDragImage: true,
-                    handler(e) {
-                      $emit('drag', e);
-                    },
-                    width: scale * 180,
-                    color: '--blue-gray-8',
-                    height: scale * (collapsed ? 112 : 420)
-                  }"
-                  @click="
-                    $emit('removeProp', {
-                      _id,
-                      prop: prop._id,
-                      value: value
-                    })
-                  "
-                >
-                  {{ value }}
-                </p>
-              </template>
-              <p v-else
-                  class="propValue"
-                  v-drag="{
-                    _id: prop.value,
-                    mode: 'move',
-                    customDragImage: true,
-                    handler(e) {
-                      $emit('drag', e);
-                    },
-                    width: scale * 180,
-                    color: '--blue-gray-8',
-                    height: scale * (collapsed ? 112 : 420)
-                  }"
-                  @click="
-                    $emit('removeProp', {
-                      _id,
-                      prop: prop._id,
-                      value: prop.value
-                    })
-                  "
-                >
-                  {{ prop.value }}
-                </p>
-            </div>
-          </div>
-          <div v-else class="description" key="3">{{ card.description }}</div>
-        </transition>
-      </div>
-    </div>
-    <div class="footer">
-      <svg
-        @click="$emit('toggleCollapse')"
-        :class="{ collapsed, visible: cardHover }"
-        class="toggleButton"
+    </header>
+    <main v-if="!collapsed">
+      <section class="cover" v-if="cover != null">
+        <img :src="`${fileServer}/${cover.path}`"/>
+      </section>
+    <div class="container" v-for="(prop, i) in props" :key="i">
+      <p class="propName">{{ prop.label }}</p>
+      <p
+        class="item"
+        v-drag="{
+          mode: 'connect',
+          doc: _id,
+          prop: prop._id,
+          customDragImage: true,
+          handler(e) {
+            $emit('drag', e);
+          },
+          dragOverHandler(e) {
+            $emit('setTempEdge', e);
+          },
+          dragEndHandler(e) {
+            $emit('clearTempEdge');
+          },
+          width: scale * 32,
+          color: '--blue-9',
+          height: scale * 32,
+          circle: true
+        }"
       >
-        <g><path d="M-8,5.5 L0,-2.5 L8,5.5" /></g>
-      </svg>
-      <ol v-if="!collapsed" class="carousel-indicators">
-        <li
-          v-for="(item, index) in ['a', 'b', 'c']"
-          :key="index"
-          @click="slide(index)"
-          :class="{ active: currentSlide === index }"
-        ></li>
-      </ol>
-    </div>
+        +
+      </p>
+      <template v-if="prop._type === 'Set' || prop._type === 'List'">
+        <p
+          class="propValue"
+          v-for="(value, i) in prop.value"
+          :key="i"
+          v-drag="{
+            _id: value,
+            mode: 'move',
+            customDragImage: true,
+            handler(e) {
+              $emit('drag', e);
+            },
+            width: scale * 180,
+            color: '--blue-gray-8',
+            height: scale * (collapsed ? 112 : 420)
+          }"
+          @click="
+            $emit('removeProp', {
+              _id,
+              prop: prop._id,
+              value: value
+            })
+          "
+        >
+          {{ value }}
+        </p>
+      </template>
+      <p v-else
+          class="propValue"
+          v-drag="{
+            _id: prop.value,
+            mode: 'move',
+            customDragImage: true,
+            handler(e) {
+              $emit('drag', e);
+            },
+            width: scale * 180,
+            color: '--blue-gray-8',
+            height: scale * (collapsed ? 112 : 420)
+          }"
+          @click="
+            $emit('removeProp', {
+              _id,
+              prop: prop._id,
+              value: prop.value
+            })
+          "
+        >
+          {{ prop.value }}
+        </p>
+      </div>
+    </main>
+    <footer v-if="!collapsed"></footer>
   </div>
 </template>
 
@@ -193,10 +161,20 @@ export default {
     ...mapGetters('data', ['getType', 'getEntity']),
     colors () {
       if (this.entityType?._metadata?.background == null) return
-      const { background, text, light } = this.entityType._metadata
+      const { background, text } = this.entityType._metadata
+      // return {
+      //   '--background': `var(--${background}-${light ? 10 : 3})`,
+      //   '--text': `var(--${text}-${light ? 3 : 9})`
+      // }
+      // return {
+      //   '--primary': `var(--${background}-10)`,
+      //   '--secondary': `var(--${text}-3)`
+      // }
       return {
-        '--background': `var(--${background}-${light ? 10 : 3})`,
-        '--text': `var(--${text}-${light ? 3 : 9})`
+        '--primary': `var(--${text}-3)`,
+        '--secondary': `var(--${background}-10)`
+        // '--primary-dark': `var(--${background}-10)`,
+        // '--secondary-dark': `var(--${text}-3)`
       }
     },
     card () {
@@ -220,7 +198,7 @@ export default {
       if (this.entityType == null) return []
       const props = []
       for (const prop in this.entityType) {
-        if (prop.match(/^_/) == null) {
+        if (prop.match(/^_/) == null && !this.entityType._metadata._properties[prop]?.hidden) {
           props.push({
             _id: prop,
             label: prop, // TODO replace with actual label
@@ -268,12 +246,14 @@ export default {
 
 <style scoped lang="scss">
 .card {
-  --background: var(--gray-2);
-  --text: var(--gray-8);
-  background: var(--background);
-  color: var(--text);
+  background: var(--primary);
+  color: var(--secondary);
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--secondary);
+    color: var(--primary);
+  }
   width: 180px;
-  padding: var(--spacing) 0px;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
@@ -282,18 +262,21 @@ export default {
     z-index: 1;
     .image {
       .cover {
-        filter: unset;
+        // filter: unset;
         // mix-blend-mode: normal;
-        transition: filter .4s;
+        // transition: filter .4s;
       }
     }
   }
 }
-.header {
-  justify-content: space-between;
+header {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing);
+  justify-content: center;
+  justify-content: center;
   height: 60px;
-  line-height: 1.1;
-  margin: 0 var(--spacing) 0 var(--spacing);
+
   white-space: nowrap;
   overflow: hidden;
   // text-overflow: ellipsis;
@@ -331,13 +314,36 @@ export default {
   }
 }
 
-.content {
-  height: 300px;
-  padding-top: 25px;
+main {
+  background: var(--secondary);
+  color: var(--primary);
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--primary);
+    color: var(--secondary);
+  }
+
+  height: 280px;
   overflow: auto;
+  padding: var(--spacing);
+  .cover {
+    display: flex;
+    justify-content: center;
+    img {
+      mix-blend-mode: var(--blend-mode);
+      // mix-blend-mode: screen;
+      filter: grayscale(1);
+      max-width: 100%;
+      max-height: 200px;
+    }
+  }
 }
+
+footer {
+  height: 20px;
+}
+
 .image {
-  // background: gray;
   height: 100%;
   width: 100%;
   padding: 0px var(--spacing);
@@ -348,7 +354,7 @@ export default {
     width: 100%;
     height: 100%;
     filter: grayscale(1);
-    mix-blend-mode: screen;
+    mix-blend-mode: multiply;
   }
 }
 .description {
@@ -369,9 +375,11 @@ export default {
   }
 }
 .propValue {
-  background: rgba(255, 255, 255, 0.3);
-  padding: 0px 5px;
-  border-radius: 8px;
+  // background: rgba(255, 255, 255, 0.3);
+  // padding: 0px 5px;
+  // border-radius: 8px;
+  font-size: var(--font-size-l);
+  font-weight: var(--bold);
 }
 .content {
   display: flex;
@@ -410,31 +418,8 @@ export default {
 .slide-prev-leave-to {
   transform: translate(100%);
 }
-.footer {
-  display: flex;
-  padding: 0px var(--spacing);
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
 .toggleButton {
   margin-left: auto;
-}
-.carousel-indicators {
-  // height: 18px;
-  li {
-    margin: 0px 3px;
-    width: 7.5em;
-    height: var(--spacing-s);
-    // border-radius: 10%;
-    background-color: rgba(255, 255, 255, 0.5);
-    display: inline-flex;
-    cursor: default;
-    &.active,
-    &:hover {
-      background-color: #fff;
-    }
-  }
 }
 
 svg {

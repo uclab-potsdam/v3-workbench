@@ -3,6 +3,7 @@
     <path class="shadow" :d="path" :stroke-width="10"
       @mouseenter="showLabel = true" @mouseleave="showLabel = false"/>
     <!-- <path :d="path" :stroke-width="strokeWidth * 15"/> -->
+    <path class="outline" :d="path" :stroke-width="22"/>
     <path :d="path" :stroke-width="20"/>
     <!-- <text v-if="showLabel">
       <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="strokeWidth * 4">
@@ -52,13 +53,13 @@ export default {
 <style scoped lang="scss">
 .edge {
   pointer-events: none;
-  mix-blend-mode: var(--blend-mode);
+  // mix-blend-mode: var(--blend-mode);
   path {
     stroke: var(--edges);
     fill: none;
-    &.shadow {
-      stroke: transparent;
-      pointer-events: all;
+    &.outline {
+      stroke: var(--background);
+      // pointer-events: all;
     }
   }
   text {

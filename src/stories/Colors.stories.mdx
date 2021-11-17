@@ -1,0 +1,50 @@
+import { Meta, ColorPalette, ColorItem, Canvas } from '@storybook/addon-docs/blocks';
+
+<Meta title="Style/Colors" />
+
+# Colors
+
+We have a set of default colors which depend on the preferred colors scheme to support dark mode  
+⚠️ *Colors require reload after toggling system dark mode to update*
+
+<MainColors/>
+
+## Full Color Space
+
+We require a wide color space. Nonetheless we want to achieve consitency across color tones and shades by relying on the [LAB B-SPLINE space](https://components.ai/theme/N9DlRkNZZagzZJTDi4Wr). When transparency is needed the transparent color should appear like one of those colors on a given background. Please use [this tool](https://observablehq.com/@fidel/transparentize) to generate them.
+
+<FullColors/>
+
+export const MainColors = () => {
+  const colors = ['background', 'text', 'border', 'muted-border', 'primary', 'accent', 'dimmed', 'muted', 'edges']
+  const style = getComputedStyle(document.body)
+  const colorSpace = Object.entries(ColorSpace())
+  const swatches = colors.map(color => {
+    const value = style.getPropertyValue(`--${color}`)
+    const key = colorSpace.find(c => c[1] === value)[0]
+    return (<ColorItem key={color} title={color} subtitle={`--${color}`} colors={{[key]: value}} />)
+    // return (<ColorItem key={color} title={color} subtitle={key} colors={{[value]: `var(--${color})`}} />)
+  })
+  return (<ColorPalette>{swatches}</ColorPalette>)
+}
+
+export const FullColors = () => {
+  const tones = ['gray', 'blue-gray', 'blue', 'indigo', 'violet', 'magenta', 'red', 'orange', 'gold', 'yellow', 'lime', 'green', 'teal', 'cyan']  
+  const shades = Array.from(Array(12).keys())
+  const colorSpace = ColorSpace()
+  const swatches = tones.map(tone => {
+    const colors = Object.fromEntries(shades.map(shade => [shade, colorSpace[`--${tone}-${shade}`]]))
+    return (<ColorItem key={tone} title={tone} subtitle={`--${tone}-[shade]`} colors={colors} />)
+  })
+  
+  return (<ColorPalette>{swatches}</ColorPalette>)
+}
+
+export const ColorSpace = () => {
+  const tones = ['gray', 'blue-gray', 'blue', 'indigo', 'violet', 'magenta', 'red', 'orange', 'gold', 'yellow', 'lime', 'green', 'teal', 'cyan']  
+  const shades = Array.from(Array(12).keys())
+  const style = getComputedStyle(document.body)
+  return Object.fromEntries(tones.map(tone => {
+    return shades.map(shade => [`--${tone}-${shade}`, style.getPropertyValue(`--${tone}-${shade}`)])
+  }).flat())
+}

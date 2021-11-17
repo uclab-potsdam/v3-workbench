@@ -1,12 +1,18 @@
 <template>
-  <button>
+  <button :class="{primary}">
     <slot>Button</slot>
   </button>
 </template>
 
 <script>
 export default {
-  name: 'BaseButton'
+  name: 'BaseButton',
+  props: {
+    primary: {
+      type: Boolean,
+      default: false
+    }
+  }
 }
 </script>
 

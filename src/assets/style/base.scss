@@ -9,7 +9,7 @@ html {
   box-sizing: border-box;
   background: var(--background);
   color: var(--text);
-  overflow: hidden;
+  // overflow: hidden; // disabled for storybook
 
   ::selection {
     background: var(--selection);

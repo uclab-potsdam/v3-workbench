@@ -1,5 +1,6 @@
 import { Meta, Preview, Story } from '@storybook/addon-docs/blocks';
 import { Typeset } from '@storybook/addon-docs/blocks';
+import { DesignTokenDocBlock } from 'storybook-design-token/dist/doc-blocks';
 
 <Meta title="Tokens/Typography"  parameters={{ order: 103 }} />
 
@@ -10,22 +11,23 @@ import { Typeset } from '@storybook/addon-docs/blocks';
 Inter is the typographic family of reference, used in Sans.
 https://fonts.google.com/specimen/Inter
 
-## Scale
 
-Typography is based on a scale in multiples of 4, with the base unit at 12px.
-
-### Inter
+Fraunces is the secondary typographic family, used in Serif.
+https://fonts.google.com/specimen/Fraunces
 
 <Typeset fontFamily="Inter" fontWeight="500" fontSizes={['8px','12px', '20px', '28px', '36px', '44px', '52px']} sampleText="Amazonia as a future laboratory" />
+<Typeset fontFamily="Fraunces" fontWeight="500" fontSizes={['8px','12px', '20px', '28px', '36px', '44px', '52px']} sampleText="Amazonia as a future laboratory" />
 
-## Titles
 
-<Preview>
-    <h2> Lorem ipsum dolor sit amet </h2>
-</Preview>
 
-## Paragraph
+<DesignTokenDocBlock categoryName="Font Family" viewType="table"></DesignTokenDocBlock>
 
-<Preview>
-    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras mollis purus sed tellus ultricies, et elementum ligula rutrum. Cras cursus turpis ac purus tincidunt, sit amet vestibulum nisl porttitor.</p>
-</Preview>
+## Typographic scale
+Typography is based on a scale in multiples of 4, with the base unit at 12px.
+
+<DesignTokenDocBlock categoryName="Typographic Scale" viewType="table"></DesignTokenDocBlock>
+
+## Font styles
+
+<DesignTokenDocBlock categoryName="Font Weight" viewType="table"></DesignTokenDocBlock>
+

@@ -1,8 +1,9 @@
+/**
+* @tokens Main Colors
+* @presenter Color
+*/
+
 :root {
-  /**
-  * @tokens Main Colors
-  * @presenter Color
-  */
   --background: var(--blue-gray-11);
   --text: var(--blue-gray-4);
   --border: var(--blue-gray-4);
@@ -12,24 +13,27 @@
   --dimmed: var(--blue-gray-10);
   --muted: var(--blue-gray-8);
   --edges: var(--indigo-9);
+}
 
-  /**
-  * @tokens Status Colors
-  * @presenter Color
-  */
+/**
+* @tokens Status Colors
+* @presenter Color
+*/
 
+:root {
   --status-ok: var(--teal-6);
   --danger: var(--red-6);
   --shadow: rgba(1,6,43,0.62); // eq --blue-gray-4 on --blue-gray-11
   --selection: rgba(228,213,255,0.95); // eq --indigo-10 on --blue-gray-11
   --blend-mode: multiply;
+}
 
-  /**
-  * @tokens Card Colors
-  * @presenter Color
-  */
+/**
+* @tokens Card Colors
+* @presenter Color
+*/
 
-  // card defaults
+:root {
   --primary: var(--blue-gray-3);
   --secondary: var(--blue-gray-10);
 }

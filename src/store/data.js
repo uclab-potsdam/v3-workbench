@@ -4,6 +4,7 @@ export default {
   namespaced: true,
   state: {
     cards: [],
+    labels: {},
     searchResults: [],
     remoteSearchResults: [],
     types: []
@@ -14,6 +15,10 @@ export default {
     },
     getType: (state) => (id) => {
       return state.types.find(d => d._id === id)
+    },
+    getLabel: (state) => (id) => {
+      console.log(id)
+      return state.labels[id] || id
     }
   },
   mutations: {
@@ -25,6 +30,9 @@ export default {
     storeEntity (state, card) {
       state.cards.push(card)
     },
+    storeEntityLabel (state, card) {
+      state.labels[card._id] = card.label
+    },
     updateDocument (state, entity) {
       state.cards = state.cards.filter(({ _id }) => _id !== entity._id)
       state.cards.push(entity)
@@ -35,12 +43,37 @@ export default {
       const types = await dispatch('api/getTypes', id, { root: true })
       commit('set', { types })
     },
-    async fetchEntity ({ state, dispatch, commit }, id) {
+    async fetchEntity ({ state, dispatch, commit, getters }, id) {
       let card = state.cards.find(card => card._id === id)
       if (card != null) return card
       card = await dispatch('api/getEntity', id, { root: true })
       commit('storeEntity', card)
+      commit('storeEntityLabel', card)
+      // get Labels for linked properties
+      const type = getters.getType(card._type)
+      for (const prop in type) {
+        // skip terminus properties
+        if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {
+          dispatch('fetchLabels', card[prop])
+          // type[prop].isLinkedProperty = (type[prop]._class || type[prop]).match(/:/) == null
+          // props.push({
+          //   _id: prop,
+          //   label: prop, // TODO replace with actual label
+          //   value: this.card[prop],
+          //   ...t[prop]
+          // })
+        }
+      }
       return card
+    },
+    async fetchLabels ({ state, dispatch, commit }, ids) {
+      // const wasArray = Array.isArray(ids)
+      for (const _id of [ids].flat()) {
+        if (state.labels[_id] != null) return state.labels[_id]
+        const label = await dispatch('api/getLabel', _id, { root: true })
+        commit('storeEntityLabel', { _id, label })
+      }
+      // return wasArray ? labels : labels[0]
     },
     async refreshEntity ({ state, dispatch, commit }, id) {
       const card = await dispatch('api/getEntity', id, { root: true })

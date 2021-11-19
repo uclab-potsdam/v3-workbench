@@ -41,84 +41,59 @@
       <section class="cover" v-if="cover != null">
         <img :src="`${fileServer}/${cover.path}`"/>
       </section>
-    <div class="container" v-for="(prop, i) in props" :key="i">
-      <p class="propName">{{ prop.label }}</p>
-      <p
-        class="item"
-        v-drag="{
-          mode: 'connect',
-          doc: _id,
-          prop: prop._id,
-          customDragImage: true,
-          handler(e) {
-            $emit('drag', e);
-          },
-          dragOverHandler(e) {
-            $emit('setTempEdge', e);
-          },
-          dragEndHandler(e) {
-            $emit('clearTempEdge');
-          },
-          width: scale * 32,
-          color: '--blue-9',
-          height: scale * 32,
-          circle: true
-        }"
-      >
-        +
-      </p>
-      <template v-if="prop._type === 'Set' || prop._type === 'List'">
+      <section class="property" v-for="(prop, i) in props" :key="i">
+        <p class="propName">{{ prop.label }}</p>
         <p
-          class="propValue"
-          v-for="(value, i) in prop.value"
-          :key="i"
+          class="item"
           v-drag="{
-            _id: value,
-            mode: 'move',
+            mode: 'connect',
+            doc: _id,
+            prop: prop._id,
             customDragImage: true,
             handler(e) {
               $emit('drag', e);
             },
-            width: scale * 180,
-            color: '--blue-gray-8',
-            height: scale * (collapsed ? 112 : 420)
-          }"
-          @click="
-            $emit('removeProp', {
-              _id,
-              prop: prop._id,
-              value: value
-            })
-          "
-        >
-          {{ value }}
-        </p>
-      </template>
-      <p v-else
-          class="propValue"
-          v-drag="{
-            _id: prop.value,
-            mode: 'move',
-            customDragImage: true,
-            handler(e) {
-              $emit('drag', e);
+            dragOverHandler(e) {
+              $emit('setTempEdge', e);
             },
-            width: scale * 180,
-            color: '--blue-gray-8',
-            height: scale * (collapsed ? 112 : 420)
+            dragEndHandler(e) {
+              $emit('clearTempEdge');
+            },
+            width: scale * 32,
+            color: '--blue-9',
+            height: scale * 32,
+            circle: true
           }"
-          @click="
-            $emit('removeProp', {
-              _id,
-              prop: prop._id,
-              value: prop.value
-            })
-          "
         >
-          {{ prop.value }}
+          +
         </p>
-      </div>
-    </main>
+          <p
+            class="propValue"
+            v-for="(value, i) in prop.value"
+            :key="i"
+            v-drag="{
+              _id: value,
+              mode: 'move',
+              customDragImage: true,
+              handler(e) {
+                $emit('drag', e);
+              },
+              width: scale * 180,
+              color: '--blue-gray-8',
+              height: scale * (collapsed ? 112 : 420)
+            }"
+            @click="
+              $emit('removeProp', {
+                _id,
+                prop: prop._id,
+                value: value
+              })
+            "
+          >
+            {{ value }}
+          </p>
+        </section>
+      </main>
     <footer v-if="!collapsed"></footer>
   </div>
 </template>
@@ -158,7 +133,7 @@ export default {
   },
   computed: {
     ...mapState('config', ['fileServer']),
-    ...mapGetters('data', ['getType', 'getEntity']),
+    ...mapGetters('data', ['getType', 'getEntity', 'getLabel']),
     colors () {
       if (this.entityType?._metadata?.background == null) return
       const { background, text } = this.entityType._metadata
@@ -198,11 +173,13 @@ export default {
       if (this.entityType == null) return []
       const props = []
       for (const prop in this.entityType) {
+        // don't display terminus (_) or hidden properties
         if (prop.match(/^_/) == null && !this.entityType._metadata._properties[prop]?.hidden) {
+          const value = [this.card[prop]].flat().map(id => this.getLabel(id))
           props.push({
             _id: prop,
             label: prop, // TODO replace with actual label
-            value: this.card[prop],
+            value,
             ...this.entityType[prop]
           })
         }
@@ -323,7 +300,7 @@ main {
     color: var(--secondary);
   }
 
-  height: 280px;
+  height: 220px;
   overflow: auto;
   padding: var(--spacing);
   .cover {
@@ -334,7 +311,7 @@ main {
       // mix-blend-mode: screen;
       filter: grayscale(1);
       max-width: 100%;
-      max-height: 200px;
+      max-height: 180px;
     }
   }
 }
@@ -363,22 +340,8 @@ footer {
 }
 .properties {
   width: 100%;
-  .container {
-    display: grid;
-    grid-template-columns: 30% 10% 60%;
-    align-items: flex-start;
-    border-bottom: 0.7px solid #fff;
-    padding: 5px var(--spacing);
-    &:first-child {
-      border-top: 1px solid #fff;
-    }
-  }
 }
 .propValue {
-  // background: rgba(255, 255, 255, 0.3);
-  // padding: 0px 5px;
-  // border-radius: 8px;
-  font-size: var(--font-size-l);
   font-weight: var(--bold);
 }
 .content {

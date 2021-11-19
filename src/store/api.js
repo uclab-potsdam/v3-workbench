@@ -69,10 +69,6 @@ export default {
       const types = (await state.Client.getClassDocuments())
         .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
 
-      // // const schema = await Client.getClasses();
-      // return schema.map((doctype, i, doctypes) =>
-      //   makeSchemaFrame(doctype, doctypes)
-      // )
       // https://github.com/terminusdb/terminusdb/issues/668
       // currently not possible to store arbitrary data in schema
       // → We misuse the @documentation field to contain
@@ -145,7 +141,7 @@ export default {
       // console.log(types)
       // return groupBy(types, 'id', 'props', ['prop', 'propType', 'propLabel'], ['id', 'type', 'label'])
     },
-    async getEntity ({ dispatch, state }, id) {
+    async getEntity ({ dispatch, state, rootState }, id) {
       const card = atTo_(await state.Client.getDocument({ id: id }))
       // console.log(card._id, id)
       // const bindings = (await dispatch('query', {
@@ -172,6 +168,21 @@ export default {
       // commit('view/set', { cards }, { root: true })
       // console.log(card)
       return card
+    },
+    async getLabel ({ dispatch, state, rootState }, _id) {
+      const res = await state.Client.query(
+        WOQL.triple(
+          _id,
+          '@schema:label',
+          'v:label'
+        )
+      ).catch((err) => {
+        throw err
+      })
+      const label = flattenBindings(res.bindings)[0]?.label
+      // bindings._type = bindings._type.replace(/^@schema:/, '')
+
+      return label
     },
     async search ({ commit, dispatch }, { term, doctype = null }) {
       const searchResults = await dispatch('query', {

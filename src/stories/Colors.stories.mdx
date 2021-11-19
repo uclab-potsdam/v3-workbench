@@ -1,4 +1,5 @@
 import { Meta, ColorPalette, ColorItem, Canvas } from '@storybook/addon-docs/blocks';
+import { DesignTokenDocBlock } from 'storybook-design-token/dist/doc-blocks';
 
 <Meta title="Tokens/Colors"  parameters={{ order: 101 }} />
 
@@ -7,7 +8,10 @@ import { Meta, ColorPalette, ColorItem, Canvas } from '@storybook/addon-docs/blo
 We have a set of default colors which depend on the preferred colors scheme to support dark mode  
 ⚠️ *Colors require reload after toggling system dark mode to update*
 
-<MainColors/>
+<!-- <MainColors/> -->
+<DesignTokenDocBlock categoryName="Main Colors" viewType="table"></DesignTokenDocBlock>
+<DesignTokenDocBlock categoryName="Status Colors" viewType="table"></DesignTokenDocBlock>
+<DesignTokenDocBlock categoryName="Card Colors" viewType="table"></DesignTokenDocBlock>
 
 ## Full Color Space
 

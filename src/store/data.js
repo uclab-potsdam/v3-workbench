@@ -17,7 +17,6 @@ export default {
       return state.types.find(d => d._id === id)
     },
     getLabel: (state) => (id) => {
-      console.log(id)
       return state.labels[id] || id
     }
   },

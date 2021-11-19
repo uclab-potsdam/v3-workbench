@@ -1,6 +1,6 @@
 import { Meta, ColorPalette, ColorItem, Canvas } from '@storybook/addon-docs/blocks';
 
-<Meta title="Style/Colors" />
+<Meta title="Tokens/Colors"  parameters={{ order: 101 }} />
 
 # Colors
 
@@ -20,10 +20,9 @@ export const MainColors = () => {
   const style = getComputedStyle(document.body)
   const colorSpace = Object.entries(ColorSpace())
   const swatches = colors.map(color => {
-    const value = style.getPropertyValue(`--${color}`)
-    const key = colorSpace.find(c => c[1] === value)[0]
+    const value = style.getPropertyValue(`--${color}`).trim()
+    const key = colorSpace.find(c => c[1].trim() === value)[0]
     return (<ColorItem key={color} title={color} subtitle={`--${color}`} colors={{[key]: value}} />)
-    // return (<ColorItem key={color} title={color} subtitle={key} colors={{[value]: `var(--${color})`}} />)
   })
   return (<ColorPalette>{swatches}</ColorPalette>)
 }

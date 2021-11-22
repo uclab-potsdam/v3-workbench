@@ -1,4 +1,24 @@
+
 :root {
+  /**
+  * @tokens Misc
+  * @presenter Border
+  */
+  
+  --base-border: 1px solid var(--border);
+  --base-border-radius: var(--spacing);
+
+  --transition: 0.2s;
+
+  --narrow: 360px;
+  --medium: 720px;
+  --wide: 1080px;
+
+  /**
+  * @tokens Spacing
+  * @presenter Spacing
+  */
+
   --spacing: 10px;
   --spacing-xs: 2.5px;
   --spacing-s: 5px;
@@ -6,46 +26,53 @@
   --spacing-l: 20px;
   --spacing-xl: 40px;
 
-  --base-border: 1px solid var(--border);
-  --base-border-radius: var(--spacing);
+  /**
+  * @tokens Shadows
+  * @presenter Shadow
+  */
 
   --base-shadow: -5px 5px 0 0 var(--shadow);
   --base-shadow-l: -10px 10px 0 0 var(--shadow);
   --shadow-l-offset: translate(5px, -5px);
 
-  --transition: 0.2s;
+  /**
+  * @tokens Font Family
+  * @presenter FontFamily
+  */
 
-  --narrow: 360px;
-  --medium: 720px;
-  --wide: 1080px;
-}
-
-/**
-* @tokens Font Family
-* @presenter FontFamily
-*/
-
-:root {
   --font-family-sans: "Inter", sans-serif;
   --font-family-serif: "Fraunces", serif;
-}
 
-/**
-* @tokens Typographic Scale
-* @presenter FontSize
-*/
+  /**
+  * @tokens Typographic Scale
+  * @presenter FontSize
+  */
 
-:root {
   --font-size: 12px;
   --font-size-l: 20px;
-}
 
-/**
-* @tokens Font Weight
-* @presenter FontWeight
-*/
+  /**
+  * @tokens Font Weight
+  * @presenter FontWeight
+  */
 
-:root {
   --regular: 350;
   --bold: 600;
+
+  /**
+  * @tokens Animation
+  * @presenter Animation
+  */
+  --slide-right: 10s -4.5s slide-right infinite;;
+}
+
+@keyframes slide-right {
+  from {
+    margin-left: 100%;
+    width: 100%;
+  }
+  to {
+    margin-left: -130%;
+    width: 100%;
+  }
 }

@@ -37,9 +37,9 @@ body {
 .sidebar-container a.sidebar-item,.sidebar-container button.sidebar-item,.sidebar-container .sidebar-subheading button:first-child{
     width: 100%;
     margin: 0!important;
-    padding: .5em!important;
+    padding-bottom: .5em !important;
     color: #000;
-    font-size: 16px!important;
+    font-size: 20px!important;
     line-height: 1!important
 }
 
@@ -79,4 +79,9 @@ body {
 
 .docblock-emptyblock a {
     display: none
+}
+
+input {
+    border-radius: 0 !important;
+    background-color: white !important;
 }

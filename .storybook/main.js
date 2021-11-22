@@ -23,8 +23,6 @@ module.exports = {
       rule.exclude = [...(rule.exclude || []), iconPath]
     })
 
-    
-
     config.module.rules.push({
       test: /\.svg$/,
       include: [

@@ -16,8 +16,12 @@ export default {
     getType: (state) => (id) => {
       return state.types.find(d => d._id === id)
     },
-    getLabel: (state) => (id) => {
-      return state.labels[id] || id
+    getLabel: (state) => (_id) => {
+      if (_id == null) return null
+      return {
+        _id,
+        label: state.labels[_id] || _id
+      }
     }
   },
   mutations: {

@@ -10,6 +10,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@shopify/draggable": "^1.0.0-beta.12",
     "@storybook/preset-scss": "^1.0.3",
     "@terminusdb/terminusdb-client": "^10.0.1",
     "@yzfe/svgicon": "^1.1.0",

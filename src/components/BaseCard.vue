@@ -25,16 +25,10 @@
     @mouseover="cardHover = true"
     @mouseleave="cardHover = false"
   >
-    <header draggable="true" @mouseover="hover = true" @mouseleave="hover = false" @click="$emit('toggleCollapse')">
-      <h2
-        class="label"
-        ref="my_label"
-        v-bind:class="{
-          'slide-right': widthLabel > widthCard - 20 && hover === true,
-        }"
-      >
-        <span>{{ card.label }}</span>
-      </h2>
+    <header class="traverse-label-trigger" draggable="true" @click="$emit('toggleCollapse')">
+      <BaseTraverseLabel v-if="1" root="h2" parent-trigger>
+        {{card.label}}
+      </BaseTraverseLabel>
       <h3>{{ entityType?._metadata?.label }}</h3>
     </header>
     <main v-if="!collapsed">
@@ -42,10 +36,9 @@
         <img :src="`${fileServer}/${cover.path}`"/>
       </section>
       <section class="property" v-for="(prop, i) in props" :key="i">
-        <p class="propName">{{ prop.label }}</p>
-        <p
-          class="item"
-          v-drag="{
+        <div class="label">
+          <div class="overflow-wrap">
+            <BaseTraverseLabel><p v-drag="{
             mode: 'connect',
             doc: _id,
             prop: prop._id,
@@ -60,40 +53,41 @@
               $emit('clearTempEdge');
             },
             width: scale * 32,
-            color: '--blue-9',
+            color: '--accent',
             height: scale * 32,
             circle: true
+          }">{{ prop.label }}</p></BaseTraverseLabel>
+          </div>
+          <icon scale="1" data="@icon/property-add.svg"/>
+        </div>
+        <div
+          class="value"
+          v-for="(value, i) in prop.value"
+          :key="i">
+          <div class="overflow-wrap">
+            <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
+          </div>
+          <icon v-drag="{
+            _id: value._id,
+            mode: 'move',
+            customDragImage: true,
+            handler(e) {
+              $emit('drag', e);
+            },
+            width: scale * 180,
+            color: '--blue-gray-8',
+            height: scale * (collapsed ? 112 : 420)
           }"
-        >
-          +
-        </p>
-          <p
-            class="propValue"
-            v-for="(value, i) in prop.value"
-            :key="i"
-            v-drag="{
-              _id: value,
-              mode: 'move',
-              customDragImage: true,
-              handler(e) {
-                $emit('drag', e);
-              },
-              width: scale * 180,
-              color: '--blue-gray-8',
-              height: scale * (collapsed ? 112 : 420)
-            }"
-            @click="
-              $emit('removeProp', {
-                _id,
-                prop: prop._id,
-                value: value
-              })
-            "
-          >
-            {{ value }}
-          </p>
-        </section>
-      </main>
+          x-click="
+            $emit('removeProp', {
+              _id,
+              prop: prop._id,
+              value: value
+            })
+          " scale="1" data="@icon/property-expand.svg"/>
+        </div>
+      </section>
+    </main>
     <footer v-if="!collapsed"></footer>
   </div>
 </template>
@@ -102,7 +96,9 @@
 import { mapActions, mapGetters, mapState } from 'vuex'
 import drag from '@/assets/js/directives/drag'
 import drop from '@/assets/js/directives/drop'
+import BaseTraverseLabel from './BaseTraverseLabel.vue'
 export default {
+  components: { BaseTraverseLabel },
   name: 'BaseCard',
   directives: {
     drag,
@@ -119,14 +115,10 @@ export default {
   },
   data () {
     return {
-      // card: null,
       cover: null,
-      // entityType: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
-      currentSlide: 0,
-      transitionName: 'slide-next',
       hover: false,
       cardHover: false
     }
@@ -154,28 +146,18 @@ export default {
     },
     card () {
       const card = this.getEntity(this._id)
-      // console.log('fetched', card)
       return card
     },
-    // cover () {
-    //   if (this.card.cover == null) return null
-    //   console.log('getting image', this.card.cover)
-    //   return this.getEntity(this.card.cover)
-    // },
     entityType () {
       return this.getType(this.card._type)
     },
-    // cover () {
-    //   this
-    // },
     props () {
-      // console.log(this.entityType)
       if (this.entityType == null) return []
       const props = []
       for (const prop in this.entityType) {
         // don't display terminus (_) or hidden properties
         if (prop.match(/^_/) == null && !this.entityType._metadata._properties[prop]?.hidden) {
-          const value = [this.card[prop]].flat().map(id => this.getLabel(id))
+          const value = [this.card[prop]].flat().map(id => this.getLabel(id)).filter(d => d != null)
           props.push({
             _id: prop,
             label: prop, // TODO replace with actual label
@@ -185,37 +167,19 @@ export default {
         }
       }
       return props
-      // return this.entityType.props.map((prop) => {
-      //   return {
-      //     ...prop,
-      //     values: this.card.props
-      //       .filter((p) => p.prop === prop.id)
-      //       .map((v) => ({
-      //         raw: v.value,
-      //         label: v.valueLabel || v.value
-      //       }))
-      //   }
-      // })
     }
   },
   async mounted () {
     const card = await this.fetchEntity(this._id)
-    // this.card = await this.fetchEntity(this._id)
     this.cover = card.cover ? await this.fetchEntity(card.cover) : null
   },
   methods: {
     ...mapActions('data', ['fetchEntity']),
-    // ...mapActions('api', ['getEntity']),
     calcWidthOfLabel () {
       this.widthLabel = this.$refs.my_label.getBoundingClientRect().width
     },
     calcWidthOfCard () {
       this.widthCard = this.$refs.my_card.getBoundingClientRect().width
-    },
-    slide (slides) {
-      this.transitionName =
-        slides < this.currentSlide ? 'slide-prev' : 'slide-next'
-      this.currentSlide = slides
     }
   }
 }
@@ -225,7 +189,6 @@ export default {
 .card {
   background: var(--primary);
   color: var(--secondary);
-
   @media (prefers-color-scheme: dark) {
     background: var(--secondary);
     color: var(--primary);
@@ -233,20 +196,13 @@ export default {
   width: 180px;
   overflow: hidden;
   display: flex;
-  justify-content: space-between;
   flex-direction: column;
+  justify-content: space-between;
   &:hover {
     z-index: 1;
-    .image {
-      .cover {
-        // filter: unset;
-        // mix-blend-mode: normal;
-        // transition: filter .4s;
-      }
-    }
   }
-}
-header {
+
+  header {
   display: flex;
   flex-direction: column;
   padding: var(--spacing);
@@ -256,38 +212,6 @@ header {
 
   white-space: nowrap;
   overflow: hidden;
-  // text-overflow: ellipsis;
-
-  * {
-    pointer-events: none;
-  }
-}
-.falafel-menu {
-  li {
-    margin: 3px 3px;
-    width: 0.4em;
-    height: 0.4em;
-    border-radius: 100%;
-    background-color: rgb(255, 255, 255);
-    display: flex;
-    cursor: default;
-  }
-}
-.label {
-  display: inline;
-}
-.slide-right {
-  animation: 10s -4.5s slide-right infinite;
-  animation-timing-function: linear;
-}
-@keyframes slide-right {
-  from {
-    margin-left: 100%;
-    width: 100%;
-  }
-  to {
-    margin-left: -130%;
-    width: 100%;
   }
 }
 
@@ -303,118 +227,48 @@ main {
   height: 220px;
   overflow: auto;
   padding: var(--spacing);
+
+  section + section {
+    margin-top: var(--spacing);
+  }
+
   .cover {
     display: flex;
     justify-content: center;
     img {
       mix-blend-mode: var(--blend-mode);
-      // mix-blend-mode: screen;
       filter: grayscale(1);
       max-width: 100%;
       max-height: 180px;
     }
   }
+
+  .property {
+    user-select: none;
+    .label, .value {
+      display: grid;
+      grid-template-columns: 1fr calc(var(--spacing) + var(--spacing-s));
+      gap: var(--spacing);
+
+      .overflow-wrap {
+        overflow: hidden
+      }
+    }
+    .value {
+      font-weight: var(--bold);
+      font-size: var(--font-size-l);
+    }
+  }
 }
 
 footer {
+  background: var(--secondary);
+  color: var(--primary);
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--primary);
+    color: var(--secondary);
+  }
   height: 20px;
-}
-
-.image {
-  height: 100%;
-  width: 100%;
-  padding: 0px var(--spacing);
-
-  .cover {
-    background: center center no-repeat;
-    background-size: contain;
-    width: 100%;
-    height: 100%;
-    filter: grayscale(1);
-    mix-blend-mode: multiply;
-  }
-}
-.description {
-  height: 100px;
-  margin: 0px var(--spacing);
-}
-.properties {
-  width: 100%;
-}
-.propValue {
-  font-weight: var(--bold);
-}
-.content {
-  display: flex;
-  align-items: flex-start;
-}
-.carousel {
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-/* GO TO NEXT SLIDE */
-
-.slide-next-enter-active,
-.slide-next-leave-active {
-  position: absolute;
-  transition: transform 0.3s ease-in-out;
-}
-.slide-next-enter-from {
-  transform: translate(100%);
-}
-.slide-next-leave-to {
-  transform: translate(-100%);
-}
-
-/* GO TO PREVIOUS SLIDE */
-.slide-prev-enter-active,
-.slide-prev-leave-active {
-  position: absolute;
-  transition: transform 0.3s ease-in-out;
-}
-.slide-prev-enter-from {
-  transform: translate(-100%);
-}
-.slide-prev-leave-to {
-  transform: translate(100%);
-}
-.toggleButton {
-  margin-left: auto;
-}
-
-svg {
-  width: 20px;
-  height: 12px;
-  margin-right: 3px;
-  g {
-    transform: translate(11px, 6px);
-    path {
-      opacity: 0;
-      transition: opacity 1s;
-      stroke: white;
-      stroke-width: 1.5;
-      fill: none;
-      transform: rotate(0deg);
-      transition: transform 0.5s, stroke 0.5s;
-    }
-  }
-  &.visible {
-    g {
-      path {
-        opacity: 1;
-        transition: opacity 1s;
-      }
-    }
-  }
-  &.collapsed {
-    g {
-      path {
-        transform: rotate(180deg);
-      }
-    }
-  }
 }
 </style>

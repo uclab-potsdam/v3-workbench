@@ -3,8 +3,8 @@
     <path class="shadow" :d="path" :stroke-width="10"
       @mouseenter="showLabel = true" @mouseleave="showLabel = false"/>
     <!-- <path :d="path" :stroke-width="strokeWidth * 15"/> -->
-    <path class="outline" :d="path" :stroke-width="22"/>
-    <path :d="path" :stroke-width="20"/>
+    <path class="outline" :d="path" :stroke-width="17"/>
+    <path :d="path" :stroke-width="15"/>
     <!-- <text v-if="showLabel">
       <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="strokeWidth * 4">
         {{ label }}

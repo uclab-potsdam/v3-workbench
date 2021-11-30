@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "storybook": "start-storybook -p 6006 -s .storybook,src, theme, --ci",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook -s .storybook,src, theme"
   },
   "dependencies": {
     "@storybook/preset-scss": "^1.0.3",

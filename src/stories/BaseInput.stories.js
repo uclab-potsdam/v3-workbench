@@ -47,3 +47,11 @@ Password.args = {
   label: 'Password', 
   type: 'password',
 }
+
+
+export const Disabled = Template.bind({})
+Disabled.args = {
+  label: 'Disabled',
+  placeholder: 'This input is disabled', 
+  disabled: true,
+}

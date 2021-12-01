@@ -4,6 +4,7 @@
       <input
         :type="type"
         :placeholder="placeholder"
+        :disabled="disabled"
         v-model="content"
       />
     <label class="input-suffix" v-if="suffix">{{ suffix }}</label>
@@ -19,6 +20,10 @@ export default {
       default: "text",
     },
     placeholder: String,
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     label: String,
     prefix: String,
     suffix: String,
@@ -43,7 +48,8 @@ input {
 
     &:disabled {
       color: var(--muted);
-      border-color: var(--muted);
+      border-color: var(--muted-border);
+        cursor: not-allowed;
     }
   }
 
@@ -62,9 +68,5 @@ input {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
-  }
-
-  label.disabled {
-    color: var(--muted);
   }
 </style>

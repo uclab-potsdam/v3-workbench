@@ -21,7 +21,7 @@ export default {
       'position'
     ]),
     ...mapState('dragdrop', [
-      'el', 'x', 'y'
+      'el', 'x', 'y', 'data'
     ]),
     ...mapState('view', [
       'zoom'
@@ -30,7 +30,9 @@ export default {
   methods: {
     setPosition () {
       if (this.clone == null) return
-      this.clone.style.transform = `translate(${this.position.x}px, ${this.position.y}px) scale(${this.zoom}) `
+      const x = this.position.x + (this.data.offset ? 10 : 0)
+      const y = this.position.y + (this.data.offset ? -10 : 0)
+      this.clone.style.transform = `translate(${x}px, ${y}px) scale(${this.zoom}) `
     }
   },
   watch: {

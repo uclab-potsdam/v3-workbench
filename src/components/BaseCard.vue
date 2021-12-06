@@ -8,13 +8,9 @@
     :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
-      ctx: 'CARD',
-      value: _id,
-      dropEffect: 'move',
-      handler(e) {
-        $emit('addProp', e);
-      },
+      obj: _id,
     }"
+    @dropped="onDrop"
     v-drag="{
       mode: 'move-card',
       trigger: '.drag-trigger',
@@ -45,7 +41,7 @@
             <icon v-drag="{
               mode: 'connect',
               data: {
-                doc: _id,
+                sub: _id,
                 prop: prop._id,
               }
             }" scale="1" data="@icon/property-add.svg"/>
@@ -59,10 +55,9 @@
             <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
           </div>
           <icon v-drag="{
-            mode: 'connect',
+            mode: 'move-card',
             data: {
-              doc: _id,
-              prop: prop._id,
+              _id: value._id
             }
           }"
           x-click="
@@ -75,7 +70,9 @@
         </div>
       </section>
     </main>
-    <footer v-if="!collapsed"></footer>
+    <footer v-if="!collapsed">
+       <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
+    </footer>
 
   </div>
   <!-- </InteractionDrag> -->
@@ -94,9 +91,10 @@ export default {
     drag,
     drop
   },
-  emits: ['drag', 'toggleCollapse', 'addProp', 'removeProp', 'setTempEdge', 'clearTempEdge'],
+  emits: ['drag', 'toggleCollapse', 'removeProp', 'setTempEdge', 'clearTempEdge'],
   props: {
     _id: String,
+    cardId: String,
     collapsed: Boolean,
     pane: String,
     context: String,
@@ -166,7 +164,8 @@ export default {
     this.cover = card.cover ? await this.fetchEntity(card.cover) : null
   },
   methods: {
-    ...mapActions('data', ['fetchEntity']),
+    ...mapActions('data', ['fetchEntity', 'addProp']),
+    ...mapActions('view', ['removeCard']),
     onDragStart (e) {
       this.dragActive = true
       // console.log('DRAG START')/
@@ -180,6 +179,13 @@ export default {
     },
     cat (a, b, c) {
       // console.log('CAT', a, b, c)
+    },
+    onDrop ({ detail }) {
+      console.log([detail.data.sub, detail.data.prop, detail.obj])
+      this.addProp([detail.data.sub, detail.data.prop, detail.obj])
+    },
+    onRemoveCard () {
+      this.removeCard(this.cardId)
     }
   }
 }
@@ -207,15 +213,15 @@ export default {
   }
 
   header {
-  display: flex;
-  flex-direction: column;
-  padding: var(--spacing);
-  justify-content: center;
-  justify-content: center;
-  height: 60px;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing);
+    justify-content: center;
+    justify-content: center;
+    height: 60px;
 
-  white-space: nowrap;
-  overflow: hidden;
+    white-space: nowrap;
+    overflow: hidden;
   }
 }
 
@@ -266,6 +272,8 @@ main {
 }
 
 footer {
+  height: 40px;
+  padding: var(--spacing);
   background: var(--secondary);
   color: var(--primary);
 
@@ -273,6 +281,5 @@ footer {
     background: var(--primary);
     color: var(--secondary);
   }
-  height: 20px;
 }
 </style>

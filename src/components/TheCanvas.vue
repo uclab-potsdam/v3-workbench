@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{ctx: 'CANVAS'}" @dropped="onDrop">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{filter: ['move-card']}" @dropped="onDrop">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -26,6 +26,7 @@
         :key="card._id"
         context="canvas"
         :_id="card.entity"
+        :card-id="card._id"
         :collapsed="card.collapsed"
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"

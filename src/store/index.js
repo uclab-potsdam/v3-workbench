@@ -6,6 +6,7 @@ import device from './device'
 import main from './main'
 import config from './config'
 import auth from './auth'
+import dragdrop from './dragdrop'
 
 export default createStore({
   modules: {
@@ -15,6 +16,7 @@ export default createStore({
     view,
     device,
     config,
-    auth
+    auth,
+    dragdrop
   }
 })

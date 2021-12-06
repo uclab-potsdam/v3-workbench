@@ -4,6 +4,7 @@
     <div class="floating">
       <TheSearchbar/>
     </div>
+    <div id="drag-layer"/>
   </div>
 </template>
 

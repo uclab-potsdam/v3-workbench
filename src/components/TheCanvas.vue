@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{dropEffect: 'move', handler: onDrop}">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{filter: ['move-card']}" @dropped="onDrop">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -26,6 +26,7 @@
         :key="card._id"
         context="canvas"
         :_id="card.entity"
+        :card-id="card._id"
         :collapsed="card.collapsed"
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
@@ -37,12 +38,12 @@
     </div>
     <div class="notifications">
       <div class="drag-options" v-if="drag?.options?.mode === 'move'" >
-        <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
+        <!-- <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
           remove card
         </div>
         <div class="delete danger" v-drop="{dropEffect: 'move', handler: onDeleteEntity}">
           delete entity
-        </div>
+        </div> -->
       </div>
     </div>
     <CanvasControls
@@ -129,7 +130,8 @@ export default {
       'translateCard',
       'dropCard',
       'removeCard',
-      'init'
+      'init',
+      'setZoom'
     ]),
     ...mapActions('data', [
       'addProp',
@@ -183,15 +185,17 @@ export default {
       //   y: e.y / this.transform.k
       // })
     },
-    onDrop (e) {
-      if (this.drag?.options?.mode === 'connect') return
+    onDrop ({ detail }) {
+      // if (this.drag?.options?.mode === 'connect') return
+      // console.log(e)
+
       this.dropCard({
-        entity: e._id,
-        x: (e.x - (this.drag?.x || 0) - this.transform.x) / this.transform.k,
-        y: (e.y - (this.drag?.y || 0) - this.transform.y) / this.transform.k,
+        entity: detail.data._id,
+        x: (detail.x - this.transform.x) / this.transform.k,
+        y: (detail.y - this.transform.y) / this.transform.k,
         collapsed: false
       })
-      this.drag = null
+      // this.drag = null
     },
     onRemoveCard (e) {
       this.drag = null
@@ -228,6 +232,11 @@ export default {
     // onClearTempEdge (e) {
     //   // this.tempEdge = null
     // }
+  },
+  watch: {
+    'transform.k' (zoom) {
+      this.setZoom(zoom)
+    }
   }
 }
 </script>
@@ -259,7 +268,7 @@ export default {
     width: 100%;
     height: 100%;
 
-    .card {
+    :deep(.card) {
       position: absolute;
     }
   }

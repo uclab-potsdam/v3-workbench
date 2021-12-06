@@ -5,7 +5,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-// import { toPng } from 'html-to-image'
 
 export default {
   name: 'TheDragLayer',

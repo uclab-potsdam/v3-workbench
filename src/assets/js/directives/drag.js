@@ -1,5 +1,3 @@
-// import { drag } from 'd3-drag'
-// import { select } from 'd3-selection'
 import store from '@/store'
 
 function onDrag (detail, e) {

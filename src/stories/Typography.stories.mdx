@@ -1,0 +1,32 @@
+import { Meta, Preview, Story } from '@storybook/addon-docs/blocks';
+import { Typeset } from '@storybook/addon-docs/blocks';
+import { DesignTokenDocBlock } from 'storybook-design-token/dist/doc-blocks';
+
+<Meta title="Elements/Typography"  parameters={{ order: 101 }} />
+
+# Typography
+
+## Overview
+
+Inter is the typographic family of reference, used in Sans.
+https://fonts.google.com/specimen/Inter
+
+
+Fraunces is the secondary typographic family, used in Serif.
+https://fonts.google.com/specimen/Fraunces
+
+<Typeset fontFamily="Inter" fontWeight="500" fontSizes={['8px','12px', '20px', '28px', '36px', '44px', '52px']} sampleText="Amazonia as a future laboratory" />
+<Typeset fontFamily="Fraunces" fontWeight="500" fontSizes={['8px','12px', '20px', '28px', '36px', '44px', '52px']} sampleText="Amazonia as a future laboratory" />
+
+
+
+<DesignTokenDocBlock categoryName="Font Family" viewType="table"></DesignTokenDocBlock>
+
+## Typographic scale
+
+<DesignTokenDocBlock categoryName="Typographic Scale" viewType="table"></DesignTokenDocBlock>
+
+## Font styles
+
+<DesignTokenDocBlock categoryName="Font Weight" viewType="table"></DesignTokenDocBlock>
+

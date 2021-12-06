@@ -2,7 +2,7 @@
 
 ## Storybook
 ```
-npm run storybook -- --ci
+npm run storybook
 ```
 
 ## Project setup

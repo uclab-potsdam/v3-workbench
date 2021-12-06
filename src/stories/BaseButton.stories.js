@@ -1,7 +1,7 @@
 import BaseButton from '@/components/BaseButton.vue'
 
 export default {
-  title: 'Inputs/BaseButton',
+  title: 'Components/BaseButton',
   component: BaseButton
 }
 

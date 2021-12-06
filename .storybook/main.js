@@ -8,7 +8,8 @@ module.exports = {
   "addons": [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
-    "@storybook/preset-scss"
+    "@storybook/preset-scss",
+    'storybook-design-token'
   ],
   webpackFinal: async (config, { configType }) => {
     iconPath = path.resolve(__dirname, '../src/assets/icons')
@@ -21,8 +22,6 @@ module.exports = {
     config.module.rules.filter(rule => rule.test?.source.match(/svg/)).forEach(rule => {
       rule.exclude = [...(rule.exclude || []), iconPath]
     })
-
-    
 
     config.module.rules.push({
       test: /\.svg$/,

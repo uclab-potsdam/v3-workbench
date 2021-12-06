@@ -4,7 +4,8 @@ export default {
   namespaced: true,
   state: {
     cards: [],
-    canvas: null
+    canvas: null,
+    zoom: 1
   },
   getters: {
     getCard: (state) => (id) => {
@@ -125,6 +126,9 @@ export default {
     async init ({ dispatch, commit, state }, canvas) {
       commit('set', { canvas: `View/${canvas}` })
       await dispatch('api/getView', null, { root: true })
+    },
+    setZoom ({ commit }, zoom) {
+      commit('set', { zoom })
     }
   },
   modules: {

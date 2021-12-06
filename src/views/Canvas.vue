@@ -4,19 +4,22 @@
     <div class="floating">
       <TheSearchbar/>
     </div>
+    <TheDragLayer/>
   </div>
 </template>
 
 <script>
 import TheCanvas from '@/components/TheCanvas.vue'
 import TheSearchbar from '@/components/TheSearchbar.vue'
+import TheDragLayer from '../components/TheDragLayer.vue'
 // import { mapActions } from 'vuex'
 
 export default {
   name: 'Main',
   components: {
     TheCanvas,
-    TheSearchbar
+    TheSearchbar,
+    TheDragLayer
   },
   methods: {
     // ...mapActions(['init'])
@@ -48,4 +51,7 @@ export default {
     }
   }
 }
+// #drag-layer {
+
+// }
 </style>

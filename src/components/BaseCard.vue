@@ -1,33 +1,34 @@
 <template>
+  <!-- <teleport to="#drag-layer" :disabled="!dragActive"> -->
+  <!-- <InteractionDrag :trigger="$refs.header"> -->
   <div
     v-if="card"
     class="card"
-    ref="my_card"
-    :style="colors"
-    v-drag="{
-      _id,
-      mode: 'move',
-      customDragImage: context === 'canvas',
-      handler(e) {
-        $emit('drag', e);
-      },
-      width: scale * 180,
-      height: scale * (collapsed ? 60 : 300),
-    }"
+    ref="card"
+    :style="{...colors, transform}"
     v-drop="{
-      disabled: !allowDrop,
+      filter: ['connect'],
+      ctx: 'CARD',
       value: _id,
       dropEffect: 'move',
       handler(e) {
         $emit('addProp', e);
       },
     }"
+    v-drag="{
+      mode: 'move-card',
+      trigger: '.drag-trigger',
+      data: {
+        _id
+      }
+    }"
     @mouseover="cardHover = true"
     @mouseleave="cardHover = false"
   >
-    <header class="traverse-label-trigger" draggable="true" @click="$emit('toggleCollapse')">
-      <BaseTraverseLabel v-if="1" root="h2" parent-trigger>
-        {{card.label}}
+    <header ref="header" @cat="cat"
+    class="drag-trigger traverse-label-trigger" @click="$emit('toggleCollapse')">
+      <BaseTraverseLabel root="h2">
+        {{ card.label }}
       </BaseTraverseLabel>
       <h3>{{ entityType?._metadata?.label }}</h3>
     </header>
@@ -38,27 +39,17 @@
       <section class="property" v-for="(prop, i) in props" :key="i">
         <div class="label">
           <div class="overflow-wrap">
-            <BaseTraverseLabel><p v-drag="{
-            mode: 'connect',
-            doc: _id,
-            prop: prop._id,
-            customDragImage: true,
-            handler(e) {
-              $emit('drag', e);
-            },
-            dragOverHandler(e) {
-              $emit('setTempEdge', e);
-            },
-            dragEndHandler(e) {
-              $emit('clearTempEdge');
-            },
-            width: scale * 32,
-            color: '--accent',
-            height: scale * 32,
-            circle: true
-          }">{{ prop.label }}</p></BaseTraverseLabel>
+            <BaseTraverseLabel>{{ prop.label }}</BaseTraverseLabel>
           </div>
-          <icon scale="1" data="@icon/property-add.svg"/>
+          <!-- <div class="icon-wrap"> -->
+            <icon v-drag="{
+              mode: 'connect',
+              data: {
+                doc: _id,
+                prop: prop._id,
+              }
+            }" scale="1" data="@icon/property-add.svg"/>
+          <!-- </div> -->
         </div>
         <div
           class="value"
@@ -68,15 +59,11 @@
             <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
           </div>
           <icon v-drag="{
-            _id: value._id,
-            mode: 'move',
-            customDragImage: true,
-            handler(e) {
-              $emit('drag', e);
-            },
-            width: scale * 180,
-            color: '--blue-gray-8',
-            height: scale * (collapsed ? 112 : 420)
+            mode: 'connect',
+            data: {
+              doc: _id,
+              prop: prop._id,
+            }
           }"
           x-click="
             $emit('removeProp', {
@@ -89,7 +76,10 @@
       </section>
     </main>
     <footer v-if="!collapsed"></footer>
+
   </div>
+  <!-- </InteractionDrag> -->
+<!-- </teleport> -->
 </template>
 
 <script>
@@ -111,7 +101,8 @@ export default {
     pane: String,
     context: String,
     scale: Number,
-    allowDrop: Boolean
+    allowDrop: Boolean,
+    transform: String
   },
   data () {
     return {
@@ -120,7 +111,8 @@ export default {
       widthCard: 0,
       isCollapsed: true,
       hover: false,
-      cardHover: false
+      cardHover: false,
+      dragActive: false
     }
   },
   computed: {
@@ -175,18 +167,30 @@ export default {
   },
   methods: {
     ...mapActions('data', ['fetchEntity']),
-    calcWidthOfLabel () {
-      this.widthLabel = this.$refs.my_label.getBoundingClientRect().width
+    onDragStart (e) {
+      this.dragActive = true
+      // console.log('DRAG START')/
     },
-    calcWidthOfCard () {
-      this.widthCard = this.$refs.my_card.getBoundingClientRect().width
+    onDrag (e) {
+      // console.log('DRAG)
+    },
+    onDragEnd (e) {
+      this.dragActive = false
+      // console.log('DRAG END')
+    },
+    cat (a, b, c) {
+      // console.log('CAT', a, b, c)
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+// .svg-icon {
+//   color: var(--secondary);
+// }
 .card {
+  transform-origin: top left;
   background: var(--primary);
   color: var(--secondary);
   @media (prefers-color-scheme: dark) {

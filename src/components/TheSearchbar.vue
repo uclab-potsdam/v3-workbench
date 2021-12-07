@@ -6,7 +6,7 @@
         v-for="card in searchResults"
         :key="card._id"
         v-bind="card"
-        collapsed/>
+        :collapsed="card.cover == null"/>
       <button class="new" @click="view = 'types'">
         Create New Entity «{{ searchterm }}»
       </button>
@@ -84,7 +84,9 @@ export default {
   color: var(--text);
   // margin-top: var(--spacing);
   width: 100%;
-  max-width: var(--medium);
+  max-width: calc(var(--card-width) * 3 + var(--spacing) * 2 + var(--spacing-l) * 3);
+  max-height: 100%;
+  overflow: auto;
   // transition: box-shadow var(--transition);
 
   &:focus-within, &:hover  {
@@ -116,8 +118,8 @@ export default {
   .grid {
     display: grid;
     margin: var(--spacing);
-    gap: var(--spacing);
-    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-l);
+    grid-template-columns: 1fr 1fr 1fr;
 
     button {
       padding: var(--spacing);
@@ -126,6 +128,13 @@ export default {
   }
   .results {
     display: none;
+
+    .card {
+      grid-row-end: span 4;
+      &.collapsed {
+        grid-row-end: span 1;
+      }
+    }
   }
 }
 </style>

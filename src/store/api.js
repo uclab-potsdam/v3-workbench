@@ -187,16 +187,20 @@ export default {
     async search ({ commit, dispatch }, { term, doctype = null }) {
       const searchResults = await dispatch('query', {
         query: WOQL
-          .select('v:label', 'v:_id', 'v:doctype', 'v:dist')
-          .limit(10)
-          .order_by('v:dist', 'desc')
+          .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover')
+          // .count('v:count').triple('v:_id', 'cover', 'v:cover')
+          // .and(WOQL.triple('v:_id', 'cover', 'v:cover'))
+          .limit(16)
+          .order_by(['v:dist', 'desc'])
           .and(
             WOQL.triple('v:_id', 'label', 'v:label'),
-            // WOQL.triple('v:id', '@type', doctype || 'v:doctype'),
+            WOQL.triple('v:_id', 'rdf:type', doctype || 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
           )
+          .opt(WOQL.triple('v:_id', 'cover', 'v:cover'))
       })
+      console.log(searchResults)
       commit('data/set', { searchResults }, { root: true })
     },
     async remoteSearch ({ commit, dispatch }, { term, doctype }) {
@@ -357,7 +361,7 @@ const flattenBindings = (bindings) => {
   if (bindings == null) return []
   return bindings.map(b => {
     return Object.fromEntries(Object.keys(b).map(key => {
-      const value = b[key]['@value'] != null ? b[key]['@value'] : b[key]
+      const value = b[key]?.['@value'] != null ? b[key]['@value'] : b[key]
       return [key, value]
     }))
   })

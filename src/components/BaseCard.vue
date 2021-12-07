@@ -195,6 +195,7 @@ export default {
     .cover {
       display: flex;
       justify-content: center;
+      height: var(--card-main-height);
       background: rgb(var(--secondary));
       @media (prefers-color-scheme: dark) {
         background: rgb(var(--primary));
@@ -202,8 +203,11 @@ export default {
       img {
         mix-blend-mode: var(--blend-mode);
         filter: grayscale(1);
+        width: auto;
+        height: auto;
         max-width: 100%;
         max-height: var(--card-main-height);
+        object-fit: contain;
       }
     }
 

@@ -150,7 +150,7 @@ export default {
     background: rgb(var(--primary));
     color: rgb(var(--secondary));
   }
-  width: 180px;
+  width: var(--card-width);
   overflow-x: hidden;
   overflow-y: auto;
   // display: flex;
@@ -164,10 +164,10 @@ export default {
   &::-webkit-scrollbar { width: 0 !important }
   scrollbar-width: none;
 
-  height: 300px;
+  height: var(--card-height);
 
   &.collapsed {
-  height: 60px;
+    height: var(--card-header-height);
   }
 
   header {
@@ -176,7 +176,7 @@ export default {
     padding: var(--spacing);
     justify-content: center;
     justify-content: center;
-    height: 60px;
+    height: var(--card-header-height);
     position: sticky;
     top: 0;
     white-space: nowrap;
@@ -185,7 +185,7 @@ export default {
   }
 
   main {
-    min-height: 200px;
+    min-height: var(--card-main-height);
     padding: 0 var(--spacing);
 
     section + section {
@@ -203,7 +203,7 @@ export default {
         mix-blend-mode: var(--blend-mode);
         filter: grayscale(1);
         max-width: 100%;
-        max-height: 200px;
+        max-height: var(--card-main-height);
       }
     }
 
@@ -224,7 +224,7 @@ export default {
   }
 
   footer {
-    height: 40px;
+    height: var(--card-footer-height);
     padding: var(--spacing);
     position: sticky;
     bottom: 0;

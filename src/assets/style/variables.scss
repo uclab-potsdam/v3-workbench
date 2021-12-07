@@ -27,6 +27,17 @@
   --spacing-xl: 40px;
 
   /**
+  * @tokens Card sizes
+  * @presenter Spacing
+  */
+
+  --card-width: 180px;
+  --card-height: 300px;
+  --card-header-height: 60px;
+  --card-main-height: 200px;
+  --card-footer-height: 40px;
+
+  /**
   * @tokens Shadows
   * @presenter Shadow
   */

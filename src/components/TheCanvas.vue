@@ -24,7 +24,6 @@
       <BaseCard
         v-for="card in cards"
         :key="card._id"
-        context="canvas"
         :_id="card.entity"
         :card-id="card._id"
         :collapsed="card.collapsed"

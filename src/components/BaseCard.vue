@@ -1,6 +1,6 @@
 <template>
   <div v-if="card" class="card"
-    :class="{ collapsed }" :style="{...colors, transform}"
+    :class="{ collapsed, 'context-search': context === 'search' }" :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
       obj: _id,
@@ -46,7 +46,7 @@
         </div>
       </section>
     </main>
-    <footer v-if="!collapsed" class="blur">
+    <footer v-if="!collapsed && context !== 'search'" class="blur">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
     </footer>
   </div>
@@ -165,6 +165,11 @@ export default {
   scrollbar-width: none;
 
   height: var(--card-height);
+
+  &.context-search {
+    height: calc(var(--card-height) - var(--card-footer-height));
+    overflow-y: hidden;
+  }
 
   &.collapsed {
     height: var(--card-header-height);

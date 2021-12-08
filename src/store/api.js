@@ -200,7 +200,6 @@ export default {
           )
           .opt(WOQL.triple('v:_id', 'cover', 'v:cover'))
       })
-      console.log(searchResults)
       commit('data/set', { searchResults }, { root: true })
     },
     async remoteSearch ({ commit, dispatch }, { term, doctype }) {

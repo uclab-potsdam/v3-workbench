@@ -229,7 +229,7 @@ export default {
 
   footer {
     height: var(--card-footer-height);
-    padding: var(--spacing);
+    padding: calc(var(--spacing-s) + var(--spacing-xs));
     position: sticky;
     bottom: 0;
   }

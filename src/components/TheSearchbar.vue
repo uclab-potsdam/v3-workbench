@@ -100,17 +100,16 @@ export default {
     }
   }
 
-  input {
-    // appearance: none;
+  .bar {
     outline: none;
     border: none;
     font-weight: var(--regular);
-    // display: block;
-    // font-size: inherit;
-    // color: var(--accent);
     padding: var(--spacing-s) var(--spacing);
-    // background: none;
     width: 100%;
+
+    position: sticky;
+    top: 0;
+    z-index: 5;
 
     &::placeholder {
       color: var(--muted);

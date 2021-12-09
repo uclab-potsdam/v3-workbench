@@ -49,7 +49,11 @@ html {
     border: var(--base-border);
   }
 
-  input {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input:not([type]) {
     appearance: none;
     height: calc(var(--spacing-xl));
     background: var(--background);

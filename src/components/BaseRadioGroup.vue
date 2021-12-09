@@ -1,0 +1,67 @@
+<template>
+  <div class="base-radio-group">
+    <label v-for="(o, i) in options" :key="i">
+      <input type="radio" :name="name"
+        :value="o.value" :checked="o.value === value"
+        @change="$emit('update:modelValue', o.value)">
+      <span>{{ o.label }}</span>
+    </label>
+  </div>
+</template>
+
+<script>
+import { v4 as uuid } from 'uuid'
+export default {
+  name: 'BaseRadioGroup',
+  props: {
+    options: {
+      type: Array,
+      default: () => []
+    },
+    name: {
+      type: String,
+      default: () => uuid()
+    },
+    modelValue: {
+      type: String,
+      default: null
+    }
+  },
+  mounted () {
+    console.log(this)
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.base-radio-group {
+  display: flex;
+  gap: var(--spacing-s);
+  flex-wrap: wrap;
+  label {
+    input {
+      appearance: none;
+      outline: none;
+
+    + span {
+      min-width: 40px;
+      display: inline-flex;
+      justify-content: center;
+      padding: var(--spacing-s) var(--spacing);
+      background: var(--dimmed);
+      // color: var(--background);
+    }
+
+      &:checked + span {
+        background: var(--accent);
+        color: var(--background);
+      }
+    }
+    + label {
+      // margin-left: var(--spacing);
+      // color: var(--background);
+    }
+  }
+
+}
+</style>

@@ -26,9 +26,6 @@ export default {
       type: String,
       default: null
     }
-  },
-  mounted () {
-    console.log(this)
   }
 }
 </script>

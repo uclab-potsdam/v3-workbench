@@ -13,23 +13,23 @@
 
 <script>
 export default {
-  name: "BaseInput",
+  name: 'BaseInput',
   props: {
     type: {
       type: String,
-      default: "text",
+      default: 'text'
     },
     placeholder: String,
     disabled: {
       type: Boolean,
-      default: false,
+      default: false
     },
     label: String,
     prefix: String,
     suffix: String,
     value: [Number, String]
-  },
-};
+  }
+}
 </script>
 
 <style scoped lang="scss">

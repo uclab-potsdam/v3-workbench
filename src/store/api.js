@@ -185,6 +185,7 @@ export default {
       return label
     },
     async search ({ commit, dispatch }, { term, doctype = null }) {
+      if (term == null || term.trim() === '') return
       const searchResults = await dispatch('query', {
         query: WOQL
           .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover')
@@ -194,7 +195,7 @@ export default {
           .order_by(['v:dist', 'desc'])
           .and(
             WOQL.triple('v:_id', 'label', 'v:label'),
-            WOQL.triple('v:_id', 'rdf:type', doctype || 'v:_type'),
+            WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
           )

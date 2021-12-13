@@ -5,40 +5,48 @@
         v-model="term"
         @input="search({ term, doctype })">
     </header>
-    <main v-if="view === 'search'">
-      <BaseRadioGroup class="doctype" :options="doctypeOptions"
-        v-model="doctype"
-        @update:modelValue="search({ term, doctype })"/>
-      <div class="grid results" v-if="term?.length > 0">
-        <BaseCard
-          v-for="card in searchResults"
-          :key="card._id"
-          v-bind="card"
-          :collapsed="card.cover == null"
-          context="search"/>
-        <button class="new" @click="view = 'types'">
-          Create New Entity «{{ term }}»
-        </button>
-      </div>
-      <div class="grid" v-if="view === 'types'">
-        <button v-for="t in types" :key="t.id" @click="create(t.id)">
-          {{t.label}}
-        </button>
-        <button
-          v-for="d in remoteSearchResults"
-          :key="d.wd" @click="importEntity(d)">
-          <b>{{ d.label }}</b><br> {{ d.description }}
-        </button>
-        <button class="cancel" @click="view = 'search'">
-          CANCEL
-        </button>
-        <!-- <BaseCard
-          v-for="card in remoteSearchResults"
-          :key="card.id"
-          v-bind="card"
-          collapsed/> -->
-      </div>
+    <main>
+      <template v-if="view === 'search'">
+        <BaseRadioGroup class="doctype" :options="doctypeOptions"
+          v-model="doctype"
+          @update:modelValue="search({ term, doctype })"/>
+        <div class="grid results" v-if="term?.length > 0">
+          <BaseCard
+            v-for="card in searchResults"
+            :key="card._id"
+            v-bind="card"
+            :collapsed="card.cover == null"
+            context="search"/>
+        </div>
+      </template>
+      <template  v-if="view === 'types'">
+        <div class="grid">
+          <button v-for="t in types" :key="t.id" @click="create(t.id)">
+            {{t.label}}
+          </button>
+          <!-- <button
+            v-for="d in remoteSearchResults"
+            :key="d.wd" @click="importEntity(d)">
+            <b>{{ d.label }}</b><br> {{ d.description }}
+          </button> -->
+          <button class="cancel" @click="view = 'search'">
+            CANCEL
+          </button>
+          <!-- <BaseCard
+            v-for="card in remoteSearchResults"
+            :key="card.id"
+            v-bind="card"
+            collapsed/> -->
+        </div>
+      </template>
     </main>
+    <footer>
+      <template v-if="view === 'search' && term?.length > 0">
+        <div @click="createEntity" :class="{disabled: doctype === null}">
+          Create new {{ doctypeLabel }} <strong>{{ term }}</strong> →
+        </div>
+      </template>
+    </footer>
   </div>
 </template>
 
@@ -71,16 +79,29 @@ export default {
       return [{ label: 'All', value: null }, ...this.types.map(t => {
         return { label: t._metadata?.label || t._id, value: t._id }
       })]
+    },
+    doctypeLabel () {
+      if (this.doctype === null) return 'entity'
+      return this.doctypeOptions.find(d => d.value === this.doctype)?.label
     }
   },
   methods: {
     ...mapActions('api', [
       'search',
       'remoteSearch',
-      'insert'
+      'insert',
+      'addDocument'
     ]),
     create (t) {
       this.remoteSearch({ doctype: t, term: this.term })
+    },
+    async createEntity () {
+      if (this.doctype == null) return
+      await this.addDocument({
+        _type: this.doctype,
+        label: this.term
+      })
+      this.search({ term: this.term, doctype: this.doctype })
     },
     importEntity (item) {
       this.insert(item)
@@ -151,6 +172,15 @@ export default {
     }
   }
 
+  footer {
+    display: none;
+    margin: var(--spacing);
+
+    .disabled {
+      color: var(--muted)
+    }
+  }
+
   &:focus-within, &:hover  {
     border-color: var(--accent);
     // box-shadow: var(--base-shadow-l);
@@ -165,6 +195,9 @@ export default {
 
     main {
       display: block;
+    }
+    footer {
+      display: flex;
     }
   }
 }

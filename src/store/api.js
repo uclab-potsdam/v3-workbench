@@ -350,6 +350,10 @@ export default {
         _id: `View/${name.replace(/ /g, '-')}`
       }))
       return res
+    },
+    async addDocument ({ dispatch, state }, data) {
+      console.log(data)
+      return await state.Client.addDocument(atFrom_(data))
     }
   },
   modules: {

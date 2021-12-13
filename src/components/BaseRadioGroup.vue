@@ -39,26 +39,19 @@ export default {
     input {
       appearance: none;
       outline: none;
-
-    + span {
-      min-width: 40px;
-      display: inline-flex;
-      justify-content: center;
-      padding: var(--spacing-s) var(--spacing);
-      background: var(--dimmed);
-      // color: var(--background);
-    }
+      + span {
+        min-width: 40px;
+        display: inline-flex;
+        justify-content: center;
+        padding: var(--spacing-s) var(--spacing);
+        background: var(--dimmed);
+      }
 
       &:checked + span {
         background: var(--accent);
         color: var(--background);
       }
     }
-    + label {
-      // margin-left: var(--spacing);
-      // color: var(--background);
-    }
   }
-
 }
 </style>

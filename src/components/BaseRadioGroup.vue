@@ -2,7 +2,7 @@
   <div class="base-radio-group">
     <label v-for="(o, i) in options" :key="i">
       <input type="radio" :name="name"
-        :value="o.value" :checked="o.value === value"
+        :value="o.value" :checked="o.value === modelValue"
         @change="$emit('update:modelValue', o.value)">
       <span>{{ o.label }}</span>
     </label>

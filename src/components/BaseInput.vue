@@ -5,6 +5,7 @@
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
+      :id="id"
       v-model="content"
     />
     <label class="input-suffix" v-if="suffix">{{ suffix }}</label>
@@ -14,6 +15,7 @@
 <script>
 export default {
   name: 'BaseInput',
+  // Aggiungi sempre il parametro default, aiuta a prevenire errori di update random
   props: {
     type: {
       type: String,
@@ -27,7 +29,11 @@ export default {
     label: String,
     prefix: String,
     suffix: String,
-    value: [Number, String]
+    value: [Number, String],
+    id: {
+      type: [Number, String],
+      default: ''
+    }
   }
 }
 </script>
@@ -60,8 +66,8 @@ label + input {
 }
 
 input + label {
-    display: block;
-   margin-top: var(--spacing-s);
+  display: block;
+  margin-top: var(--spacing-s);
 }
 
 input,

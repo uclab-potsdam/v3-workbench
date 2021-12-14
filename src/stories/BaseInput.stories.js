@@ -25,7 +25,7 @@ Prefix.args = {
   label: 'Prefix',
   type: 'text',
   placeholder: 'Insert text',
-  prefix: 'Prefix'
+  prefix: 'prefix'
 }
 
 export const Suffix = Template.bind({})
@@ -33,7 +33,7 @@ Suffix.args = {
   label: 'Suffix',
   type: 'text',
   placeholder: 'Insert text',
-  suffix: 'Suffix'
+  suffix: 'suffix'
 }
 
 export const Date = Template.bind({})

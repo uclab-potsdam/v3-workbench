@@ -55,13 +55,13 @@ input {
 }
 
 label + input {
-  margin-top: var(--spacing-s);
-  margin-left: var(--spacing-s);
+  display: block;
+  margin-bottom: var(--spacing-s);
 }
 
 input + label {
-  margin-top: var(--spacing-s);
-  margin-left: var(--spacing-s);
+    display: block;
+   margin-top: var(--spacing-s);
 }
 
 input,

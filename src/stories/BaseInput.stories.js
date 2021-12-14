@@ -15,43 +15,42 @@ const Template = ({ label, ...args }) => ({
 
 export const Default = Template.bind({})
 Default.args = {
-  label: 'Default', 
+  label: 'Default',
   type: 'text',
-  placeholder: 'Insert text',
+  placeholder: 'Insert text'
 }
 
 export const Prefix = Template.bind({})
 Prefix.args = {
-  label: 'Prefix', 
+  label: 'Prefix',
   type: 'text',
   placeholder: 'Insert text',
-  prefix: 'prefix',
+  prefix: 'Prefix'
 }
 
 export const Suffix = Template.bind({})
 Suffix.args = {
-  label: 'Suffix', 
+  label: 'Suffix',
   type: 'text',
   placeholder: 'Insert text',
-  suffix: 'suffix',
+  suffix: 'Suffix'
 }
 
 export const Date = Template.bind({})
 Date.args = {
-  label: 'Default', 
-  type: 'date',
+  label: 'Default',
+  type: 'date'
 }
 
 export const Password = Template.bind({})
 Password.args = {
-  label: 'Password', 
-  type: 'password',
+  label: 'Password',
+  type: 'password'
 }
-
 
 export const Disabled = Template.bind({})
 Disabled.args = {
   label: 'Disabled',
-  placeholder: 'This input is disabled', 
-  disabled: true,
+  placeholder: 'This input is disabled',
+  disabled: true
 }

@@ -17,7 +17,7 @@ const Template = ({ ...props }) => ({
 export const Default = Template.bind({})
 Default.args = {
   inputs: [
-    { ...BaseInput.args = { label: 'user', type: 'email', placeholder: 'Insert text', prefix: 'User' } },
+    { ...BaseInput.args = { label: 'user', type: 'email', placeholder: 'Insert email', prefix: 'User' } },
     { ...BaseInput.args = { label: 'org', type: 'text', placeholder: 'V3', prefix: 'Organization', disabled: true } },
     { ...BaseInput.args = { label: 'token', type: 'password', placeholder: 'Insert Password', prefix: 'Access Token' } }
   ]

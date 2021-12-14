@@ -14,8 +14,8 @@ const Template = ({ ...props }) => ({
   template: '<SignIn v-bind="props"></SignIn>'
 })
 
-export const Default = Template.bind({})
-Default.args = {
+export const Login = Template.bind({})
+Login.args = {
   inputs: [
     { ...BaseInput.args = { label: 'user', type: 'email', placeholder: 'Insert email', prefix: 'User' } },
     { ...BaseInput.args = { label: 'org', type: 'text', placeholder: 'V3', prefix: 'Organization', disabled: true } },

@@ -23,11 +23,27 @@
 <script>
 import BaseButton from '../components/BaseButton.vue'
 import BaseInput from './BaseInput.vue'
+import { mapActions } from 'vuex'
 
 export default {
   components: { BaseInput, BaseButton },
   props: {
     inputs: { type: Array, required: true, default: () => [] }
+  },
+  data () {
+    return {
+      user: null,
+      jwt: null,
+      organization: 'V3'
+    }
+  },
+  methods: {
+    ...mapActions('auth', ['authenticate']),
+    async signin () {
+      const { user, jwt, organization } = this
+      await this.authenticate({ user, jwt, organization })
+      this.$router.push({ name: 'Open' })
+    }
   }
 }
 </script>

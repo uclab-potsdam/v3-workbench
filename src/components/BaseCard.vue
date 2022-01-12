@@ -112,7 +112,7 @@ export default {
           const value = [this.card[prop]].flat().map(id => this.getLabel(id)).filter(d => d != null)
           props.push({
             _id: prop,
-            label: prop, // TODO replace with actual label
+            label: this.entityType._metadata?._properties[prop]?.label || prop,
             value,
             ...this.entityType[prop]
           })

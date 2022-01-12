@@ -11,44 +11,14 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <header class="drag-trigger traverse-label-trigger blur" @click="$emit('toggleCollapse')">
-      <BaseTraverseLabel root="h2">
-        {{ card.label }}
-      </BaseTraverseLabel>
-      <h3>{{ entityType?._metadata?.label }}</h3>
-    </header>
+    <CardHeader :label="card.label" :doctype="entityType?._metadata?.label" @click="$emit('toggleCollapse')"/>
     <main v-if="!collapsed">
-      <section class="cover" v-if="cover != null">
-        <img :src="`${fileServer}/${cover.path}`"/>
-      </section>
-      <section class="property" v-for="(prop, i) in props" :key="i">
-        <div class="label">
-          <div class="overflow-wrap">
-            <BaseTraverseLabel>{{ prop.label }}</BaseTraverseLabel>
-          </div>
-          <icon scale="1" data="@icon/property-add.svg" v-drag="{
-            mode: 'connect',
-            data: {
-              sub: _id,
-              prop: prop._id,
-            }
-          }"/>
-        </div>
-        <div class="value" v-for="(value, i) in prop.value" :key="i">
-          <div class="overflow-wrap">
-            <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
-          </div>
-          <icon v-drag="{
-            mode: 'move-card',
-            data: { _id: value._id }
-          }"
-          scale="1" data="@icon/property-expand.svg"/>
-        </div>
-      </section>
+      <card-cover v-if="cover != null" :path="cover.path"/>
+      <card-property v-for="(prop, i) in props" :key="i" :prop="prop" :entity="_id"/>
     </main>
-    <footer v-if="!collapsed && context !== 'search'" class="blur">
+    <card-footer v-if="!collapsed && context !== 'search'">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
-    </footer>
+    </card-footer>
   </div>
 </template>
 
@@ -56,9 +26,12 @@
 import { mapActions, mapGetters, mapState } from 'vuex'
 import drag from '@/assets/js/directives/drag'
 import drop from '@/assets/js/directives/drop'
-import BaseTraverseLabel from './BaseTraverseLabel.vue'
+import CardHeader from './CardHeader.vue'
+import CardFooter from './CardFooter.vue'
+import CardProperty from './CardProperty.vue'
+import CardCover from './CardCover.vue'
 export default {
-  components: { BaseTraverseLabel },
+  components: { CardHeader, CardFooter, CardProperty, CardCover },
   name: 'BaseCard',
   directives: {
     drag,
@@ -195,61 +168,6 @@ export default {
 
     section + section {
       margin-top: var(--spacing);
-    }
-
-    .cover {
-      display: flex;
-      justify-content: center;
-      height: var(--card-main-height);
-      background: rgb(var(--secondary));
-      @media (prefers-color-scheme: dark) {
-        background: rgb(var(--primary));
-      }
-      img {
-        mix-blend-mode: var(--blend-mode);
-        filter: grayscale(1);
-        width: auto;
-        height: auto;
-        max-width: 100%;
-        max-height: var(--card-main-height);
-        object-fit: contain;
-      }
-    }
-
-    .property {
-      user-select: none;
-      .label, .value {
-        display: grid;
-        grid-template-columns: 1fr calc(var(--spacing) + var(--spacing-s));
-        gap: var(--spacing);
-        .overflow-wrap {
-          overflow: hidden
-        }
-      }
-      .value {
-        font-weight: var(--bold);
-      }
-    }
-  }
-
-  footer {
-    height: var(--card-footer-height);
-    padding: calc(var(--spacing-s) + var(--spacing-xs));
-    position: sticky;
-    bottom: 0;
-  }
-
-  .blur {
-    background: rgb(var(--secondary));
-    @media (prefers-color-scheme: dark) {
-      background: rgb(var(--primary));
-    }
-    @supports ((-webkit-backdrop-filter:saturate(180%) blur(20px)) or (backdrop-filter:saturate(180%) blur(20px))) {
-      background: rgba(var(--secondary), .5);
-      @media (prefers-color-scheme: dark) {
-        background: rgba(var(--primary), .5);
-      }
-      backdrop-filter: blur(7px);
     }
   }
 }

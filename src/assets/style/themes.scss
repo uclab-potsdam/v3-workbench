@@ -54,3 +54,17 @@
     --secondary: var(--blue-gray-3);
   }
 }
+
+.blur {
+  background: rgb(var(--secondary));
+  @media (prefers-color-scheme: dark) {
+    background: rgb(var(--primary));
+  }
+  @supports ((-webkit-backdrop-filter:saturate(180%) blur(20px)) or (backdrop-filter:saturate(180%) blur(20px))) {
+    background: rgba(var(--secondary), .5);
+    @media (prefers-color-scheme: dark) {
+      background: rgba(var(--primary), .5);
+    }
+    backdrop-filter: blur(7px);
+  }
+}

@@ -92,8 +92,8 @@ export default {
       if (this.entityType?._metadata?.background == null) return
       const { background, text } = this.entityType._metadata
       return {
-        '--primary': `var(--${text}-2)`,
-        '--secondary': `var(--${background}-9)`
+        '--primary': `var(--${text}-9)`,
+        '--secondary': `var(--${background}-2)`
       }
     },
     card () {

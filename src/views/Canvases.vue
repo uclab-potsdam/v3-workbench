@@ -43,8 +43,6 @@ export default {
     ...mapActions('api', ['getCanvases', 'createCanvas']),
     async create () {
       await this.createCanvas(this.canvas)
-      // const { user, jwt, organization } = this
-      // await this.authenticate({ user, jwt, organization })
       this.$router.push({ name: 'Canvas', params: { id: this.canvas } })
     }
   }

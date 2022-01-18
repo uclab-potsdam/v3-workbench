@@ -1,5 +1,5 @@
 <template>
-  <div v-if="card" class="card"
+  <div class="card"
     :class="{ collapsed, 'context-search': context === 'search' }" :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
@@ -11,10 +11,12 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="card.label" :doctype="entityType?._metadata?.label" @click="$emit('toggleCollapse')"/>
+    <CardHeader :label="label" :doctype="doctype?.label" @click="$emit('toggleCollapse')"/>
     <main v-if="!collapsed">
-      <card-cover v-if="cover != null" :path="cover.path"/>
-      <card-property v-for="(prop, i) in props" :key="i" :prop="prop" :entity="_id"/>
+      <card-cover v-if="cover" :path="cover"/>
+      <template v-for="(prop, i) in properties" :key="i">
+        <card-property :prop="prop" :entity="_id"/>
+      </template>
     </main>
     <card-footer v-if="!collapsed && context !== 'search'">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
@@ -40,6 +42,10 @@ export default {
   emits: ['drag', 'toggleCollapse', 'removeProp', 'setTempEdge', 'clearTempEdge'],
   props: {
     _id: String,
+    label: String,
+    doctype: Object,
+    properties: Object,
+    cover: String,
     cardId: String,
     collapsed: Boolean,
     pane: String,
@@ -50,7 +56,6 @@ export default {
   },
   data () {
     return {
-      cover: null,
       widthLabel: 0,
       widthCard: 0,
       isCollapsed: true,
@@ -62,44 +67,16 @@ export default {
     ...mapState('config', ['fileServer']),
     ...mapGetters('data', ['getType', 'getEntity', 'getLabel']),
     colors () {
-      if (this.entityType?._metadata?.background == null) return
-      const { background, text } = this.entityType._metadata
+      if (this.doctype?.background == null) return
+      const { background, text } = this.doctype
       return {
         '--primary': `var(--${text}-9)`,
         '--secondary': `var(--${background}-2)`
       }
-    },
-    card () {
-      const card = this.getEntity(this._id)
-      return card
-    },
-    entityType () {
-      return this.getType(this.card._type)
-    },
-    props () {
-      if (this.entityType == null) return []
-      const props = []
-      for (const prop in this.entityType) {
-        // don't display terminus (_) or hidden properties
-        if (prop.match(/^_/) == null && !this.entityType._metadata._properties[prop]?.hidden) {
-          const value = [this.card[prop]].flat().map(id => this.getLabel(id)).filter(d => d != null)
-          props.push({
-            _id: prop,
-            label: this.entityType._metadata?._properties[prop]?.label || prop,
-            value,
-            ...this.entityType[prop]
-          })
-        }
-      }
-      return props
     }
   },
-  async mounted () {
-    const card = await this.fetchEntity(this._id)
-    this.cover = card.cover ? await this.fetchEntity(card.cover) : null
-  },
   methods: {
-    ...mapActions('data', ['fetchEntity', 'addProp']),
+    ...mapActions('data', ['addProp']),
     ...mapActions('view', ['removeCard']),
     onDrop ({ detail }) {
       this.addProp([detail.data.sub, detail.data.prop, detail.obj])

@@ -1,6 +1,6 @@
 const user = localStorage.getItem('USER')
-const jwt = localStorage.getItem('JWT')
-const key = localStorage.getItem('KEY')
+const token = localStorage.getItem('JWT')
+// const key = localStorage.getItem('KEY')
 const organization = localStorage.getItem('ORGANIZATION')
 
 export default {
@@ -9,8 +9,8 @@ export default {
     authenticated: false,
     credentials: {
       user,
-      key,
-      jwt,
+      // key,
+      token,
       organization
     }
   },
@@ -19,8 +19,8 @@ export default {
       return state.authenticated
     },
     hasCredentials: (state) => {
-      const { user, organization, key, jwt } = state.credentials
-      return user != null && organization != null && (key != null || jwt != null)
+      const { user, organization, key, token } = state.credentials
+      return user != null && organization != null && (key != null || token != null)
     }
   },
   mutations: {
@@ -31,13 +31,13 @@ export default {
   actions: {
     async authenticate ({ getters, state, dispatch, commit }, credentials) {
       credentials = credentials || state.credentials
-      const successful = await dispatch('api/connect', credentials, { root: true })
-      commit('setStatus', successful)
+      const authenticated = await dispatch('api/connect', credentials, { root: true })
+      commit('setStatus', authenticated)
       localStorage.setItem('USER', credentials.user)
-      localStorage.setItem('JWT', credentials.jwt)
-      localStorage.setItem('KEY', credentials.key)
+      localStorage.setItem('JWT', credentials.token)
+      // localStorage.setItem('KEY', credentials.key)
       localStorage.setItem('ORGANIZATION', credentials.organization)
-      return successful
+      return authenticated
     },
     signOut ({ dispatch, commit }) {
       localStorage.removeItem('USER')

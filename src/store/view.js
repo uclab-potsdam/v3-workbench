@@ -19,11 +19,11 @@ export default {
       state.cards.forEach(card => {
         const entity = rootGetters['data/getEntity'](card.entity)
         if (entity == null) return
-        const entityType = rootGetters['data/getType'](entity._type)
-        for (const prop in entityType) {
-          if (prop.match(/^_/) == null && entityType[prop]._class.match(/:/) == null && entity[prop] != null) {
-            [entity[prop]].flat().forEach(targetId => {
-              const target = getters.getCardByEntity(targetId)
+        // const entityType = rootGetters['data/getType'](entity._type)
+        for (const prop of entity.properties) {
+          if (prop.linkProperty && !prop.hidden && !prop.inverse && prop.value != null) {
+            [prop.value].flat().forEach(value => {
+              const target = getters.getCardByEntity(value._id)
               if (target != null) {
                 edges.push({
                   source: card._id,
@@ -101,7 +101,6 @@ export default {
       dispatch('updateCard', options.id)
       // update view in db if drop event ended successfully
     },
-    // refactor: rename method to avoid confusion with sql dropping
     async dropCard ({ commit, state, dispatch }, options) {
       let card = state.cards.find(card => card.entity === options.entity)
       // console.log(options, card?.entity)

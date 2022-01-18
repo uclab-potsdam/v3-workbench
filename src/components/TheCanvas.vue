@@ -30,6 +30,7 @@
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
+        v-bind="getEntity(card.entity)"
         @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"
@@ -99,6 +100,9 @@ export default {
     ]),
     ...mapGetters('view', [
       'edges'
+    ]),
+    ...mapGetters('data', [
+      'getEntity'
     ]),
     pattern () {
       if (this.transform == null) return
@@ -185,16 +189,12 @@ export default {
       // })
     },
     onDrop ({ detail }) {
-      // if (this.drag?.options?.mode === 'connect') return
-      // console.log(e)
-
       this.dropCard({
         entity: detail.data._id,
         x: (detail.x - this.transform.x) / this.transform.k,
         y: (detail.y - this.transform.y) / this.transform.k,
         collapsed: false
       })
-      // this.drag = null
     },
     onRemoveCard (e) {
       this.drag = null

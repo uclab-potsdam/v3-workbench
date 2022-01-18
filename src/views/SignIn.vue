@@ -10,7 +10,7 @@
     </section>
     <section>
       <label>Access Token</label>
-      <input v-model="jwt" type="password" autocomplete="current-password"/>
+      <input v-model="token" type="password" autocomplete="current-password"/>
     </section>
     <section>
       <base-button @click="signin" class="primary">Sign in →</base-button>
@@ -28,15 +28,15 @@ export default {
   data () {
     return {
       user: null,
-      jwt: null,
+      token: null,
       organization: 'V3'
     }
   },
   methods: {
     ...mapActions('auth', ['authenticate']),
     async signin () {
-      const { user, jwt, organization } = this
-      await this.authenticate({ user, jwt, organization })
+      const { user, token, organization } = this
+      await this.authenticate({ user, token, organization })
       this.$router.push({ name: 'Open' })
     }
   }

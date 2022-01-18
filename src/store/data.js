@@ -7,7 +7,8 @@ export default {
     labels: {},
     searchResults: [],
     remoteSearchResults: [],
-    types: []
+    types: [],
+    doctypes: {}
   },
   getters: {
     getEntity: (state) => (id) => {
@@ -33,6 +34,9 @@ export default {
     storeEntity (state, card) {
       state.cards.push(card)
     },
+    storeEntities (state, entities) {
+      state.cards.push(...entities)
+    },
     storeEntityLabel (state, card) {
       state.labels[card._id] = card.label
     },
@@ -43,8 +47,9 @@ export default {
   },
   actions: {
     async init ({ dispatch, commit }, id) {
-      const types = await dispatch('api/getTypes', id, { root: true })
+      const { types, doctypes } = await dispatch('api/getTypes', id, { root: true })
       commit('set', { types })
+      commit('set', { doctypes })
     },
     async fetchEntity ({ state, dispatch, commit, getters }, id) {
       let card = state.cards.find(card => card._id === id)
@@ -73,8 +78,8 @@ export default {
       // const wasArray = Array.isArray(ids)
       for (const _id of [ids].flat()) {
         if (state.labels[_id] != null) return state.labels[_id]
-        const label = await dispatch('api/getLabel', _id, { root: true })
-        commit('storeEntityLabel', { _id, label })
+        // const label = await dispatch('api/getLabel', _id, { root: true })
+        // commit('storeEntityLabel', { _id, label })
       }
       // return wasArray ? labels : labels[0]
     },
@@ -87,6 +92,7 @@ export default {
       await dispatch('refreshEntity', triple[0])
     },
     async removeProp ({ dispatch, getters, commit }, { _id, prop, value }) {
+      // TODO: simplify to sth like addProp
       const document = { ...getters.getEntity(_id) }
       if (Array.isArray(document[prop])) {
         document[prop] = document[prop].filter(d => d !== value)

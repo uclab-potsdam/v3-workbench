@@ -8,7 +8,7 @@ export default {
     offsetX: 0,
     offsetY: 0,
     mode: null,
-    data: {}
+    data: null
   },
   getters: {
     position: ({ x, offsetX, y, offsetY }) => {
@@ -36,7 +36,7 @@ export default {
   },
   actions: {
     dragStart ({ commit }, params) {
-      commit('setTimeout', timeout(() => commit('set', params), 200))
+      commit('setTimeout', timeout(() => commit('set', params), 400))
     },
     dragCancelStart ({ commit }) {
       commit('clearTimeout')
@@ -48,6 +48,11 @@ export default {
     dragEnd ({ commit }, params) {
       commit('clearTimeout')
       commit('set', { el: null })
+    },
+    getData ({ commit, state }) {
+      const data = state.data
+      commit('set', { data: null })
+      return data
     }
   }
 }

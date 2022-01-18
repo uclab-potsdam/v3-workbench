@@ -1,5 +1,5 @@
 <template>
-  <section class="property">
+  <section v-if="!prop.meta?.hidden" class="property">
     <div class="label">
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ prop.label }}</BaseTraverseLabel>
@@ -12,7 +12,7 @@
         }
       }"/>
     </div>
-    <div class="value" v-for="(value, i) in prop.value" :key="i">
+    <div class="value" v-for="(value, i) in prop.value || []" :key="i">
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
       </div>

@@ -32,11 +32,12 @@ function mouseMove (el, e) {
   // console.log('Mouse Move', el.dropOptions.ctx)
 }
 
-function mouseUp (el, e) {
+async function mouseUp (el, e) {
   e.stopPropagation()
   window.dispatchEvent(new MouseEvent(e.type, e))
   const { x, y } = store.getters['dragdrop/position']
-  const data = store.state.dragdrop.data
+  const data = await store.dispatch('dragdrop/getData')
+  if (data == null) return
   el.dispatchEvent(new CustomEvent('dropped', {
     detail: {
       ...el.dropOptions,

@@ -489,7 +489,7 @@ function getDoctypeProperties (doctype, { inverse = true } = {}) {
       prop.class = getSuperiorClass(prop.supportedClasses)
     })
   }
-  return properties.sort((a, b) => a.priority < b.priority)
+  return properties.sort((a, b) => a.priority === b.priority ? a.label > b.label : a.priority < b.priority)
 }
 
 // async function getLabels (values) {

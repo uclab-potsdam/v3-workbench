@@ -5,7 +5,9 @@ export default {
   state: {
     cards: [],
     canvas: null,
-    zoom: 1
+    zoom: 1,
+    cardScrolls: {},
+    propertyOffsets: {}
   },
   getters: {
     getCard: (state) => (id) => {
@@ -21,17 +23,41 @@ export default {
         if (entity == null) return
         // const entityType = rootGetters['data/getType'](entity._type)
         for (const prop of entity.properties) {
-          if (prop.linkProperty && !prop.hidden && !prop.inverse && prop.value != null) {
+          if (prop.linkProperty && !prop.meta?.hidden && !prop.inverse && prop.value != null) {
             [prop.value].flat().forEach(value => {
               const target = getters.getCardByEntity(value._id)
               if (target != null) {
+                let cardOffset = 30
+                if (!card.collapsed) {
+                  const offset = state.propertyOffsets[card._id]?.[prop._id]?.[value._id]
+                  // const offset = 0
+                  const scroll = state.cardScrolls[card._id] || 0
+                  if (offset != null) {
+                    cardOffset = offset - scroll + 12.5
+                    cardOffset = Math.max(30, cardOffset)
+                    cardOffset = Math.min(285, cardOffset)
+                  }
+                }
+
+                let targetOffset = 30
+                if (!target.collapsed) {
+                  const offset = state.propertyOffsets[target._id]?.[prop._id]?.[card.entity]
+                  // const offset = 0
+                  const scroll = state.cardScrolls[target._id] || 0
+                  if (offset != null) {
+                    targetOffset = offset - scroll + 12.5
+                    targetOffset = Math.max(30, targetOffset)
+                    targetOffset = Math.min(285, targetOffset)
+                  }
+                }
+
                 edges.push({
                   source: card._id,
                   x1: card.x,
-                  y1: card.y,
+                  y1: card.y + cardOffset,
                   target: target._id,
                   x2: target.x,
-                  y2: target.y,
+                  y2: target.y + targetOffset,
                   prop
                 })
               }
@@ -89,6 +115,12 @@ export default {
     },
     removeCard (state, id) {
       state.cards = state.cards.filter(card => card._id !== id)
+    },
+    setCardScroll (state, { _id, value }) {
+      state.cardScrolls[_id] = value
+    },
+    setPropertyOffsets (state, { _id, value }) {
+      state.propertyOffsets[_id] = value
     }
   },
   actions: {
@@ -128,6 +160,12 @@ export default {
     },
     setZoom ({ commit }, zoom) {
       commit('set', { zoom })
+    },
+    setCardScroll ({ commit }, scroll) {
+      commit('setCardScroll', scroll)
+    },
+    setPropertyOffsets ({ commit }, offset) {
+      commit('setPropertyOffsets', offset)
     }
   },
   modules: {

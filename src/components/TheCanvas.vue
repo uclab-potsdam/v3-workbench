@@ -34,7 +34,8 @@
         @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"
-        @removeProp="onRemoveProp"/>
+        @removeProp="onRemoveProp"
+        @scroll="onScroll($event, card._id)"/>
     </div>
     <div class="notifications">
       <div class="drag-options" v-if="drag?.options?.mode === 'move'" >
@@ -134,7 +135,8 @@ export default {
       'dropCard',
       'removeCard',
       'init',
-      'setZoom'
+      'setZoom',
+      'setCardScroll'
     ]),
     ...mapActions('data', [
       'addProp',
@@ -219,6 +221,9 @@ export default {
     onRemoveProp (e) {
       // console.log([e.doc, e.prop, e.value])
       this.removeProp(e)
+    },
+    onScroll (e, _id) {
+      this.setCardScroll({ _id, value: e.target.scrollTop })
     }
     // onSetTempEdge (e) {
     //   this.tempEdge = {

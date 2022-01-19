@@ -1,6 +1,8 @@
 <template>
-  <footer class="blur">
-    <slot/>
+  <footer>
+    <div class="wrapper blur">
+      <slot/>
+    </div>
   </footer>
 </template>
 
@@ -12,9 +14,13 @@ export default {
 
 <style scoped lang="scss">
 footer {
-  height: var(--card-footer-height);
-  padding: calc(var(--spacing-s) + var(--spacing-xs));
+  height: 0;
   position: sticky;
-  bottom: 0;
+  z-index: 1;
+  top: calc(var(--card-height) - var(--card-footer-height));
+
+  .wrapper {
+    padding: calc(var(--spacing-s) + var(--spacing-xs));
+  }
 }
 </style>

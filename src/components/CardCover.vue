@@ -19,6 +19,7 @@ export default {
 
 <style scoped lang="scss">
 .cover {
+  padding: 0 var(--spacing);
   display: flex;
   justify-content: center;
   height: var(--card-main-height);

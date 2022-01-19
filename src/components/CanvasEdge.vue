@@ -37,9 +37,9 @@ export default {
   computed: {
     path () {
       const x1 = this.x1 + 180
-      const y1 = this.y1 + 30
+      const y1 = this.y1
       const x2 = this.x2
-      const y2 = this.y2 + 30
+      const y2 = this.y2
       return x1 < x2
         ? `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
         : `M${x2},${y2}C${x2 - 100},${y2},${x1 + 100},${y1},${x1},${y1}`

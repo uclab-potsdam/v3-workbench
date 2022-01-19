@@ -11,16 +11,16 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="label" :doctype="doctype?.label" @click="$emit('toggleCollapse')"/>
-    <main v-if="!collapsed">
-      <card-cover v-if="cover" :path="cover"/>
-      <template v-for="(prop, i) in properties" :key="i">
-        <card-property :prop="prop" :entity="_id"/>
-      </template>
-    </main>
+    <CardHeader :label="label" :doctype="doctype?.label" @click="toggleCollapse"/>
     <card-footer v-if="!collapsed && context !== 'search'">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
     </card-footer>
+    <main v-if="!collapsed">
+      <card-cover v-if="cover" :path="cover"/>
+      <card-property v-for="(prop, i) in properties" :key="i"
+        :ref="el => { if (el) refs[i] = {el, _id: prop._id} }"
+        :prop="prop" :entity="_id"/>
+    </main>
   </div>
 </template>
 
@@ -60,7 +60,8 @@ export default {
       widthCard: 0,
       isCollapsed: true,
       hover: false,
-      dragActive: false
+      dragActive: false,
+      refs: []
     }
   },
   computed: {
@@ -71,19 +72,48 @@ export default {
       const { background, text } = this.doctype
       return {
         '--primary': `var(--${text}-9)`,
+        '--primary-muted': `var(--${background}-3)`,
         '--secondary': `var(--${background}-2)`
       }
     }
   },
   methods: {
     ...mapActions('data', ['addProp']),
-    ...mapActions('view', ['removeCard']),
+    ...mapActions('view', ['removeCard', 'setPropertyOffsets']),
     onDrop ({ detail }) {
       this.addProp([detail.data.sub, detail.data.prop, detail.obj])
     },
+    toggleCollapse () {
+      this.$emit('toggleCollapse')
+      setTimeout(() => {
+        // this.$nextTick(() => {
+        this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
+        // })
+      }, 500)
+    },
     onRemoveCard () {
       this.removeCard(this.cardId)
+    },
+    // onScroll (e) {
+    //   this.e.target.scrollTop
+    // },
+    getOffsets () {
+      return Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.getOffset()]))
     }
+  },
+  beforeUpdate () {
+    this.refs = []
+  },
+  updated () {
+    // this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
+    // console.log(this._id, this.getOffsets())
+  },
+  mounted () {
+    setTimeout(() => {
+    // this.$nextTick(() => {
+      this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
+    // })
+    }, 1500)
   }
 }
 </script>
@@ -125,23 +155,10 @@ export default {
     height: var(--card-header-height);
   }
 
-  header {
-    display: flex;
-    flex-direction: column;
-    padding: var(--spacing);
-    justify-content: center;
-    justify-content: center;
-    height: var(--card-header-height);
-    position: sticky;
-    top: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    z-index: 1;
-  }
-
   main {
     min-height: var(--card-main-height);
-    padding: 0 var(--spacing);
+    margin-bottom: var(--card-footer-height);
+    // padding: 0 var(--spacing);
 
     section + section {
       margin-top: var(--spacing);

@@ -1,51 +1,40 @@
 import store from '@/store'
 
-function mouseEnter (el, options, e) {
-  // console.log('Mouse Enter', options.ctx)
-  // e.preventDefault()
-  // e.stopPropagation()
-  // // e.preventDefault()
-  // el.classList.remove('drag-over')
-
-  // // e.dataTransfer.dropEffect = 'move'
-  // const value = e.dataTransfer.getData('text/plain')
-  // // console.log('drop', value, e)
-  // if (options.handler != null) {
-  //   e.dataTransfer.dropEffect = 'none'
-  //   options.handler({
-  //     options,
-  //     x: e.clientX,
-  //     y: e.clientY,
-  //     _id: value
-  //   })
-  // }
-}
-
-function mouseLeave (el, options, e) {
-  // console.log('Mouse Leave', options.ctx)
-}
-
 function mouseMove (el, e) {
   // console.log(store.state.dragdrop.mode)
   e.stopPropagation()
-  window.dispatchEvent(new MouseEvent(e.type, e))
+
+  window.dispatchEvent(e.type === 'touchmove' ? new TouchEvent(e.type, e) : new MouseEvent(e.type, e))
   // console.log('Mouse Move', el.dropOptions.ctx)
 }
 
 async function mouseUp (el, e) {
   e.stopPropagation()
-  window.dispatchEvent(new MouseEvent(e.type, e))
+  window.dispatchEvent(e.type === 'touchend' ? new TouchEvent(e.type, e) : new MouseEvent(e.type, e))
   const { x, y } = store.getters['dragdrop/position']
   const data = await store.dispatch('dragdrop/getData')
   if (data == null) return
-  el.dispatchEvent(new CustomEvent('dropped', {
-    detail: {
-      ...el.dropOptions,
-      x,
-      y,
-      data
-    }
-  }))
+  if (e.type !== 'touchend') {
+    el.dispatchEvent(new CustomEvent('dropped', {
+      detail: {
+        ...el.dropOptions,
+        x,
+        y,
+        data
+      }
+    }))
+  } else {
+    const targetEl = document.elementFromPoint(x, y)
+    targetEl.dispatchEvent(new CustomEvent('dropped', {
+      bubbles: true,
+      detail: {
+        ...el.dropOptions,
+        x,
+        y,
+        data
+      }
+    }))
+  }
 }
 
 // function onDragOver (el, options, e) {
@@ -99,10 +88,10 @@ export default {
     el.dropOptions = binding.value
 
     el.dropListeners = {
-      mouseenter: mouseEnter.bind(null, el),
-      mouseleave: mouseLeave.bind(null, el),
       mousemove: mouseMove.bind(null, el),
-      mouseup: mouseUp.bind(null, el)
+      touchmove: mouseMove.bind(null, el),
+      mouseup: mouseUp.bind(null, el),
+      touchend: mouseUp.bind(null, el)
     }
 
     // if (!binding.value.disabled) {

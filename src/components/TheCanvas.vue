@@ -191,7 +191,9 @@ export default {
       //   y: e.y / this.transform.k
       // })
     },
-    onDrop ({ detail }) {
+    onDrop (e) {
+      e.stopPropagation()
+      const { detail } = e
       this.dropCard({
         entity: detail.data._id,
         x: (detail.x - this.transform.x) / this.transform.k,

@@ -1,7 +1,8 @@
 import store from '@/store'
 
 function onDrag (detail, e) {
-  const { x, y } = e
+  const x = e.x || e.touches?.[0]?.clientX
+  const y = e.y || e.touches?.[0]?.clientY
   store.dispatch('dragdrop/drag', {
     x,
     y
@@ -29,28 +30,33 @@ function dragEnd () {
 }
 
 function onDragStart (el, e) {
+  if (e.type === 'touchstart' && e.touches.length !== 1) return
+
   // stop d3-zoom and prevent click event when dragging
   e.stopPropagation()
   e.preventDefault()
 
   const bounds = el.getBoundingClientRect()
+  const x = e.x || e.touches?.[0]?.clientX
+  const y = e.y || e.touches?.[0]?.clientY
   const detail = {
-    x: e.x,
-    y: e.y,
+    x,
+    y,
     boundsX: bounds.x,
     boundsY: bounds.y,
-    offsetX: e.x - bounds.x,
-    offsetY: e.y - bounds.y
+    offsetX: x - bounds.x,
+    offsetY: y - bounds.y
   }
   // console.log(e)
   // document.querySelector(el.dragOptions.dragLayer).appendChild(clone)
   window.dragListeners = {
     mousemove: onDrag.bind(null, detail),
+    touchmove: onDrag.bind(null, detail),
     mouseup: onDragEnd.bind(null, detail),
+    touchend: onDragEnd.bind(null, detail),
     keydown: onDragCancel.bind(null, detail)
   }
 
-  const { x, y } = e
   const { mode, data } = el.dragOptions
   store.dispatch('dragdrop/dragStart', {
     mode,
@@ -123,7 +129,8 @@ export default {
     // el.dragOptions = options
 
     el.dragTrigger.dragListeners = {
-      mousedown: onDragStart.bind(null, el)
+      mousedown: onDragStart.bind(null, el),
+      touchstart: onDragStart.bind(null, el)
     }
 
     // for (const l in el.dragListeners) {

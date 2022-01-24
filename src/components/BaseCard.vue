@@ -80,15 +80,16 @@ export default {
   methods: {
     ...mapActions('data', ['addProp']),
     ...mapActions('view', ['removeCard', 'setPropertyOffsets']),
-    onDrop ({ detail }) {
-      this.addProp([detail.data.sub, detail.data.prop, detail.obj])
+    onDrop (e) {
+      const { detail } = e
+      if (detail.data.sub == null || detail.data.prop == null) return
+      e.stopPropagation()
+      this.addProp([detail.data.sub, detail.data.prop, this._id])
     },
     toggleCollapse () {
       this.$emit('toggleCollapse')
       setTimeout(() => {
-        // this.$nextTick(() => {
         this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
-        // })
       }, 500)
     },
     onRemoveCard () {

@@ -16,6 +16,9 @@ export default {
     getCardByEntity: (state) => (id) => {
       return state.cards.find(card => card.entity === id)
     },
+    hasCardWithEntity: (state) => (id) => {
+      return state.cards.find(card => card.entity === id) != null
+    },
     edges (state, getters, rootState, rootGetters) {
       const edges = []
       state.cards.forEach(card => {

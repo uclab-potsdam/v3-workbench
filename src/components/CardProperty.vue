@@ -12,16 +12,18 @@
       }">
         <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" data="@icon/property-expand-l.svg" v-drag="{
-        mode: 'move-card',
-        data: { _id: value._id }
-      }"/>
+      <div class="double-icon">
+        <icon scale="1" :color="getColors(value._id)" data="@icon/property-expand-l.svg" v-drag="{
+          mode: 'move-card',
+          data: { _id: value._id }
+        }"/>
+      </div>
     </div>
     <div class="add" v-if="prop.set && !prop.inverse">
       <div class="overflow-wrap fade">
         <BaseTraverseLabel>{{prop.class}}</BaseTraverseLabel>
       </div>
-      <icon scale="1" data="@icon/property-add-l.svg" v-drag="{
+      <icon scale="1" :color="getAddColors()" data="@icon/property-add-l.svg" v-drag="{
         mode: 'connect',
         data: {
           sub: entity,
@@ -35,6 +37,7 @@
 <script>
 import BaseTraverseLabel from './BaseTraverseLabel.vue'
 import drag from '@/assets/js/directives/drag'
+import { mapGetters } from 'vuex'
 export default {
   components: { BaseTraverseLabel },
   name: 'CardProperty',
@@ -50,12 +53,31 @@ export default {
       refs: []
     }
   },
+  computed: {
+    ...mapGetters('view', ['hasCardWithEntity'])
+  },
   methods: {
     getOffset () {
       return Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
     },
     beforeUpdate () {
       this.refs = []
+    },
+    getColors (id) {
+      const colors = [
+        this.hasCardWithEntity(id) ? 'var(--edges)' : 'none',
+        'rgb(var(--secondary))',
+        'currentColor'
+      ]
+      return colors
+    },
+    getAddColors (id) {
+      const colors = [
+        'none',
+        'rgb(var(--secondary))',
+        'currentColor'
+      ]
+      return colors
     }
   }
 }
@@ -74,7 +96,13 @@ export default {
     gap: var(--spacing-xs);
     .overflow-wrap {
       // overflow: hidden;
-      width: calc(var(--card-width) - 40px);
+      width: calc(var(--card-width) - 37.5px);
+    }
+
+    .svg-icon {
+      color: rgba(var(--primary), 0.3);
+      transition: color var(--transition) var(--transition);
+      display: block;
     }
 
     &.inverse {
@@ -87,16 +115,10 @@ export default {
       }
     }
 
-    .svg-icon {
-      opacity: 0.3;
-      // position: absolute;
-      // right: 0;
-      transition: opacity var(--transition) var(--transition);
-    }
     &:hover {
       .svg-icon {
-        opacity: 1;
-        transition: opacity var(--transition);
+        color: rgb(var(--primary));
+        transition: color var(--transition);
       }
     }
   }
@@ -111,16 +133,12 @@ export default {
     }
   }
   .add {
-    opacity: 0.3;
-    transition: opacity var(--transition) var(--transition);
-
-    .svg-icon {
-      opacity: 1;
-    }
+    color: rgba(var(--primary), 0.3);
+    transition: color var(--transition) var(--transition);
 
     &:hover {
-      opacity: 1;
-      transition: opacity var(--transition);
+      color: rgb(var(--primary));
+      transition: color var(--transition);
     }
   }
 }

@@ -150,6 +150,7 @@ export default {
         .scaleExtent(this.scaleExtent)
         .on('zoom', e => { this.transform = e.transform })
         .filter(e => {
+          if (e.type === 'touchstart' && e.touches?.length === 1) return false
           if (e.type === 'mousedown' && e.target.getAttribute('draggable')) return false
           return !e.button && !(e.type === 'wheel' && !e.ctrlKey && !e.shiftKey)
         })

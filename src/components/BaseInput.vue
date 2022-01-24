@@ -39,6 +39,7 @@ input {
     background: var(--background);
     box-sizing: border-box;
     border: none;
+    border-radius: 0;
     color: var(--text);
     font-weight: var(--bold);
     border-bottom: var(--base-border);

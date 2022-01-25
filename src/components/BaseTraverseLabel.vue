@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  name: 'BaseCard',
+  name: 'BaseTraverseLabel',
   props: {
     root: {
       type: String,

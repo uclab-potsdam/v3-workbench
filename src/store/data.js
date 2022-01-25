@@ -31,8 +31,9 @@ export default {
         state[key] = obj[key]
       })
     },
-    storeEntity (state, card) {
-      state.cards.push(card)
+    storeEntity (state, entity) {
+      state.cards = state.cards.filter(({ _id }) => _id !== entity._id)
+      state.cards.push(entity)
     },
     storeEntities (state, entities) {
       state.cards.push(...entities)
@@ -83,13 +84,10 @@ export default {
       }
       // return wasArray ? labels : labels[0]
     },
-    async refreshEntity ({ state, dispatch, commit }, id) {
-      const card = await dispatch('api/getEntity', id, { root: true })
-      commit('updateDocument', card)
-    },
     async addProp ({ dispatch }, triple) {
       await dispatch('api/addTriple', triple, { root: true })
-      await dispatch('refreshEntity', triple[0])
+      dispatch('api/getEntity', triple[0], { root: true })
+      dispatch('api/getEntity', triple[2], { root: true })
     },
     async removeProp ({ dispatch, getters, commit }, { _id, prop, value }) {
       // TODO: simplify to sth like addProp
@@ -101,7 +99,6 @@ export default {
       }
       commit('updateDocument', document)
       await dispatch('api/updateDocument', document, { root: true })
-      // await dispatch('refreshEntity', triple[0])
     }
   },
   modules: {

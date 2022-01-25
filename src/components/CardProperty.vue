@@ -12,14 +12,12 @@
       }">
         <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
       </div>
-      <div class="double-icon">
-        <icon scale="1" :color="getColors(value._id)" data="@icon/property-expand-l.svg" v-drag="{
-          mode: 'move-card',
-          data: { _id: value._id }
-        }"/>
-      </div>
+      <icon scale="1" :color="getColors(value._id)" v-if="prop.linkProperty" data="@icon/property-expand-l.svg" v-drag="{
+        mode: 'move-card',
+        data: { _id: value._id }
+      }"/>
     </div>
-    <div class="add" v-if="prop.set && !prop.inverse">
+    <div class="add" v-if="(prop.set || prop.value.length === 0) && !prop.inverse">
       <div class="overflow-wrap fade">
         <BaseTraverseLabel>{{prop.class}}</BaseTraverseLabel>
       </div>
@@ -87,15 +85,11 @@ export default {
 .property {
   user-select: none;
   .label, .value, .add {
-    // margin: 0 var(--spacing-l) 0 var(--spacing);
     padding: 0 var(--spacing);
     display: flex;
     position: relative;
-    // grid-template-columns: 1fr calc(var(--spacing-l));
-    // max-width: 100%;
     gap: var(--spacing-xs);
     .overflow-wrap {
-      // overflow: hidden;
       width: calc(var(--card-width) - 37.5px);
     }
 
@@ -103,11 +97,10 @@ export default {
       color: rgba(var(--primary), 0.3);
       transition: color var(--transition) var(--transition);
       display: block;
+      z-index: 1;
     }
 
     &.inverse {
-      // padding: 0 var(--spacing) 0 var(--spacing-s);
-      // grid-template-columns: calc(var(--spacing) + var(--spacing-s)) 1fr;
       flex-direction: row-reverse;
 
       .svg-icon {

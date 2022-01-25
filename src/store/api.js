@@ -515,7 +515,7 @@ async function getProperties (id) {
       _id: prop.replace(/@schema:/, ''),
       value: {
         _id,
-        label
+        label: label || _id
       },
       ...(path != null && { path })
     }

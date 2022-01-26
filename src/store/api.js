@@ -36,7 +36,7 @@ export default {
         return false
       }
       Client.db(database)
-      dispatch('data/init', null, { root: true })
+      await dispatch('data/init', null, { root: true })
       return true
     },
     disconnect ({ commit }) {

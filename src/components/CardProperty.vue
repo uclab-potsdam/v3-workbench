@@ -35,7 +35,7 @@
 <script>
 import BaseTraverseLabel from './BaseTraverseLabel.vue'
 import drag from '@/assets/js/directives/drag'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   components: { BaseTraverseLabel },
   name: 'CardProperty',
@@ -55,8 +55,13 @@ export default {
     ...mapGetters('view', ['hasCardWithEntity'])
   },
   methods: {
-    getOffset () {
-      return Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
+    ...mapActions('view', ['updatePropertyOffsets']),
+    setOffsets () {
+      this.updatePropertyOffsets({
+        entity: this.entity,
+        prop: this.prop._id,
+        value: Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
+      })
     },
     beforeUpdate () {
       this.refs = []
@@ -76,6 +81,16 @@ export default {
         'currentColor'
       ]
       return colors
+    }
+  },
+  mounted () {
+    this.setOffsets()
+  },
+  watch: {
+    'prop.value.length' () {
+      this.$nextTick(() => {
+        this.setOffsets()
+      })
     }
   }
 }

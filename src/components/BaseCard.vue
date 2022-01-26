@@ -18,7 +18,6 @@
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
       <card-property v-for="(prop, i) in properties" :key="i"
-        :ref="el => { if (el) refs[i] = {el, _id: prop._id} }"
         :prop="prop" :entity="_id"/>
     </main>
   </div>
@@ -60,8 +59,7 @@ export default {
       widthCard: 0,
       isCollapsed: true,
       hover: false,
-      dragActive: false,
-      refs: []
+      dragActive: false
     }
   },
   computed: {
@@ -88,33 +86,10 @@ export default {
     },
     toggleCollapse () {
       this.$emit('toggleCollapse')
-      setTimeout(() => {
-        this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
-      }, 500)
     },
     onRemoveCard () {
       this.removeCard(this.cardId)
-    },
-    // onScroll (e) {
-    //   this.e.target.scrollTop
-    // },
-    getOffsets () {
-      return Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.getOffset()]))
     }
-  },
-  beforeUpdate () {
-    this.refs = []
-  },
-  updated () {
-    // this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
-    // console.log(this._id, this.getOffsets())
-  },
-  mounted () {
-    setTimeout(() => {
-    // this.$nextTick(() => {
-      this.setPropertyOffsets({ _id: this.cardId, value: this.getOffsets() })
-    // })
-    }, 1500)
   }
 }
 </script>

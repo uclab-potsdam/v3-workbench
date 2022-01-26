@@ -32,7 +32,7 @@ export default {
               if (target != null) {
                 let cardOffset = 30
                 if (!card.collapsed) {
-                  const offset = state.propertyOffsets[card._id]?.[prop._id]?.[value._id]
+                  const offset = state.propertyOffsets[card.entity]?.[prop._id]?.[value._id]
                   // const offset = 0
                   const scroll = state.cardScrolls[card._id] || 0
                   if (offset != null) {
@@ -44,7 +44,7 @@ export default {
 
                 let targetOffset = 30
                 if (!target.collapsed) {
-                  const offset = state.propertyOffsets[target._id]?.[prop._id]?.[card.entity]
+                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.[card.entity]
                   // const offset = 0
                   const scroll = state.cardScrolls[target._id] || 0
                   if (offset != null) {
@@ -124,6 +124,12 @@ export default {
     },
     setPropertyOffsets (state, { _id, value }) {
       state.propertyOffsets[_id] = value
+    },
+    updatePropertyOffsets (state, { entity, prop, value }) {
+      state.propertyOffsets[entity] = {
+        ...state.propertyOffsets[entity],
+        [prop]: value
+      }
     }
   },
   actions: {
@@ -169,6 +175,9 @@ export default {
     },
     setPropertyOffsets ({ commit }, offset) {
       commit('setPropertyOffsets', offset)
+    },
+    updatePropertyOffsets ({ commit }, offset) {
+      commit('updatePropertyOffsets', offset)
     }
   },
   modules: {

@@ -24,7 +24,7 @@ export default {
     position: sticky;
     top: 0;
     height: var(--card-header-height);
-    z-index: 1;
+    z-index: 2;
 
     display: flex;
     flex-direction: column;

@@ -147,15 +147,15 @@ export default {
       })
 
       const searchResults = res.map(({ _id, _type, label, cover }) => {
-        if (doctype == null) doctype = _type.replace('@schema:', '')
+        const dt = doctype || _type.replace('@schema:', '')
         return {
           _id,
           label,
           cover,
           doctype: {
-            _id: doctype,
-            label: doctype,
-            ...doctypes[doctype]?._metadata
+            _id: dt,
+            label: dt,
+            ...doctypes[dt]?._metadata
           }
         }
       })

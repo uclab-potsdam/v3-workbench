@@ -164,7 +164,7 @@ export default {
       await dispatch('api/updateCard', card, { root: true })
     },
     async init ({ dispatch, commit, state }, canvas) {
-      commit('set', { canvas: `View/${canvas}` })
+      commit('set', { canvas: `Canvas/${canvas}` })
       await dispatch('api/getView', null, { root: true })
     },
     setZoom ({ commit }, zoom) {

@@ -36,7 +36,7 @@ export default {
     const canvases = await this.getCanvases()
     this.canvases = canvases.map(c => ({
       ...c,
-      route: c._id.replace('View/', '')
+      route: c._id.replace('Canvas/', '')
     }))
   },
   methods: {

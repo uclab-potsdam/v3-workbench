@@ -75,6 +75,9 @@ export default {
       'remoteSearchResults',
       'types'
     ]),
+    ...mapState('config', [
+      'lang'
+    ]),
     doctypeOptions () {
       return [{ label: 'All', value: null }, ...this.types.map(t => {
         return { label: t._metadata?.label || t._id, value: t._id }
@@ -99,7 +102,10 @@ export default {
       if (this.doctype == null) return
       await this.addDocument({
         _type: this.doctype,
-        label: this.term
+        label: {
+          _type: 'Dictionary',
+          [this.lang]: this.term
+        }
       })
       this.search({ term: this.term, doctype: this.doctype })
     },

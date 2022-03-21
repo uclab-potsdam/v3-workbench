@@ -55,14 +55,18 @@ export default {
     async getView ({ dispatch, commit, state, rootState }) {
       const id = rootState.view.canvas
       const view = atTo_(await Client.getDocument({ id }))
-      const cards = view.cards?.filter(card => card.entity != null) || []
-      cards.forEach(card => dispatch('getEntity', card.entity))
+      console.log('getView', view)
+      const cards = view.cards?.filter(card => card.represents != null) || []
+      console.log('getView', cards)
+      cards.forEach(card => dispatch('getEntity', card.represents))
       // const entities = await Promise.all(requests)
       // commit('data/storeEntities', entities, { root: true })
       commit('view/set', { cards: cards }, { root: true })
     },
     async getTypes ({ state }) {
-      let types = (await Client.getClassDocuments())
+      // console.log(await Client.getClassDocuments())
+      let types = (await Client.getClasses())
+        .filter(d => d['@subdocument'] == null)
         .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
 
       // https://github.com/terminusdb/terminusdb/issues/668
@@ -85,6 +89,7 @@ export default {
       return { types, doctypes }
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
+      console.log('get', id)
       const properties = await getProperties(id)
       const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
       const label = properties.find(p => p._id === 'label').value._id
@@ -95,7 +100,7 @@ export default {
       const cover = properties.find(({ _id }) => _id === 'cover')?.path
       const entity = {
         _id: id,
-        label: label || id,
+        label: label?.[rootState.config.lang] || id,
         cover,
         properties: doctypeProperties,
         doctype: {
@@ -130,7 +135,7 @@ export default {
       })
       return flattenBindings(res.bindings)
     },
-    async search ({ commit, dispatch }, { term, doctype = null }) {
+    async search ({ commit, dispatch, rootState }, { term, doctype = null }) {
       if (term == null || term.trim() === '') return
       const res = await dispatch('query', {
         query: WOQL
@@ -138,7 +143,8 @@ export default {
           .limit(16)
           .order_by(['v:dist', 'desc'])
           .and(
-            WOQL.triple('v:_id', 'label', 'v:label'),
+            WOQL.triple('v:_id', 'label', 'v:dict'),
+            WOQL.triple('v:dict', rootState.config.lang, 'v:label'),
             WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
@@ -196,7 +202,7 @@ export default {
           ...data.props.map(p => {
             return WOQL.insert_data({
               id: `item_${p.wd.replace('wd:', '')}`,
-              label: p.label,
+              label: { en: p.label },
               wd: p.wd,
               description: p.description,
               type: p.type
@@ -231,13 +237,13 @@ export default {
       //   _type: 'Card',
       //   ...data
       // })
-      if (rootGetters['data/getEntity'](card.entity) == null) {
-        dispatch('getEntity', card.entity)
+      if (rootGetters['data/getEntity'](card.represents) == null) {
+        dispatch('getEntity', card.represents)
       }
 
       await Client.query(WOQL
         .add_triple(card._id, 'rdf:type', '@schema:Card')
-        .add_triple(card._id, 'entity', card.entity)
+        .add_triple(card._id, 'represents', card.represents)
         .add_triple(card._id, 'collapsed', card.collapsed)
         .add_triple(card._id, 'x', card.x)
         .add_triple(card._id, 'y', card.y)
@@ -320,12 +326,12 @@ export default {
       return bindings
     },
     async getCanvases ({ dispatch, state }) {
-      return atTo_(await Client.getDocument({ type: 'View', unfold: false, as_list: true }))
+      return atTo_(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
     },
     async createCanvas ({ dispatch, state }, name) {
       const res = await Client.addDocument(atFrom_({
-        _type: 'View',
-        _id: `View/${name.replace(/ /g, '-')}`
+        _type: 'Canvas',
+        _id: `Canvas/${name.replace(/ /g, '-')}`
       }))
       return res
     },

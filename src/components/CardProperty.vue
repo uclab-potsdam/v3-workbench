@@ -24,7 +24,7 @@
       <icon scale="1" :color="getAddColors()" data="@icon/property-add-l.svg" v-drag="{
         mode: 'connect',
         data: {
-          sub: entity,
+          sub: represents,
           prop: prop._id,
         }
       }"/>
@@ -44,7 +44,7 @@ export default {
   },
   props: {
     prop: Object,
-    entity: String
+    represents: String
   },
   data () {
     return {
@@ -58,7 +58,7 @@ export default {
     ...mapActions('view', ['updatePropertyOffsets']),
     setOffsets () {
       this.updatePropertyOffsets({
-        entity: this.entity,
+        represents: this.represents,
         prop: this.prop._id,
         value: Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
       })

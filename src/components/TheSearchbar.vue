@@ -79,8 +79,8 @@ export default {
       'lang'
     ]),
     doctypeOptions () {
-      return [{ label: 'All', value: null }, ...this.types.map(t => {
-        return { label: t._metadata?.label || t._id, value: t._id }
+      return [{ label: 'All', value: null }, ...this.types.filter(d => d._abstract == null).map(t => {
+        return { label: t._metadata?.label?.[this.lang] || t._id, value: t._id }
       })]
     },
     doctypeLabel () {

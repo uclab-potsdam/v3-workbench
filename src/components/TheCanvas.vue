@@ -24,13 +24,13 @@
       <BaseCard
         v-for="card in cards"
         :key="card._id"
-        :_id="card.entity"
+        :_id="card.represents"
         :card-id="card._id"
         :collapsed="card.collapsed"
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
-        v-bind="getEntity(card.entity)"
+        v-bind="getEntity(card.represents)"
         @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"
@@ -195,7 +195,7 @@ export default {
       e.stopPropagation()
       const { detail } = e
       this.dropCard({
-        entity: detail.data._id,
+        represents: detail.data._id,
         x: (detail.x - this.transform.x) / this.transform.k,
         y: (detail.y - this.transform.y) / this.transform.k,
         collapsed: false
@@ -205,13 +205,13 @@ export default {
       this.drag = null
       // find a card with matching ids
       // console.log(e, this.cards)
-      // console.log(this.cards.find(c => c.entity === e._id))
-      this.removeCard(this.cards.find(c => c.entity === e._id)._id)
+      // console.log(this.cards.find(c => c.represents === e._id))
+      this.removeCard(this.cards.find(c => c.represents === e._id)._id)
     },
     onDeleteEntity (e) {
       this.drag = null
       // find a card with matching ids
-      this.removeCard(this.cards.find(c => c.entity === e._id)._id)
+      this.removeCard(this.cards.find(c => c.represents === e._id)._id)
       this.deleteObject(e._id)
     },
     onAddProp (e) {

@@ -14,15 +14,15 @@ export default {
       return state.cards.find(card => card._id === id)
     },
     getCardByEntity: (state) => (id) => {
-      return state.cards.find(card => card.entity === id)
+      return state.cards.find(card => card.represents === id)
     },
     hasCardWithEntity: (state) => (id) => {
-      return state.cards.find(card => card.entity === id) != null
+      return state.cards.find(card => card.represents === id) != null
     },
     edges (state, getters, rootState, rootGetters) {
       const edges = []
       state.cards.forEach(card => {
-        const entity = rootGetters['data/getEntity'](card.entity)
+        const entity = rootGetters['data/getEntity'](card.represents)
         if (entity == null) return
         // const entityType = rootGetters['data/getType'](entity._type)
         for (const prop of entity.properties) {
@@ -32,7 +32,7 @@ export default {
               if (target != null) {
                 let cardOffset = 30
                 if (!card.collapsed) {
-                  const offset = state.propertyOffsets[card.entity]?.[prop._id]?.[value._id]
+                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.[value._id]
                   // const offset = 0
                   const scroll = state.cardScrolls[card._id] || 0
                   if (offset != null) {
@@ -44,7 +44,7 @@ export default {
 
                 let targetOffset = 30
                 if (!target.collapsed) {
-                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.[card.entity]
+                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.[card.represents]
                   // const offset = 0
                   const scroll = state.cardScrolls[target._id] || 0
                   if (offset != null) {
@@ -125,9 +125,9 @@ export default {
     setPropertyOffsets (state, { _id, value }) {
       state.propertyOffsets[_id] = value
     },
-    updatePropertyOffsets (state, { entity, prop, value }) {
-      state.propertyOffsets[entity] = {
-        ...state.propertyOffsets[entity],
+    updatePropertyOffsets (state, { represents, prop, value }) {
+      state.propertyOffsets[represents] = {
+        ...state.propertyOffsets[represents],
         [prop]: value
       }
     }
@@ -143,8 +143,8 @@ export default {
       // update view in db if drop event ended successfully
     },
     async dropCard ({ commit, state, dispatch }, options) {
-      let card = state.cards.find(card => card.entity === options.entity)
-      // console.log(options, card?.entity)
+      let card = state.cards.find(card => card.represents === options.represents)
+      // console.log(options, card?.represents)
       if (card != null) {
         commit('moveCard', { ...card, ...options })
         await dispatch('api/updateCard', card, { root: true })

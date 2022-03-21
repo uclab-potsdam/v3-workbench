@@ -18,7 +18,7 @@
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
       <card-property v-for="(prop, i) in properties" :key="i"
-        :prop="prop" :entity="_id"/>
+        :prop="prop" :represents="_id"/>
     </main>
   </div>
 </template>

@@ -90,17 +90,18 @@ export default {
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
       console.log('get', id)
-      const properties = await getProperties(id)
+      const properties = await getProperties(id, rootState.config.lang)
+      console.log(properties)
       const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
-      const label = properties.find(p => p._id === 'label').value._id
-      const doctypeProperties = getDoctypeProperties(doctype)
+      const label = properties.find(p => p._id === 'label').value.label
+      const doctypeProperties = getDoctypeProperties(doctype, rootState.config.lang)
       for (const prop of doctypeProperties) {
         prop.value = properties.filter(({ _id }) => _id === prop._id).map(({ value }) => value)
       }
       const cover = properties.find(({ _id }) => _id === 'cover')?.path
       const entity = {
         _id: id,
-        label: label?.[rootState.config.lang] || id,
+        label: label || id,
         cover,
         properties: doctypeProperties,
         doctype: {
@@ -446,7 +447,7 @@ function isLinkedProperty (key, doctype) {
   return isProperty(key) && Object.keys(doctypes).includes(doctypes[doctype][key]._class || doctypes[doctype][key])
 }
 
-function getDoctypeProperties (doctype, { inverse = true } = {}) {
+function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
   const properties = []
   for (const key in doctypes[doctype]) {
     if (isProperty(key)) {
@@ -454,7 +455,7 @@ function getDoctypeProperties (doctype, { inverse = true } = {}) {
       const className = prop._class || prop
       const meta = doctypes[doctype]._metadata?._properties?.[key]
       properties.push({
-        label: meta?.label || key,
+        label: meta?.label?.[lang] || key,
         priority: meta?.priority || 0,
         _id: key,
         class: className,
@@ -477,7 +478,7 @@ function getDoctypeProperties (doctype, { inverse = true } = {}) {
           } else {
             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
             properties.push({
-              label: meta?.inverseLabel || `${meta?.label || propKey} (inverse)`,
+              label: meta?.inverseLabel || `${meta?.label?.[lang] || propKey} (inverse)`,
               priority: meta?.inversePriority || meta?.priority || 0,
               _id: propKey,
               supportedClasses: [doctypeKey],
@@ -503,13 +504,20 @@ function getDoctypeProperties (doctype, { inverse = true } = {}) {
 //   return values
 // }
 
-async function getProperties (id) {
+async function getProperties (id, lang = 'en') {
   const res = await Client.query(
-    WOQL.or(
-      WOQL.triple('v:_id', 'v:prop', id),
-      WOQL.triple(id, 'v:prop', 'v:_id')
-    )
-      .opt(WOQL.triple('v:_id', '@schema:label', 'v:label'))
+    WOQL
+      .or(
+        WOQL.triple('v:_id', 'v:prop', id),
+        WOQL.triple(id, 'v:prop', 'v:_id')
+      )
+      .opt(WOQL
+        .triple('v:_id', lang, 'v:label')
+      )
+      .opt(WOQL
+        .triple('v:_id', 'label', 'v:dict')
+        .triple('v:dict', lang, 'v:label')
+      )
       .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path'))
       // WOQL.opt(WOQL.triple(id, 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover_image_path'))
   ).catch((err) => {

@@ -86,19 +86,20 @@ export default {
       return { types, doctypes }
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
-      const properties = await getProperties(id, rootState.config.lang)
+      const properties = await getProperties(id, rootState.config.languages)
       const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
-      const label = properties.find(p => p._id === 'label').value.label
+      const label = properties.find(p => p._id === 'label')?.value.label
       const doctypeProperties = getDoctypeProperties(doctype, rootState.config.lang)
       for (const prop of doctypeProperties) {
         prop.value = properties.filter(({ _id, inverse }) => _id === prop._id && inverse === prop.inverse).map(({ value }) => value)
       }
+      doctypeProperties.sort((a, b) => (a.value.length > 0) === (b.value.length > 0) ? 0 : (a.value.length > 0) ? -1 : 1)
       const cover = properties.find(({ _id }) => _id === 'cover')?.path
       const entity = {
         _id: id,
         label: label || id,
         cover,
-        properties: doctypeProperties,
+        properties: doctypeProperties.filter(d => !(d.inverse && d.value.length === 0)),
         doctype: {
           _id: doctype,
           label: doctype,
@@ -140,7 +141,9 @@ export default {
           .order_by(['v:dist', 'desc'])
           .and(
             WOQL.triple('v:_id', 'label', 'v:dict'),
-            WOQL.triple('v:dict', rootState.config.lang, 'v:label'),
+            WOQL.once(WOQL.or(
+              ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+            )),
             WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
@@ -450,7 +453,7 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
       const className = prop._class || prop
       const meta = doctypes[doctype]._metadata?._properties?.[key]
       properties.push({
-        label: meta?.label?.[lang] || key,
+        label: meta?.label?.[lang] || meta?.label || key,
         priority: meta?.priority || 0,
         _id: key,
         class: className,
@@ -473,7 +476,7 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
           } else {
             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
             properties.push({
-              label: meta?.inverseLabel?.[lang] || `${meta?.label?.[lang] || propKey} (inverse)`,
+              label: meta?.inverseLabel?.[lang] || `${meta?.label /* ?.[lang] */ || propKey} (inverse)`,
               priority: meta?.inversePriority || meta?.priority || 0,
               _id: propKey,
               supportedClasses: [doctypeKey],
@@ -491,7 +494,9 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
       prop.class = getSuperiorClass(prop.supportedClasses)
     })
   }
-  return properties.sort((a, b) => a.priority === b.priority ? a.label > b.label : a.priority < b.priority)
+  // priority based sorting disabled in favour of sorting by P roperty number
+  // return properties.sort((a, b) => a.priority === b.priority ? a.label > b.label : a.priority < b.priority)
+  return properties.sort((a, b) => +(a._id.match(/P([0-9]+)/)?.[1] || 9999) - +(b._id.match(/P([0-9]+)/)?.[1] || 9999))
 }
 
 // async function getLabels (values) {
@@ -499,24 +504,45 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
 //   return values
 // }
 
-async function getProperties (id, lang = 'en') {
+async function getProperties (id, languages = ['en', 'de', 'pt', 'es']) {
   const res = await Client.query(
     WOQL
+      // .limit(100)
       .or(
-        WOQL.triple('v:_id', 'v:prop', id),
         WOQL.triple(id, 'v:prop', 'v:_id')
+          .opt(
+            WOQL.triple('v:inverse', 'v:prop', id)
+          )
+          .opt(
+            WOQL.once(WOQL.or(
+              ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
+            ))
+          )
+          .opt(WOQL
+            .triple('v:_id', 'label', 'v:dict')
+            .once(WOQL.or(
+              ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+            ))
+          )
+          .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path')),
+        WOQL // .limit(100)
+          .and(
+            WOQL.triple('v:_id', 'v:prop', id),
+            WOQL.evaluate(WOQL.plus(1, 0), 'v:inverse')
+          )
+          .opt(
+            WOQL.once(WOQL.or(
+              ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
+            ))
+          )
+          .opt(WOQL
+            .triple('v:_id', 'label', 'v:dict')
+            .once(WOQL.or(
+              ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+            ))
+          )
+          .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path'))
       )
-      .opt(
-        WOQL.triple('v:inverse', 'v:prop', id)
-      )
-      .opt(WOQL
-        .triple('v:_id', lang, 'v:label')
-      )
-      .opt(WOQL
-        .triple('v:_id', 'label', 'v:dict')
-        .triple('v:dict', lang, 'v:label')
-      )
-      .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path'))
       // WOQL.opt(WOQL.triple(id, 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover_image_path'))
   ).catch((err) => {
     throw err

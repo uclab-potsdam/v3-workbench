@@ -400,7 +400,12 @@ function makeSchemaFrame (doctype, doctypes) {
         Object.entries(sc).filter((entry) => entry[0].indexOf('@') !== 0)
       )
     )
-    const superClassDocs = superClasses.map(
+    const superClassDocComment = superClasses.map(
+      (sc) => sc['@documentation']?.['@comment']
+    )
+    console.log()
+
+    const superClassDocProp = superClasses.map(
       (sc) => sc['@documentation']?.['@properties']
     )
     return {
@@ -408,8 +413,15 @@ function makeSchemaFrame (doctype, doctypes) {
       ...doctype,
       '@documentation': {
         ...doctype['@documentation'],
+        '@comment': JSON.stringify({
+          ...JSON.parse(superClassDocComment.reduce((a, b) => (JSON.stringify(
+            Object.fromEntries(Object.entries({ ...JSON.parse(a || '{}'), ...JSON.parse(b || '{}') }).filter(d => d[0] !== 'label'))
+          )), '{}')
+          ),
+          ...JSON.parse(doctype['@documentation']?.['@comment'] || '{}')
+        }),
         '@properties': {
-          ...superClassDocs.reduce((a, b) => ({ ...a, ...b }), {}),
+          ...superClassDocProp.reduce((a, b) => ({ ...a, ...b }), {}),
           ...doctype['@documentation']?.['@properties']
         }
       }

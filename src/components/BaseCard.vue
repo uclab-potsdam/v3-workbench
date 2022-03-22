@@ -102,10 +102,10 @@ export default {
   transform-origin: top left;
   background: rgb(var(--secondary));
   color: rgb(var(--primary));
-  @media (prefers-color-scheme: dark) {
-    background: rgb(var(--primary));
-    color: rgb(var(--secondary));
-  }
+  // @media (prefers-color-scheme: dark) {
+  //   background: rgb(var(--primary));
+  //   color: rgb(var(--secondary));
+  // }
   width: var(--card-width);
   overflow-x: hidden;
   overflow-y: auto;

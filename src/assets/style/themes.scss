@@ -7,7 +7,7 @@
   --text: rgb(var(--blue-gray-4));
   --border: rgb(var(--blue-gray-4));
   --muted-border: rgb(var(--blue-gray-9));
-  --primary: rgb(var(--blue-gray-3 ));
+  // --primary: rgb(var(--blue-gray-3 ));
   --accent: rgb(var(--indigo-5));
   --dimmed: rgb(var(--blue-gray-10));
   --muted: rgb(var(--blue-gray-8));
@@ -38,7 +38,7 @@
     --background: rgb(var(--blue-gray-1));
     --text: rgb(var(--blue-gray-7));
     --border: rgb(var(--blue-gray-7));
-    --primary: rgb(var(--teal-1));
+    // --primary: rgb(var(--teal-1));
     --accent: rgb(var(--indigo-4));
     --dimmed: rgb(var(--blue-gray-2));
     --muted: rgb(var(--blue-gray-4));
@@ -50,21 +50,21 @@
     --blend-mode: multiply;
 
     // card defaults
-    --primary: var(--blue-gray-10);
-    --secondary: var(--blue-gray-3);
+    // --primary: var(--blue-gray-10);
+    // --secondary: var(--blue-gray-3);
   }
 }
 
 .blur {
   background: rgb(var(--secondary));
-  @media (prefers-color-scheme: dark) {
-    background: rgb(var(--primary));
-  }
+  // @media (prefers-color-scheme: dark) {
+  //   background: rgb(var(--primary));
+  // }
   @supports ((-webkit-backdrop-filter:saturate(180%) blur(20px)) or (backdrop-filter:saturate(180%) blur(20px))) {
     background: rgba(var(--secondary), .5);
-    @media (prefers-color-scheme: dark) {
-      background: rgba(var(--primary), .5);
-    }
+    // @media (prefers-color-scheme: dark) {
+    //   background: rgba(var(--primary), .5);
+    // }
     backdrop-filter: blur(7px);
   }
 }

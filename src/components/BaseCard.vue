@@ -66,12 +66,11 @@ export default {
     ...mapState('config', ['fileServer']),
     ...mapGetters('data', ['getType', 'getEntity', 'getLabel']),
     colors () {
-      if (this.doctype?.background == null) return
-      const { background, text } = this.doctype
+      if (this.doctype?.secondary == null) return
+      const { secondary, primary } = this.doctype
       return {
-        '--primary': `var(--${text}-9)`,
-        '--primary-muted': `var(--${background}-3)`,
-        '--secondary': `var(--${background}-2)`
+        '--primary': `var(--${primary}-2)`,
+        '--secondary': `var(--${secondary}-9)`
       }
     }
   },

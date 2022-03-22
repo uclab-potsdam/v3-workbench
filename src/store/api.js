@@ -403,7 +403,6 @@ function makeSchemaFrame (doctype, doctypes) {
     const superClassDocComment = superClasses.map(
       (sc) => sc['@documentation']?.['@comment']
     )
-    console.log()
 
     const superClassDocProp = superClasses.map(
       (sc) => sc['@documentation']?.['@properties']

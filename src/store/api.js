@@ -453,7 +453,7 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
       const className = prop._class || prop
       const meta = doctypes[doctype]._metadata?._properties?.[key]
       properties.push({
-        label: meta?.label?.[lang] || meta?.label || key,
+        label: meta?.label?.[lang] || key.replace(/_/g, ' '),
         priority: meta?.priority || 0,
         _id: key,
         class: className,
@@ -476,7 +476,7 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
           } else {
             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
             properties.push({
-              label: meta?.inverseLabel?.[lang] || `${meta?.label /* ?.[lang] */ || propKey} (inverse)`,
+              label: meta?.inverseLabel?.[lang] || `${propKey.replace(/_/g, ' ')} (inverse)`,
               priority: meta?.inversePriority || meta?.priority || 0,
               _id: propKey,
               supportedClasses: [doctypeKey],

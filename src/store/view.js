@@ -32,7 +32,7 @@ export default {
               if (target != null) {
                 let cardOffset = 30
                 if (!card.collapsed) {
-                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.[value._id]
+                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.default?.[value._id]
                   // const offset = 0
                   const scroll = state.cardScrolls[card._id] || 0
                   if (offset != null) {
@@ -44,7 +44,7 @@ export default {
 
                 let targetOffset = 30
                 if (!target.collapsed) {
-                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.[card.represents]
+                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.inverse?.[card.represents]
                   // const offset = 0
                   const scroll = state.cardScrolls[target._id] || 0
                   if (offset != null) {
@@ -122,13 +122,13 @@ export default {
     setCardScroll (state, { _id, value }) {
       state.cardScrolls[_id] = value
     },
-    setPropertyOffsets (state, { _id, value }) {
-      state.propertyOffsets[_id] = value
-    },
-    updatePropertyOffsets (state, { represents, prop, value }) {
+    updatePropertyOffsets (state, { represents, inverse, prop, value }) {
       state.propertyOffsets[represents] = {
         ...state.propertyOffsets[represents],
-        [prop]: value
+        [prop]: {
+          default: inverse ? state.propertyOffsets[represents]?.[prop]?.default : value,
+          inverse: inverse ? value : state.propertyOffsets[represents]?.[prop]?.inverse
+        }
       }
     }
   },
@@ -172,9 +172,6 @@ export default {
     },
     setCardScroll ({ commit }, scroll) {
       commit('setCardScroll', scroll)
-    },
-    setPropertyOffsets ({ commit }, offset) {
-      commit('setPropertyOffsets', offset)
     },
     updatePropertyOffsets ({ commit }, offset) {
       commit('updatePropertyOffsets', offset)

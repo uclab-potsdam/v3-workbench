@@ -55,16 +55,13 @@ export default {
     async getView ({ dispatch, commit, state, rootState }) {
       const id = rootState.view.canvas
       const view = atTo_(await Client.getDocument({ id }))
-      console.log('getView', view)
       const cards = view.cards?.filter(card => card.represents != null) || []
-      console.log('getView', cards)
       cards.forEach(card => dispatch('getEntity', card.represents))
       // const entities = await Promise.all(requests)
       // commit('data/storeEntities', entities, { root: true })
       commit('view/set', { cards: cards }, { root: true })
     },
     async getTypes ({ state }) {
-      // console.log(await Client.getClassDocuments())
       let types = (await Client.getClasses())
         .filter(d => d['@subdocument'] == null)
         .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
@@ -89,14 +86,12 @@ export default {
       return { types, doctypes }
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
-      console.log('get', id)
       const properties = await getProperties(id, rootState.config.lang)
-      console.log(properties)
       const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
       const label = properties.find(p => p._id === 'label').value.label
       const doctypeProperties = getDoctypeProperties(doctype, rootState.config.lang)
       for (const prop of doctypeProperties) {
-        prop.value = properties.filter(({ _id }) => _id === prop._id).map(({ value }) => value)
+        prop.value = properties.filter(({ _id, inverse }) => _id === prop._id && inverse === prop.inverse).map(({ value }) => value)
       }
       const cover = properties.find(({ _id }) => _id === 'cover')?.path
       const entity = {
@@ -478,7 +473,7 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
           } else {
             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
             properties.push({
-              label: meta?.inverseLabel || `${meta?.label?.[lang] || propKey} (inverse)`,
+              label: meta?.inverseLabel?.[lang] || `${meta?.label?.[lang] || propKey} (inverse)`,
               priority: meta?.inversePriority || meta?.priority || 0,
               _id: propKey,
               supportedClasses: [doctypeKey],
@@ -511,6 +506,9 @@ async function getProperties (id, lang = 'en') {
         WOQL.triple('v:_id', 'v:prop', id),
         WOQL.triple(id, 'v:prop', 'v:_id')
       )
+      .opt(
+        WOQL.triple('v:inverse', 'v:prop', id)
+      )
       .opt(WOQL
         .triple('v:_id', lang, 'v:label')
       )
@@ -524,14 +522,15 @@ async function getProperties (id, lang = 'en') {
     throw err
   })
 
-  return flattenBindings(res.bindings).map(({ prop, _id, label, path }) => {
+  return flattenBindings(res.bindings).map(({ prop, _id, label, path, inverse }) => {
     return {
       _id: prop.replace(/@schema:/, ''),
       value: {
         _id,
         label: label || _id
       },
-      ...(path != null && { path })
+      ...(path != null && { path }),
+      ...(inverse != null && { inverse: true })
     }
   })
 }

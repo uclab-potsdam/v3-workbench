@@ -60,6 +60,7 @@ export default {
       this.updatePropertyOffsets({
         represents: this.represents,
         prop: this.prop._id,
+        inverse: this.prop.inverse,
         value: Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
       })
     },

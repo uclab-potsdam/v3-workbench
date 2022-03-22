@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     ...mapActions('data', ['addProp']),
-    ...mapActions('view', ['removeCard', 'setPropertyOffsets']),
+    ...mapActions('view', ['removeCard']),
     onDrop (e) {
       const { detail } = e
       if (detail.data.sub == null || detail.data.prop == null) return

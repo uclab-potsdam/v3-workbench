@@ -1,6 +1,6 @@
 <template>
   <div class="card"
-    :class="{ collapsed, 'context-search': context === 'search' }" :style="{...colors, transform}"
+    :class="{ collapsed, 'context-search': context === 'search', note: isNote }" :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
       obj: _id,
@@ -17,6 +17,7 @@
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
+      <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d._id === 'text')"/>
       <card-property v-for="(prop, i) in properties" :key="i"
         :prop="prop" :represents="_id"/>
     </main>
@@ -31,8 +32,9 @@ import CardHeader from './CardHeader.vue'
 import CardFooter from './CardFooter.vue'
 import CardProperty from './CardProperty.vue'
 import CardCover from './CardCover.vue'
+import CardNote from './CardNote.vue'
 export default {
-  components: { CardHeader, CardFooter, CardProperty, CardCover },
+  components: { CardHeader, CardFooter, CardProperty, CardCover, CardNote },
   name: 'BaseCard',
   directives: {
     drag,
@@ -72,6 +74,9 @@ export default {
         '--primary': `var(--${primary}-2)`,
         '--secondary': `var(--${secondary}-9)`
       }
+    },
+    isNote () {
+      return this.doctype?._id === 'Note'
     }
   },
   methods: {
@@ -120,6 +125,9 @@ export default {
   scrollbar-width: none;
 
   height: var(--card-height);
+  // &.note {
+  //   height: var(--card-width);
+  // }
 
   &.context-search {
     height: calc(var(--card-height) - var(--card-footer-height));

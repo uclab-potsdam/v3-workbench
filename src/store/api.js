@@ -99,7 +99,7 @@ export default {
         _id: id,
         label: label || id,
         cover,
-        properties: doctypeProperties.filter(d => !(d.inverse && d.value.length === 0)),
+        properties: doctypeProperties.filter(d => !(d.inverse && d.value.length === 0) && !(!d.linkProperty && d.value.length === 0 && d._id !== 'text')),
         doctype: {
           _id: doctype,
           label: doctype,
@@ -336,6 +336,11 @@ export default {
     },
     async addDocument ({ dispatch, state }, data) {
       return await Client.addDocument(atFrom_(data))
+    },
+    async updateNote (_, data) {
+      await Client.query(
+        WOQL.update_triple(...data)
+      )
     }
   },
   modules: {

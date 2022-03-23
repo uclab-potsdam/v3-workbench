@@ -6,22 +6,25 @@
       </div>
     </div>
     <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value._id} }" :class="{ inverse: prop.inverse }" v-for="(value, i) in prop.value || []" :key="i">
-      <div class="overflow-wrap" v-drag="{
+      <div class="overflow-wrap" x-v-drag="{
         mode: 'move-card',
         data: { _id: value._id }
       }">
         <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getColors(value._id)" v-if="prop.linkProperty" data="@icon/property-expand-l.svg" v-drag="{
+      <icon scale="1" :color="getColors(value._id)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="{
         mode: 'move-card',
         data: { _id: value._id }
       }"/>
+      <a v-if="url && prefixes[value.label.split(':')[0]]" :href="value.label.replace(/^([^:]+):/, (a, b, c) => prefixes[b])" target="_blank">
+        <icon scale="1" :color="getColors(value._id)" data="@icon/property-external-link.svg"/>
+      </a>
     </div>
     <div class="add" v-if="(prop.set || prop.value.length === 0) && !prop.inverse">
       <div class="overflow-wrap fade">
         <BaseTraverseLabel>{{prop.class}}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getAddColors()" data="@icon/property-add-l.svg" v-drag="{
+      <icon v-if="!primitive" scale="1" :color="getAddColors()" data="@icon/property-add-l.svg" v-drag="{
         mode: 'connect',
         data: {
           sub: represents,
@@ -35,7 +38,7 @@
 <script>
 import BaseTraverseLabel from './BaseTraverseLabel.vue'
 import drag from '@/assets/js/directives/drag'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 export default {
   components: { BaseTraverseLabel },
   name: 'CardProperty',
@@ -52,7 +55,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('view', ['hasCardWithEntity'])
+    ...mapGetters('view', ['hasCardWithEntity']),
+    ...mapState('data', ['prefixes']),
+    primitive () {
+      return !this.prop.linkProperty
+    },
+    url () {
+      return this.prop.class === 'xdd:url'
+    }
   },
   methods: {
     ...mapActions('view', ['updatePropertyOffsets']),

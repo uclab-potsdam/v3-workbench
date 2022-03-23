@@ -8,7 +8,8 @@ export default {
     searchResults: [],
     remoteSearchResults: [],
     types: [],
-    doctypes: {}
+    doctypes: {},
+    prefixes: {}
   },
   getters: {
     getEntity: (state) => (id) => {
@@ -48,9 +49,10 @@ export default {
   },
   actions: {
     async init ({ dispatch, commit }, id) {
-      const { types, doctypes } = await dispatch('api/getTypes', id, { root: true })
+      const { types, doctypes, prefixes } = await dispatch('api/getTypes', id, { root: true })
       commit('set', { types })
       commit('set', { doctypes })
+      commit('set', { prefixes })
     },
     async fetchEntity ({ state, dispatch, commit, getters }, id) {
       let card = state.cards.find(card => card._id === id)

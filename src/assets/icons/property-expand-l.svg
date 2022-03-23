@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25"><g fill="none" fill-rule="evenodd"><rect width="12" height="10" x="13" y="7.5" fill="#9D87FF"/><polygon fill="#EA5E36" fill-rule="nonzero" points="11.5 1.5 .5 12.5 11.5 23.5 22.5 12.5"/><path fill="#484A5E" fill-rule="nonzero" d="M11.5,2.5 L21.5,12.5 L11.5,22.5 L1.5,12.5 L11.5,2.5 Z M10.8535538,9.14644661 L10.146447,9.85355339 L12.7930004,12.5 L10.146447,15.1464466 L10.8535538,15.8535534 L14.2071072,12.5 L10.8535538,9.14644661 Z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25">
+  <g fill="none" fill-rule="evenodd">
+    <rect width="12" height="10" x="13" y="7.5" fill="#9D87FF" />
+    <polygon fill="#EA5E36" fill-rule="nonzero" points="11.5 1.5 .5 12.5 11.5 23.5 22.5 12.5" />
+    <path fill="#484A5E" fill-rule="nonzero" d="M11.5,2.5 L21.5,12.5 L11.5,22.5 L1.5,12.5 L11.5,2.5 Z M10.8535538,9.14644661 L10.146447,9.85355339 L12.7930004,12.5 L10.146447,15.1464466 L10.8535538,15.8535534 L14.2071072,12.5 L10.8535538,9.14644661 Z" />
+  </g>
+</svg>

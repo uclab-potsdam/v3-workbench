@@ -62,8 +62,10 @@ export default {
       commit('view/set', { cards: cards }, { root: true })
     },
     async getTypes ({ state }) {
-      let types = (await Client.getClasses())
-        .filter(d => d['@subdocument'] == null)
+      const schema = await Client.getSchema()
+
+      let types = schema
+        .filter(d => d['@id'] != null && d['@subdocument'] == null)
         .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
 
       // https://github.com/terminusdb/terminusdb/issues/668
@@ -83,7 +85,9 @@ export default {
       doctypes = Object.fromEntries(types.map(doctype => {
         return [doctype._id, doctype]
       }))
-      return { types, doctypes }
+
+      const prefixes = Object.fromEntries(Object.entries(schema.find(d => d['@id'] == null)).filter(d => !/^@/.test(d[0])))
+      return { types, doctypes, prefixes }
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
       const properties = await getProperties(id, rootState.config.languages)

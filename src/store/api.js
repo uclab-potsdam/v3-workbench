@@ -535,9 +535,6 @@ async function getProperties (id, languages = ['en', 'de', 'pt', 'es']) {
       .or(
         WOQL.triple(id, 'v:prop', 'v:_id')
           .opt(
-            WOQL.triple('v:inverse', 'v:prop', id)
-          )
-          .opt(
             WOQL.once(WOQL.or(
               ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
             ))

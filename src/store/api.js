@@ -331,10 +331,14 @@ export default {
     async getCanvases ({ dispatch, state }) {
       return atTo_(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
     },
-    async createCanvas ({ dispatch, state }, name) {
+    async createCanvas ({ dispatch, state, rootState }, { label, _id }) {
       const res = await Client.addDocument(atFrom_({
         _type: 'Canvas',
-        _id: `Canvas/${name.replace(/ /g, '-')}`
+        label: {
+          _type: 'Dictionary',
+          [rootState.config.lang]: label
+        },
+        _id
       }))
       return res
     },

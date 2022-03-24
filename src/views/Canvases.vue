@@ -42,8 +42,10 @@ export default {
   methods: {
     ...mapActions('api', ['getCanvases', 'createCanvas']),
     async create () {
-      await this.createCanvas(this.canvas)
-      this.$router.push({ name: 'Canvas', params: { id: this.canvas } })
+      const label = this.canvas
+      const _id = `Canvas/${label.replace(/ /g, '-')}`
+      await this.createCanvas({ label, _id })
+      this.$router.push(`/${_id}`)
     }
   }
 }

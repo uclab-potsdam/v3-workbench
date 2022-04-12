@@ -26,7 +26,7 @@ export default {
   actions: {
     async connect ({ commit, getters, rootState, dispatch }, credentials) {
       if (getters.connected) return
-      const { server, database } = rootState.config
+      const { server, database, branch } = rootState.config
       Client = new WOQLClient(server, {})
       try {
         await Client.connect(credentials)
@@ -36,6 +36,7 @@ export default {
         return false
       }
       Client.db(database)
+      Client.checkout(branch)
       await dispatch('data/init', null, { root: true })
       return true
     },

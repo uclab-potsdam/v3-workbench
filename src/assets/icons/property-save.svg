@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>property-save</title>
+    <g id="property-save" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path-9" fill="#EA5E36" fill-rule="nonzero" points="11.5 1.5 0.5 12.5 11.5 23.5 22.5 12.5"></polygon>
+        <path d="M11.5,2.5 L21.5,12.5 L11.5,22.5 L1.5,12.5 L11.5,2.5 Z M14.6464466,10.6464466 L11,14.293 L9.35355339,12.6464466 L8.64644661,13.3535534 L11,15.7071068 L15.3535534,11.3535534 L14.6464466,10.6464466 Z" id="Combined-Shape" fill="#484A5E" fill-rule="nonzero"></path>
+    </g>
+</svg>

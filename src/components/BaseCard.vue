@@ -48,7 +48,7 @@ export default {
     properties: Object,
     cover: String,
     cardId: String,
-    collapsed: Boolean,
+    // collapsed: Boolean,
     pane: String,
     context: String,
     scale: Number,
@@ -59,7 +59,7 @@ export default {
     return {
       widthLabel: 0,
       widthCard: 0,
-      isCollapsed: true,
+      collapsed: true,
       hover: false,
       dragActive: false
     }
@@ -89,6 +89,7 @@ export default {
       this.addProp([detail.data.sub, detail.data.prop, this._id])
     },
     toggleCollapse () {
+      this.collapsed = !this.collapsed
       this.$emit('toggleCollapse')
     },
     onRemoveCard () {

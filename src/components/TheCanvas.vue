@@ -26,7 +26,6 @@
         :key="card._id"
         :_id="card.represents"
         :card-id="card._id"
-        :collapsed="card.collapsed"
         :allow-drop="drag?.options?.mode === 'connect'"
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
@@ -198,7 +197,7 @@ export default {
         represents: detail.data._id,
         x: (detail.x - this.transform.x) / this.transform.k,
         y: (detail.y - this.transform.y) / this.transform.k,
-        collapsed: false
+          collapsed: true
       })
     },
     onRemoveCard (e) {

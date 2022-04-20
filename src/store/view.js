@@ -135,7 +135,7 @@ export default {
   actions: {
     toggleCollapse ({ commit, dispatch }, id) {
       commit('toggleCollapse', id)
-      dispatch('updateCard', id)
+      // dispatch('updateCard', id)
     },
     translateCard ({ commit, dispatch }, options) {
       commit('translateCard', options)

@@ -58,6 +58,7 @@ export default {
       const view = atTo_(await Client.getDocument({ id }))
       const cards = view.cards?.filter(card => card.represents != null) || []
       cards.forEach(card => dispatch('getEntity', card.represents))
+      cards.forEach(card => { card.collapsed = true })
       // const entities = await Promise.all(requests)
       // commit('data/storeEntities', entities, { root: true })
       commit('view/set', { cards: cards }, { root: true })

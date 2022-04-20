@@ -10,9 +10,10 @@
       <rect x="0" y="0" width="100%" height="100%" fill="url(#bg)"></rect>
       <g :transform="transform">
         <CanvasEdge
-          v-for="edge in edges"
-          :key="`${edge.source}/${edge.target}/${edge.prop}`"
+          v-for="(edge, i) in edges"
+          :key="`${edge.source}:${edge.prop._id}:${edge.target}`"
           v-bind="edge"
+          :path-id="i"
           :stroke-width="1 / transform.k" />
         <!-- <CanvasEdge
           v-if="tempEdge"

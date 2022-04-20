@@ -11,7 +11,8 @@
   --accent: rgb(var(--indigo-5));
   --dimmed: rgb(var(--blue-gray-10));
   --muted: rgb(var(--blue-gray-8));
-  --edges: rgb(var(--indigo-8));
+  --edges: rgb(var(--indigo-3));
+  --edges-label: rgb(var(--indigo-10));
   
   /**
   * @tokens Status Colors
@@ -43,6 +44,7 @@
     --dimmed: rgb(var(--blue-gray-2));
     --muted: rgb(var(--blue-gray-4));
     --edges: rgb(var(--indigo-3));
+    --edges-label: rgb(var(--indigo-8));
 
     --shadow: rgba(214,216,254,0.68); // eq --blue-gray-7 on --blue-gray-1
     --selection: rgba(29,55,126,0.8); // eq --indigo-2 on --blue-gray-1

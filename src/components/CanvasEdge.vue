@@ -1,18 +1,21 @@
 <template>
   <g class="edge">
-    <path class="shadow" :d="path" :stroke-width="10"
-      @mouseenter="showLabel = true" @mouseleave="showLabel = false"/>
+    <!-- <path class="shadow" :d="path" :stroke-width="12"
+      @mouseenter="showLabel = true" @mouseleave="showLabel = false"/> -->
     <!-- <path :d="path" :stroke-width="strokeWidth * 15"/> -->
-    <path class="outline" :d="path" :stroke-width="12"/>
-    <path :d="path" :stroke-width="10"/>
-    <!-- <text v-if="showLabel">
-      <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="strokeWidth * 4">
+    <path class="outline" :d="path" :stroke-width="17"/>
+    <path :d="path" :id="`path-${pathId}`" :stroke-width="15"/>
+    <text>
+      <!-- <textPath class="shadow" :path="path" startOffset="50%" dominant-baseline="middle" :stroke-width="10">
         {{ label }}
-      </textPath>
-      <textPath :path="path" startOffset="50%" dominant-baseline="middle">
+      </textPath> -->
+      <!-- <textPath :path="path" startOffset="50%" dominant-baseline="middle">
         {{ label }}
+      </textPath> -->
+      <textPath v-for="(l, i) in labels" :key="i" :href="`#path-${pathId}`" :startOffset="`${l}%`" dominant-baseline="middle">
+        {{ i % 2 ? label : arrow }}
       </textPath>
-    </text> -->
+    </text>
   </g>
 </template>
 
@@ -27,7 +30,8 @@ export default {
     label: String,
     source: String,
     target: String,
-    strokeWidth: Number
+    strokeWidth: Number,
+    pathId: Number
   },
   data () {
     return {
@@ -35,6 +39,14 @@ export default {
     }
   },
   computed: {
+    labels () {
+      const distance = Math.sqrt(Math.pow(this.x1 - this.x2, 2) + Math.pow(this.y1 - this.y2, 2))
+      const occurances = Math.max(Math.floor(distance / 350), 1) * 2 + 1
+      return '.'.repeat(occurances).split('').map((d, i) => 100 / (occurances + 1) * (i + 1))
+    },
+    arrow () {
+      return (this.x1 + 180) < this.x2 ? '→' : '←'
+    },
     path () {
       const x1 = this.x1 + 180
       const y1 = this.y1
@@ -64,9 +76,11 @@ export default {
   }
   text {
     text-anchor: middle;
+    font-size: var(--font-size);
+    fill: var(--edges-label);
 
     .shadow {
-      stroke: white;
+      stroke: var(--edges);;
     }
   }
 }

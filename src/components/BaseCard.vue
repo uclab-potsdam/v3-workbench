@@ -11,23 +11,24 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="label" :doctype="doctype?.label" @click="toggleCollapse"/>
+    <CardHeader :label="label" :doctype="doctype?.label" @click="toggleCollapse">
+      <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
+        collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
+        'rgb(var(--secondary))',
+        'currentColor'
+      ]" v-drag="{
+        mode: 'connect',
+        data: {
+          sub: _id,
+          doctype: doctype?._id
+        }
+      }"/>
+    </CardHeader>
     <card-footer v-if="!collapsed && context !== 'search'">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
        <icon @click="confirmDeleteEntity = true" scale="1" data="@icon/delete.svg"/>
-       <template #right>
-        <icon data="@icon/property-add-l.svg" :color="[
-          'none',
-          'rgb(var(--secondary))',
-          'currentColor'
-        ]" v-drag="{
-          mode: 'connect',
-          data: {
-            sub: _id,
-            doctype: doctype?._id
-          }
-        }"/>
-       </template>
+       <!-- <template #right>
+       </template> -->
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
@@ -102,6 +103,9 @@ export default {
     },
     isNote () {
       return this.doctype?._id === 'Note'
+    },
+    hasOutgoingConnections () {
+      return this.properties?.find(p => p.linkProperty && !p.inverse && p.value.length > 0) != null
     }
   },
   methods: {

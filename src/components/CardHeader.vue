@@ -4,6 +4,9 @@
       {{ label }}
     </BaseTraverseLabel>
     <h3>{{ doctype }}</h3>
+    <div class="icon">
+      <slot/>
+    </div>
   </header>
 </template>
 
@@ -33,5 +36,10 @@ export default {
     padding: var(--spacing);
     white-space: nowrap;
     overflow: hidden;
+
+    .icon {
+      position: absolute;
+      right: 0;
+    }
   }
 </style>

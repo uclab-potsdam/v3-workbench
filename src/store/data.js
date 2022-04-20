@@ -95,16 +95,13 @@ export default {
       dispatch('api/getEntity', triple[0], { root: true })
       dispatch('api/getEntity', triple[2], { root: true })
     },
-    async removeProp ({ dispatch, getters, commit }, { _id, prop, value }) {
-      // TODO: simplify to sth like addProp
-      const document = { ...getters.getEntity(_id) }
-      if (Array.isArray(document[prop])) {
-        document[prop] = document[prop].filter(d => d !== value)
-      } else {
-        delete document[prop]
-      }
-      commit('updateDocument', document)
-      await dispatch('api/updateDocument', document, { root: true })
+    async removeProp ({ dispatch, getters, commit }, triple) {
+      await dispatch('api/removeTriple', triple, { root: true })
+      dispatch('api/getEntity', triple[0], { root: true })
+      dispatch('api/getEntity', triple[2], { root: true })
+    },
+    async deleteEntity ({ dispatch }, id) {
+      await dispatch('api/deleteDocument', id, { root: true })
     }
   },
   modules: {

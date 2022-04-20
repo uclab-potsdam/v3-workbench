@@ -1,7 +1,12 @@
 <template>
   <footer>
     <div class="wrapper blur">
-      <slot/>
+      <div>
+        <slot/>
+      </div>
+      <div>
+        <slot name="right"/>
+      </div>
     </div>
   </footer>
 </template>
@@ -21,6 +26,13 @@ footer {
 
   .wrapper {
     padding: calc(var(--spacing-s) + var(--spacing-xs));
+    display: flex;
+    justify-content: space-between;
+
+    > div {
+      display: flex;
+      gap: var(--spacing-s);
+    }
   }
 }
 </style>

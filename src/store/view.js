@@ -61,6 +61,7 @@ export default {
                   target: target._id,
                   x2: target.x,
                   y2: target.y + targetOffset,
+                  label: prop.label,
                   prop
                 })
               }
@@ -157,7 +158,7 @@ export default {
     async removeCard ({ commit, dispatch }, _id) {
       commit('removeCard', _id)
       // console.log(_id)
-      await dispatch('api/deleteObject', _id, { root: true })
+      // await dispatch('api/deleteDocument', _id, { root: true })
     },
     async updateCard ({ dispatch, state }, _id) {
       const card = state.cards.find(card => card._id === _id)

@@ -14,6 +14,20 @@
     <CardHeader :label="label" :doctype="doctype?.label" @click="toggleCollapse"/>
     <card-footer v-if="!collapsed && context !== 'search'">
        <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
+       <icon @click="confirmDeleteEntity = true" scale="1" data="@icon/delete.svg"/>
+       <template #right>
+        <icon data="@icon/property-add-l.svg" :color="[
+          'none',
+          'rgb(var(--secondary))',
+          'currentColor'
+        ]" v-drag="{
+          mode: 'connect',
+          data: {
+            sub: _id,
+            doctype: doctype?._id
+          }
+        }"/>
+       </template>
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
@@ -21,6 +35,12 @@
       <card-property v-for="(prop, i) in properties" :key="i"
         :prop="prop" :represents="_id"/>
     </main>
+    <base-modal v-if="sub != null" @close="closePropSelect">
+      <card-select :options="propOptions" @select="selectProperty"/>
+    </base-modal>
+    <base-modal v-if="confirmDeleteEntity" @close="confirmDeleteEntity = false">
+      <card-select :options="['Permanently Delete Entity']" @select="onDeleteEntity"/>
+    </base-modal>
   </div>
 </template>
 
@@ -33,8 +53,10 @@ import CardFooter from './CardFooter.vue'
 import CardProperty from './CardProperty.vue'
 import CardCover from './CardCover.vue'
 import CardNote from './CardNote.vue'
+import BaseModal from './BaseModal.vue'
+import CardSelect from './CardSelect.vue'
 export default {
-  components: { CardHeader, CardFooter, CardProperty, CardCover, CardNote },
+  components: { CardHeader, CardFooter, CardProperty, CardCover, CardNote, BaseModal, CardSelect },
   name: 'BaseCard',
   directives: {
     drag,
@@ -61,18 +83,21 @@ export default {
       widthCard: 0,
       collapsed: true,
       hover: false,
-      dragActive: false
+      dragActive: false,
+      sub: null,
+      propOptions: [],
+      confirmDeleteEntity: false
     }
   },
   computed: {
     ...mapState('config', ['fileServer']),
-    ...mapGetters('data', ['getType', 'getEntity', 'getLabel']),
+    ...mapGetters('data', ['getProperties']),
     colors () {
       if (this.doctype?.secondary == null) return
       const { secondary, primary } = this.doctype
       return {
-        '--primary': `var(--${primary}-2)`,
-        '--secondary': `var(--${secondary}-9)`
+        '--primary': /-[0-9]+/.test(primary) ? `var(--${primary})` : `var(--${primary}-2)`,
+        '--secondary': /-[0-9]+/.test(secondary) ? `var(--${secondary})` : `var(--${secondary}-9)`
       }
     },
     isNote () {
@@ -81,12 +106,26 @@ export default {
   },
   methods: {
     ...mapActions('data', ['addProp']),
+    ...mapActions('api', ['deleteDocument']),
     ...mapActions('view', ['removeCard']),
     onDrop (e) {
       const { detail } = e
-      if (detail.data.sub == null || detail.data.prop == null) return
+      if (detail.data.sub == null) return
       e.stopPropagation()
-      this.addProp([detail.data.sub, detail.data.prop, this._id])
+      if (detail.data.prop == null) {
+        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }))
+        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(({ prop }) => prop)
+        this.sub = detail.data.sub
+      } else {
+        this.addProp([detail.data.sub, detail.data.prop, this._id])
+      }
+    },
+    closePropSelect () {
+      this.sub = null
+    },
+    selectProperty (prop) {
+      this.addProp([this.sub, prop, this._id])
+      this.closePropSelect()
     },
     toggleCollapse () {
       this.collapsed = !this.collapsed
@@ -94,6 +133,11 @@ export default {
     },
     onRemoveCard () {
       this.removeCard(this.cardId)
+      this.deleteDocument(this.cardId)
+    },
+    onDeleteEntity () {
+      this.removeCard(this.cardId)
+      this.deleteDocument(this._id)
     }
   }
 }

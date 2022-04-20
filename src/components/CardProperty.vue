@@ -1,18 +1,18 @@
 <template>
-  <section v-if="!prop.meta?.hidden" class="property">
+  <section v-if="!prop.meta?.hidden && prop.value.length > 0" class="property">
     <div class="label" @click="logOffset">
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ prop.label }}</BaseTraverseLabel>
       </div>
     </div>
     <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value._id} }" :class="{ inverse: prop.inverse }" v-for="(value, i) in prop.value || []" :key="i">
-      <div class="overflow-wrap" x-v-drag="{
-        mode: 'move-card',
-        data: { _id: value._id }
-      }">
+      <div class="overflow-wrap">
         <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getColors(value._id)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="{
+      <icon scale="1" :color="getColors(value._id)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value._id) ? {
+        mode: 'remove-prop',
+        data: [prop.inverse ? value._id : represents, prop._id, prop.inverse ? represents : value._id]
+      } : {
         mode: 'move-card',
         data: { _id: value._id }
       }"/>
@@ -20,7 +20,7 @@
         <icon scale="1" :color="getColors(value._id)" data="@icon/property-external-link.svg"/>
       </a>
     </div>
-    <div class="add" v-if="(prop.set || prop.value.length === 0) && !prop.inverse">
+    <!-- <div class="add" v-if="(prop.set || prop.value.length === 0) && !prop.inverse">
       <div class="overflow-wrap fade">
         <BaseTraverseLabel>{{prop.class}}</BaseTraverseLabel>
       </div>
@@ -31,7 +31,7 @@
           prop: prop._id,
         }
       }"/>
-    </div>
+    </div> -->
   </section>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="container" v-resize="s => size = s" ref="container" v-drop="{filter: ['move-card']}" @dropped="onDrop">
+  <div class="container" v-resize="s => size = s" ref="container" v-drop="{filter: ['move-card', 'remove-prop']}" @dropped="onDrop">
     <svg width="100%" height="100%">
       <defs>
         <pattern id="bg" v-bind="pattern" patternUnits="userSpaceOnUse">
@@ -194,12 +194,23 @@ export default {
     onDrop (e) {
       e.stopPropagation()
       const { detail } = e
-      this.dropCard({
-        represents: detail.data._id,
-        x: (detail.x - this.transform.x) / this.transform.k,
-        y: (detail.y - this.transform.y) / this.transform.k,
+      if (detail.mode === 'move-card') {
+        this.dropCard({
+          represents: detail.data._id,
+          x: (detail.x - this.transform.x) / this.transform.k,
+          y: (detail.y - this.transform.y) / this.transform.k,
           collapsed: true
-      })
+        })
+      }
+      if (detail.mode === 'remove-prop') {
+        this.removeProp(detail.data)
+        // this.dropCard({
+        //   represents: detail.data._id,
+        //   x: (detail.x - this.transform.x) / this.transform.k,
+        //   y: (detail.y - this.transform.y) / this.transform.k,
+        //   collapsed: false
+        // })
+      }
     },
     onRemoveCard (e) {
       this.drag = null
@@ -212,7 +223,7 @@ export default {
       this.drag = null
       // find a card with matching ids
       this.removeCard(this.cards.find(c => c.represents === e._id)._id)
-      this.deleteObject(e._id)
+      this.deleteDocument(e._id)
     },
     onAddProp (e) {
       if (this.drag?.options?.mode !== 'connect') return

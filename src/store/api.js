@@ -299,7 +299,7 @@ export default {
       //     .add_triple(view, 'scm:cards', { '@id': id })
       // })
     },
-    async deleteObject ({ state }, id) {
+    async deleteDocument ({ state }, id) {
       await Client.deleteDocument({ id })
     },
     async addTriple ({ state, commit, dispatch }, triple) {

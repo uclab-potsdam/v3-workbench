@@ -12,6 +12,7 @@ async function mouseUp (el, e) {
   e.stopPropagation()
   window.dispatchEvent(e.type === 'touchend' ? new TouchEvent(e.type, e) : new MouseEvent(e.type, e))
   const { x, y } = store.getters['dragdrop/position']
+  const mode = store.state.dragdrop.mode
   const data = await store.dispatch('dragdrop/getData')
   if (data == null) return
   if (e.type !== 'touchend') {
@@ -20,6 +21,7 @@ async function mouseUp (el, e) {
         ...el.dropOptions,
         x,
         y,
+        mode,
         data
       }
     }))

@@ -1,4 +1,5 @@
 // refactor: replace `card` with `entity`
+import * as schema from '@/assets/js/helper/schema'
 
 export default {
   namespaced: true,
@@ -24,6 +25,9 @@ export default {
         _id,
         label: state.labels[_id] || _id
       }
+    },
+    getProperties: (state) => ({ sub, obj }) => {
+      return schema.propsBetween(state.doctypes, sub, obj)
     }
   },
   mutations: {

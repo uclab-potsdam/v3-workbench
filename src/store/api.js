@@ -1,7 +1,6 @@
 import { WOQLClient, WOQL } from '@terminusdb/terminusdb-client'
 import { WikidataSearch, QueryWikidata, WikidataProps } from '@/assets/js/query/wikidata'
 import { v4 as uuid } from 'uuid'
-// import deepclone from 'rfdc/default'
 
 let Client = null
 let doctypes = {}
@@ -12,7 +11,7 @@ export default {
     prefixes: []
   },
   getters: {
-    connected (state) {
+    connected () {
       return Client != null
     }
   },
@@ -24,7 +23,7 @@ export default {
     }
   },
   actions: {
-    async connect ({ commit, getters, rootState, dispatch }, credentials) {
+    async connect ({ getters, rootState, dispatch }, credentials) {
       if (getters.connected) return
       const { server, database, branch } = rootState.config
       Client = new WOQLClient(server, {})
@@ -40,12 +39,10 @@ export default {
       await dispatch('data/init', null, { root: true })
       return true
     },
-    disconnect ({ commit }) {
+    disconnect () {
       Client = null
     },
-    async query ({ state, dispatch }, { query, msg }) {
-      // await dispatch('connect')
-      msg = msg != null ? `WB - ${msg}` : null
+    async query (_, { query, msg }) {
       return await Client.query(query, msg)
         .then((res) => {
           return flattenBindings(res.bindings)
@@ -59,8 +56,6 @@ export default {
       const cards = view.cards?.filter(card => card.represents != null) || []
       cards.forEach(card => dispatch('getEntity', card.represents))
       cards.forEach(card => { card.collapsed = true })
-      // const entities = await Promise.all(requests)
-      // commit('data/storeEntities', entities, { root: true })
       commit('view/set', { cards: cards }, { root: true })
     },
     async getTypes ({ state }) {
@@ -479,12 +474,13 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
       const className = prop._class || prop
       const meta = doctypes[doctype]._metadata?._properties?.[key]
       properties.push({
-        label: meta?.label?.[lang] || key.replace(/_/g, ' '),
+        label: meta?.inverse ? meta?.inverseLabel?.[lang] : meta?.label?.[lang] || key,
         priority: meta?.priority || 0,
         _id: key,
         class: className,
         supportedClasses: [className, ...getSubClasses(className)],
         set: prop._type === 'Set',
+        // inverse: meta?.inverse === true,
         linkProperty: isLinkedProperty(key, doctype),
         source: prop,
         meta
@@ -502,11 +498,12 @@ function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
           } else {
             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
             properties.push({
-              label: meta?.inverseLabel?.[lang] || `${propKey.replace(/_/g, ' ')} (inverse)`,
+              label: meta?.inverse ? meta?.label?.[lang] : meta?.inverseLabel?.[lang] || `${propKey} (inverse)`,
               priority: meta?.inversePriority || meta?.priority || 0,
               _id: propKey,
               supportedClasses: [doctypeKey],
               set: prop._type === 'Set',
+              // inverse: meta?.inverse !== true,
               inverse: true,
               linkProperty: isLinkedProperty(propKey, doctypeKey),
               source: prop,

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@storybook/preset-scss": "^1.0.3",
-    "@terminusdb/terminusdb-client": "github:terminusdb/terminusdb-client-js",
+    "@terminusdb/terminusdb-client": "^10.0.10",
     "@yzfe/svgicon": "^1.1.0",
     "@yzfe/svgicon-loader": "^1.1.0",
     "@yzfe/vue3-svgicon": "^1.0.1",

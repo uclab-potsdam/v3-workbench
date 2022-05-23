@@ -11,7 +11,7 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="label" :doctype="doctype?._id" @click="toggleCollapse">
+    <CardHeader :label="getLabel(entity.label)" :doctype="getLabel(doctype.metadata.label)" @click="toggleCollapse">
       <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
         collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',
@@ -33,7 +33,7 @@
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
       <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d._id === 'text')"/>
-      <card-property v-for="(prop, i) in properties" :key="i"
+      <card-property v-for="(prop, i) in entity.properties" :key="i"
         :prop="prop" :represents="_id"/>
     </main>
     <base-modal v-if="sub != null" @close="closePropSelect">
@@ -66,8 +66,9 @@ export default {
   emits: ['drag', 'toggleCollapse', 'removeProp', 'setTempEdge', 'clearTempEdge'],
   props: {
     _id: String,
-    label: String,
-    doctype: Object,
+    // label: String,
+    // doctype: Object,
+    entity: Object,
     properties: Object,
     cover: String,
     cardId: String,
@@ -92,14 +93,23 @@ export default {
   },
   computed: {
     ...mapState('config', ['fileServer']),
-    ...mapGetters('data', ['getProperties']),
+    ...mapGetters('data', ['getProperties', 'getClass']),
+    ...mapGetters('config', ['getLabel']),
     colors () {
-      if (this.doctype?.secondary == null) return
-      const { secondary, primary } = this.doctype
+      if (this.doctype?.metadata?.secondary == null) return
+      const { secondary, primary } = this.doctype.metadata
       return {
         '--primary': /-[0-9]+/.test(primary) ? `var(--${primary})` : `var(--${primary}-2)`,
         '--secondary': /-[0-9]+/.test(secondary) ? `var(--${secondary})` : `var(--${secondary}-9)`
       }
+    },
+    doctype () {
+      // console.log(this.entity)
+      return this.getClass(this.entity.doctype)
+    },
+    label () {
+      // console.log(this.entity)
+      return this.getLabel(this.entity?.label)
     },
     isNote () {
       return this.doctype?._id === 'Note'

@@ -1,5 +1,4 @@
 // refactor: replace `card` with `entity`
-import * as schema from '@/assets/js/helper/schema'
 
 export default {
   namespaced: true,
@@ -8,16 +7,16 @@ export default {
     labels: {},
     searchResults: [],
     remoteSearchResults: [],
-    types: [],
-    doctypes: {},
-    prefixes: {}
+    prefixes: {},
+    classes: [],
+    props: []
   },
   getters: {
     getEntity: (state) => (id) => {
       return state.cards.find(card => card._id === id)
     },
-    getType: (state) => (id) => {
-      return state.types.find(d => d._id === id)
+    getClass: (state) => (id) => {
+      return state.classes.find(d => d._id === id)
     },
     getLabel: (state) => (_id) => {
       if (_id == null) return null
@@ -27,7 +26,7 @@ export default {
       }
     },
     getProperties: (state) => ({ sub, obj }) => {
-      return schema.propsBetween(state.doctypes, sub, obj)
+      return state.props.filter(({ domain, range }) => domain.includes(sub) && range.includes(obj))
     }
   },
   mutations: {
@@ -41,6 +40,8 @@ export default {
       state.cards.push(entity)
     },
     storeEntities (state, entities) {
+      const ids = entities.map(e => e._id)
+      state.cards = state.cards.filter(({ _id }) => ids.includes(_id))
       state.cards.push(...entities)
     },
     storeEntityLabel (state, card) {
@@ -52,12 +53,6 @@ export default {
     }
   },
   actions: {
-    async init ({ dispatch, commit }, id) {
-      const { types, doctypes, prefixes } = await dispatch('api/getTypes', id, { root: true })
-      commit('set', { types })
-      commit('set', { doctypes })
-      commit('set', { prefixes })
-    },
     async fetchEntity ({ state, dispatch, commit, getters }, id) {
       let card = state.cards.find(card => card._id === id)
       if (card != null) return card
@@ -65,7 +60,7 @@ export default {
       commit('storeEntity', card)
       commit('storeEntityLabel', card)
       // get Labels for linked properties
-      const type = getters.getType(card._type)
+      const type = getters.getClass(card._type)
       for (const prop in type) {
         // skip terminus properties
         if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {

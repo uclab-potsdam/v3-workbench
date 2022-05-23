@@ -31,6 +31,8 @@
         :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
         :scale="transform.k"
         v-bind="getEntity(card.represents)"
+        :card="card"
+        :entity="getEntity(card.represents)"
         @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"

@@ -56,6 +56,7 @@ export default {
   },
   computed: {
     ...mapGetters('view', ['hasCardWithEntity']),
+    ...mapGetters('config', ['getLabel']),
     ...mapState('data', ['prefixes']),
     primitive () {
       return !this.prop.linkProperty
@@ -63,6 +64,10 @@ export default {
     url () {
       return this.prop.class === 'xdd:url'
     }
+    // propLabel () {
+    //   const dictionary = this.prop.inverse && ? this.prop.metadata.
+    //   return this.getLabel()
+    // }
   },
   methods: {
     ...mapActions('view', ['updatePropertyOffsets']),

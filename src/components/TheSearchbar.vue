@@ -73,13 +73,13 @@ export default {
     ...mapState('data', [
       'searchResults',
       'remoteSearchResults',
-      'types'
+      'classes'
     ]),
     ...mapState('config', [
       'lang'
     ]),
     doctypeOptions () {
-      return [{ label: 'All', value: null }, ...this.types.filter(d => d._abstract == null).map(t => {
+      return [{ label: 'All', value: null }, ...this.classes.filter(d => d._abstract == null).map(t => {
         return { label: t._metadata?.label?.[this.lang] || t._id, value: t._id }
       })]
     },

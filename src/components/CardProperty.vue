@@ -119,6 +119,10 @@ export default {
       width: calc(var(--card-width) - 37.5px);
     }
 
+    a {
+      z-index: 1;
+    }
+
     .svg-icon {
       color: rgba(var(--primary), 0.3);
       transition: color var(--transition) var(--transition);

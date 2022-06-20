@@ -34,7 +34,8 @@ function transformSchema (s) {
             domain,
             _type,
             doctype: c._id,
-            _class
+            _class,
+            primitive: /:/.test(_class)
           }
         })
       return props

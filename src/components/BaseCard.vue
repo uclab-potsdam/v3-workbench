@@ -11,7 +11,7 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="getLabel(entity.label)" :doctype="getLabel(doctype.metadata.label)" @click="toggleCollapse">
+    <CardHeader :label="getLabel(entity.label)" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
       <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
         collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',
@@ -32,8 +32,8 @@
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
-      <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d._id === 'text')"/>
-      <card-property v-for="(prop, i) in entity.properties" :key="i"
+      <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d.id === 'text')"/>
+      <card-property v-for="(prop, i) in entityProperties" :key="i"
         :prop="prop" :represents="_id"/>
     </main>
     <base-modal v-if="sub != null" @close="closePropSelect">
@@ -93,6 +93,7 @@ export default {
   },
   computed: {
     ...mapState('config', ['fileServer']),
+    ...mapState('data', ['classes', 'props']),
     ...mapGetters('data', ['getProperties', 'getClass']),
     ...mapGetters('config', ['getLabel']),
     colors () {
@@ -116,6 +117,14 @@ export default {
     },
     hasOutgoingConnections () {
       return this.properties?.find(p => p.linkProperty && !p.inverse && p.value.length > 0) != null
+    },
+    entityProperties () {
+      return this.entity.properties.map(d => {
+        return {
+          ...d,
+          ...this.props.find(p => p._id === d.id)
+        }
+      }).filter(d => d.metadata != null && !d.metadata.hidden)
     }
   },
   methods: {

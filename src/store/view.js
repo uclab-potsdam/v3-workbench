@@ -24,14 +24,21 @@ export default {
       state.cards.forEach(card => {
         const entity = rootGetters['data/getEntity'](card.represents)
         if (entity == null) return
-        for (const prop of entity.properties) {
-          if (prop.linkProperty && !prop.meta?.hidden && !prop.inverse && prop.value != null) {
-            [prop.value].flat().forEach(value => {
-              const target = getters.getCardByEntity(value._id)
+
+        const entityProperties = entity.properties.map(d => {
+          return {
+            ...d,
+            ...rootState.data.props.find(p => p._id === d.id)
+          }
+        })
+        for (const prop of entityProperties) {
+          if (!prop.primitive && !prop.metadata?.hidden && !prop.inverse && prop.values != null) {
+            [prop.values].flat().forEach(value => {
+              const target = getters.getCardByEntity(value.value)
               if (target != null) {
                 let cardOffset = 30
                 if (!card.collapsed) {
-                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.default?.[value._id]
+                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.default?.[value.value]
                   // const offset = 0
                   const scroll = state.cardScrolls[card._id] || 0
                   if (offset != null) {
@@ -43,8 +50,7 @@ export default {
 
                 let targetOffset = 30
                 if (!target.collapsed) {
-                  const offset = state.propertyOffsets[value._id]?.[prop._id]?.inverse?.[card.represents]
-                  // const offset = 0
+                  const offset = state.propertyOffsets[value.value]?.[prop._id]?.inverse?.[card.represents]
                   const scroll = state.cardScrolls[target._id] || 0
                   if (offset != null) {
                     targetOffset = offset - scroll + 12.5
@@ -60,7 +66,7 @@ export default {
                   target: target._id,
                   x2: target.x,
                   y2: target.y + targetOffset,
-                  label: prop.label,
+                  label: rootGetters['config/getLabel'](prop.metadata.label),
                   prop
                 })
               }

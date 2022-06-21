@@ -291,7 +291,7 @@ export default {
       //   ...data
       // })
       if (rootGetters['data/getEntity'](card.represents) == null) {
-        dispatch('getEntity', card.represents)
+        dispatch('getEntities', [card.represents])
       }
 
       await Client.query(WOQL

@@ -135,8 +135,11 @@ export default {
       if (detail.data.sub == null) return
       e.stopPropagation()
       if (detail.data.prop == null) {
-        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }))
-        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(({ prop }) => prop)
+        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id })[0])
+        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => ({
+          value: prop._id,
+          label: this.getLabel(prop.metadata.label)
+        }))
         this.sub = detail.data.sub
       } else {
         this.addProp([detail.data.sub, detail.data.prop, this._id])

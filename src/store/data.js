@@ -41,7 +41,7 @@ export default {
     },
     storeEntities (state, entities) {
       const ids = entities.map(e => e._id)
-      state.cards = state.cards.filter(({ _id }) => ids.includes(_id))
+      state.cards = state.cards.filter(({ _id }) => !ids.includes(_id))
       state.cards.push(...entities)
     },
     storeEntityLabel (state, card) {
@@ -53,47 +53,47 @@ export default {
     }
   },
   actions: {
-    async fetchEntity ({ state, dispatch, commit, getters }, id) {
-      let card = state.cards.find(card => card._id === id)
-      if (card != null) return card
-      card = await dispatch('api/getEntity', id, { root: true })
-      commit('storeEntity', card)
-      commit('storeEntityLabel', card)
-      // get Labels for linked properties
-      const type = getters.getClass(card._type)
-      for (const prop in type) {
-        // skip terminus properties
-        if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {
-          dispatch('fetchLabels', card[prop])
-          // type[prop].isLinkedProperty = (type[prop]._class || type[prop]).match(/:/) == null
-          // props.push({
-          //   _id: prop,
-          //   label: prop, // TODO replace with actual label
-          //   value: this.card[prop],
-          //   ...t[prop]
-          // })
-        }
-      }
-      return card
-    },
-    async fetchLabels ({ state, dispatch, commit }, ids) {
-      // const wasArray = Array.isArray(ids)
-      for (const _id of [ids].flat()) {
-        if (state.labels[_id] != null) return state.labels[_id]
-        // const label = await dispatch('api/getLabel', _id, { root: true })
-        // commit('storeEntityLabel', { _id, label })
-      }
-      // return wasArray ? labels : labels[0]
-    },
+    // async fetchEntity ({ state, dispatch, commit, getters }, id) {
+    //   let card = state.cards.find(card => card._id === id)
+    //   if (card != null) return card
+    //   card = await dispatch('api/getEntity', id, { root: true })
+    //   commit('storeEntity', card)
+    //   commit('storeEntityLabel', card)
+    //   // get Labels for linked properties
+    //   const type = getters.getClass(card._type)
+    //   for (const prop in type) {
+    //     // skip terminus properties
+    //     if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {
+    //       dispatch('fetchLabels', card[prop])
+    //       // type[prop].isLinkedProperty = (type[prop]._class || type[prop]).match(/:/) == null
+    //       // props.push({
+    //       //   _id: prop,
+    //       //   label: prop, // TODO replace with actual label
+    //       //   value: this.card[prop],
+    //       //   ...t[prop]
+    //       // })
+    //     }
+    //   }
+    //   return card
+    // },
+    // async fetchLabels ({ state, dispatch, commit }, ids) {
+    //   // const wasArray = Array.isArray(ids)
+    //   for (const _id of [ids].flat()) {
+    //     if (state.labels[_id] != null) return state.labels[_id]
+    //     // const label = await dispatch('api/getLabel', _id, { root: true })
+    //     // commit('storeEntityLabel', { _id, label })
+    //   }
+    //   // return wasArray ? labels : labels[0]
+    // },
     async addProp ({ dispatch }, triple) {
       await dispatch('api/addTriple', triple, { root: true })
-      dispatch('api/getEntity', triple[0], { root: true })
-      dispatch('api/getEntity', triple[2], { root: true })
+      dispatch('api/getEntities', [triple[0]], { root: true })
+      dispatch('api/getEntities', [triple[2]], { root: true })
     },
     async removeProp ({ dispatch, getters, commit }, triple) {
       await dispatch('api/removeTriple', triple, { root: true })
-      dispatch('api/getEntity', triple[0], { root: true })
-      dispatch('api/getEntity', triple[2], { root: true })
+      dispatch('api/getEntities', [triple[0]], { root: true })
+      dispatch('api/getEntities', [triple[2]], { root: true })
     },
     async deleteEntity ({ dispatch }, id) {
       await dispatch('api/deleteDocument', id, { root: true })

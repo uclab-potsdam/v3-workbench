@@ -9,12 +9,12 @@
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ getDisplayValue(value) }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getColors(value.value)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value._id) ? {
+      <icon scale="1" :color="getColors(value.value)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value.value) ? {
         mode: 'remove-prop',
-        data: [prop.inverse ? value._id : represents, prop._id, prop.inverse ? represents : value._id]
+        data: [prop.inverse ? value.value : represents, prop._id, prop.inverse ? represents : value.value]
       } : {
         mode: 'move-card',
-        data: { _id: value._id }
+        data: { _id: value.value }
       }"/>
       <a v-if="url && prefixes[getDisplayValue(value).split(':')[0]]" :href="getDisplayValue(value).replace(/^([^:]+):/, (a, b, c) => prefixes[b])" target="_blank">
         <icon scale="1" :color="getColors(value.value)" data="@icon/property-external-link.svg"/>

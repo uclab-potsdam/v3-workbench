@@ -1,5 +1,5 @@
 <template>
-  <div class="card"
+  <div v-if="entity != null" class="card"
     :class="{ collapsed, 'context-search': context === 'search', note: isNote }" :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
@@ -105,7 +105,6 @@ export default {
       }
     },
     doctype () {
-      // console.log(this.entity)
       return this.getClass(this.entity.doctype)
     },
     label () {

@@ -1,11 +1,13 @@
 <template>
-  <header>
-    <h1>{{$route.name}}</h1>
-  </header>
-  <div class="container">
-    <main class="border shadow">
-      <slot/>
-    </main>
+  <div>
+    <header>
+      <h1>{{$route.name}}</h1>
+    </header>
+    <div class="container">
+      <main class="border shadow">
+        <slot/>
+      </main>
+    </div>
   </div>
 </template>
 

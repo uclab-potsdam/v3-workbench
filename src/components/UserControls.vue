@@ -1,6 +1,6 @@
 <template>
   <div v-if="isAuthenticated" class="controls shadow">
-    <BaseButton class="no-outline" :disabled="max" @click="signOut">
+    <BaseButton class="no-outline" @click="signOut">
       <icon :scale="1" data="@icon/sign-out.svg"/>
       <!-- <inline-svg :src="require('@/assets/icons/btn-zoom_in.svg')"/> -->
     </BaseButton>
@@ -12,7 +12,7 @@ import { mapGetters } from 'vuex'
 import BaseButton from './BaseButton.vue'
 export default {
   components: { BaseButton },
-  name: 'CanvasControls',
+  name: 'UserControls',
   computed: {
     ...mapGetters('auth', ['isAuthenticated'])
   },

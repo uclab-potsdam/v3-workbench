@@ -31,7 +31,8 @@ export default {
     source: String,
     target: String,
     strokeWidth: Number,
-    pathId: Number
+    pathId: Number,
+    prop: Object
   },
   data () {
     return {
@@ -45,13 +46,17 @@ export default {
       return '.'.repeat(occurances).split('').map((d, i) => 100 / (occurances + 1) * (i + 1))
     },
     arrow () {
-      return (this.x1 + 180) < this.x2 ? '→' : '←'
+      const positioning = (this.x1 + 180) < this.x2
+      return (this.inverse ? !positioning : positioning) ? '→' : '←'
+    },
+    inverse () {
+      return this.prop.metadata.inverse
     },
     path () {
-      const x1 = this.x1 + 180
-      const y1 = this.y1
-      const x2 = this.x2
-      const y2 = this.y2
+      const x1 = (this.inverse ? this.x2 : this.x1) + 180
+      const y1 = this.inverse ? this.y2 : this.y1
+      const x2 = this.inverse ? this.x1 : this.x2
+      const y2 = this.inverse ? this.y1 : this.y2
       return x1 < x2
         ? `M${x1},${y1}C${x1 + 100},${y1},${x2 - 100},${y2},${x2},${y2}`
         : `M${x2},${y2}C${x2 - 100},${y2},${x1 + 100},${y1},${x1},${y1}`

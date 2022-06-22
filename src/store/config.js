@@ -16,6 +16,12 @@ export default {
       organization
     }
   },
+  getters: {
+    getLabel: ({ languages }) => (dictionary) => {
+      if (dictionary == null) return null
+      return dictionary[languages.find(l => dictionary[l] != null)]
+    }
+  },
   mutations: {
   },
   actions: {

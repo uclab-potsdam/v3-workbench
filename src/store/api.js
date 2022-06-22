@@ -1,9 +1,10 @@
 import { WOQLClient, WOQL } from '@terminusdb/terminusdb-client'
 import { WikidataSearch, QueryWikidata, WikidataProps } from '@/assets/js/query/wikidata'
 import { v4 as uuid } from 'uuid'
+import { transformSchema, flattenBindings, underscorify } from '@/assets/js/helper/terminus'
 
 let Client = null
-let doctypes = {}
+// const doctypes = {}
 
 export default {
   namespaced: true,
@@ -36,11 +37,15 @@ export default {
       }
       Client.db(database)
       Client.checkout(branch)
-      await dispatch('data/init', null, { root: true })
+      await dispatch('init')
       return true
     },
     disconnect () {
       Client = null
+    },
+    async init ({ commit }) {
+      const { prefixes, classes, props } = transformSchema(await Client.getSchema())
+      commit('data/set', { prefixes, classes, props }, { root: true })
     },
     async query (_, { query, msg }) {
       return await Client.query(query, msg)
@@ -52,61 +57,109 @@ export default {
     },
     async getView ({ dispatch, commit, state, rootState }) {
       const id = rootState.view.canvas
-      const view = atTo_(await Client.getDocument({ id }))
+      const view = underscorify(await Client.getDocument({ id }))
       const cards = view.cards?.filter(card => card.represents != null) || []
-      cards.forEach(card => dispatch('getEntity', card.represents))
+      // cards.forEach(card => dispatch('getEntity', card.represents))
+      await dispatch('getEntities', cards.map(c => c.represents))
       cards.forEach(card => { card.collapsed = true })
       commit('view/set', { cards: cards }, { root: true })
     },
-    async getTypes ({ state }) {
-      const schema = await Client.getSchema()
+    async getEntities ({ dispatch, state, rootState, commit }, ids) {
+      const res = await Client.query(
+        WOQL.select('props', 'id')
+          .group_by('v:id', ['sub', 'prop', 'obj', 'label'], 'v:props')
+          .or(
+            ...ids.map((id) =>
+              WOQL.trim(id, 'v:id').or(
+                WOQL.triple(id, 'label', 'v:l').read_document('v:l', 'v:label'),
+                WOQL.triple(id, 'v:prop', 'v:obj').opt(
+                  WOQL.triple('v:obj', 'label', 'v:l').read_document(
+                    'v:l',
+                    'v:label'
+                  )
+                ),
+                WOQL.triple('v:sub', 'v:prop', id).opt(
+                  WOQL.triple('v:sub', 'label', 'v:l').read_document(
+                    'v:l',
+                    'v:label'
+                  )
+                )
+              )
+            )
+          )
+      )
 
-      let types = schema
-        .filter(d => d['@id'] != null && d['@subdocument'] == null)
-        .map((doctype, i, doctypes) => atTo_(makeSchemaFrame(doctype, doctypes)))
+      const entities = underscorify(flattenBindings(res.bindings)).map(binding => {
+        const props = binding.props.map(p => {
+          const sub = p[0]
+          const prop = p[1]
+          const obj = p[2]
+          const label = p[3]
+          return {
+            id: prop?.replace(/^@schema:/, '') || null,
+            inverse: sub !== null,
+            value: sub || obj,
+            label
+          }
+        })
 
-      // https://github.com/terminusdb/terminusdb/issues/668
-      // currently not possible to store arbitrary data in schema
-      // → We misuse the @documentation field to contain
-      //   a stringified json
-      types = types.map(t => {
-        t._metadata = {
-          ...JSON.parse(t._documentation?._comment || null),
-          _properties: Object.fromEntries(Object.entries(t._documentation?._properties || {}).map(d => {
-            return [d[0], JSON.parse(d[1])]
-          }))
+        const label = props.find(({ id }) => id === null)?.label
+        const doctype = props.find(({ id }) => id === 'rdf:type')?.value.replace(/^@schema:/, '')
+
+        // group properties by id and inverse
+        const inverseOptions = [false, true]
+        const groupedProps = inverseOptions.map(inverse => {
+          const grouped = props.filter(p => p.inverse === inverse).reduce((groups, item) => ({
+            ...groups,
+            [item.id]: [...(groups[item.id] || []), item]
+          }), {})
+          return Object.entries(grouped).map(d => {
+            return {
+              id: d[0],
+              inverse,
+              values: d[1].map(({ value, label }) => ({
+                value,
+                label
+              }))
+            }
+          })
+        }).flat()
+
+        const entity = {
+          _id: binding.id,
+          label: label,
+          properties: groupedProps,
+          doctype
         }
-        return t
+        return entity
       })
 
-      doctypes = Object.fromEntries(types.map(doctype => {
-        return [doctype._id, doctype]
-      }))
-
-      const prefixes = Object.fromEntries(Object.entries(schema.find(d => d['@id'] == null)).filter(d => !/^@/.test(d[0])))
-      return { types, doctypes, prefixes }
+      commit('data/storeEntities', entities, { root: true })
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
-      const properties = await getProperties(id, rootState.config.languages)
-      const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
-      const label = properties.find(p => p._id === 'label')?.value.label
-      const doctypeProperties = getDoctypeProperties(doctype, rootState.config.lang)
-      for (const prop of doctypeProperties) {
-        prop.value = properties.filter(({ _id, inverse }) => _id === prop._id && inverse === prop.inverse).map(({ value }) => value)
-      }
-      doctypeProperties.sort((a, b) => (a.value.length > 0) === (b.value.length > 0) ? 0 : (a.value.length > 0) ? -1 : 1)
-      const cover = properties.find(({ _id }) => _id === 'cover')?.path
-      const entity = {
-        _id: id,
-        label: label || id,
-        cover,
-        properties: doctypeProperties.filter(d => !(d.inverse && d.value.length === 0) && !(!d.linkProperty && d.value.length === 0 && d._id !== 'text')),
-        doctype: {
-          _id: doctype,
-          label: doctype,
-          ...doctypes[doctype]._metadata
-        }
-      }
+      const entity = await Client.query(WOQL.read_document(id, 'v:entity'))
+      console.log(entity)
+
+      // const properties = await getProperties(id, rootState.config.languages)
+      // const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
+      // const label = properties.find(p => p._id === 'label')?.value.label
+      // const doctypeProperties = getDoctypeProperties(doctype, rootState.config.lang)
+      // for (const prop of doctypeProperties) {
+      //   prop.value = properties.filter(({ _id, inverse }) => _id === prop._id && inverse === prop.inverse).map(({ value }) => value)
+      // }
+      // doctypeProperties.sort((a, b) => (a.value.length > 0) === (b.value.length > 0) ? 0 : (a.value.length > 0) ? -1 : 1)
+      // const cover = properties.find(({ _id }) => _id === 'cover')?.path
+      // const entity = {
+      //   _id: id,
+      //   label: label || id,
+      //   cover,
+      //   properties: doctypeProperties.filter(d => !(d.inverse && d.value.length === 0) && !(!d.linkProperty && d.value.length === 0 && d._id !== 'text')),
+      //   doctype: {
+      //     _id: doctype,
+      //     label: doctype,
+      //     ...doctypes[doctype]._metadata
+      //   }
+      // }
       // return entity
       commit('data/storeEntity', entity, { root: true })
     },
@@ -142,9 +195,12 @@ export default {
           .order_by(['v:dist', 'desc'])
           .and(
             WOQL.triple('v:_id', 'label', 'v:dict'),
-            WOQL.once(WOQL.or(
+            // WOQL.once(WOQL.or(
+            //   ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+            // )),
+            WOQL.or(
               ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            )),
+            ),
             WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
@@ -156,13 +212,11 @@ export default {
         const dt = doctype || _type.replace('@schema:', '')
         return {
           _id,
-          label,
+          label: {
+            universal: label
+          },
           cover,
-          doctype: {
-            _id: dt,
-            label: dt,
-            ...doctypes[dt]?._metadata
-          }
+          doctype: dt
         }
       })
       // commit('data/storeEntities', entities2, { root: true })
@@ -238,7 +292,7 @@ export default {
       //   ...data
       // })
       if (rootGetters['data/getEntity'](card.represents) == null) {
-        dispatch('getEntity', card.represents)
+        dispatch('getEntities', [card.represents])
       }
 
       await Client.query(WOQL
@@ -326,7 +380,7 @@ export default {
       return bindings
     },
     async getCanvases ({ dispatch, state }) {
-      return atTo_(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
+      return underscorify(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
     },
     async createCanvas ({ dispatch, state, rootState }, { label, _id }) {
       const res = await Client.addDocument(atFrom_({
@@ -353,15 +407,6 @@ export default {
 }
 
 // Utilities (maybe to be moved into separate file)
-const flattenBindings = (bindings) => {
-  if (bindings == null) return []
-  return bindings.map(b => {
-    return Object.fromEntries(Object.keys(b).map(key => {
-      const value = b[key]?.['@value'] != null ? b[key]['@value'] : b[key]
-      return [key, value]
-    }))
-  })
-}
 
 // const replacePrefixes = (value, prefixes) => {
 //   prefixes.forEach(prefix => {
@@ -373,17 +418,17 @@ const flattenBindings = (bindings) => {
 //   return value
 // }
 
-function atTo_ (data) {
-  if (isArray(data)) {
-    return data.map(d => atTo_(d))
-  } else if (isObject(data)) {
-    return Object.fromEntries(Object.entries(data).map(d => {
-      d[0] = d[0].replace(/^@/, '_')
-      return atTo_(d)
-    }))
-  }
-  return data
-}
+// function atTo_ (data) {
+//   if (isArray(data)) {
+//     return data.map(d => atTo_(d))
+//   } else if (isObject(data)) {
+//     return Object.fromEntries(Object.entries(data).map(d => {
+//       d[0] = d[0].replace(/^@/, '_')
+//       return atTo_(d)
+//     }))
+//   }
+//   return data
+// }
 
 function atFrom_ (data) {
   if (isArray(data)) {
@@ -395,48 +440,6 @@ function atFrom_ (data) {
     }))
   }
   return data
-}
-
-function makeSchemaFrame (doctype, doctypes) {
-  if (doctype['@inherits']) {
-    const superClasses = [doctype['@inherits']].flat().map((sc) =>
-      makeSchemaFrame(
-        doctypes.find((d) => d['@id'] === sc),
-        doctypes
-      )
-    )
-    const superClassProps = superClasses.map((sc) =>
-      Object.fromEntries(
-        Object.entries(sc).filter((entry) => entry[0].indexOf('@') !== 0)
-      )
-    )
-    const superClassDocComment = superClasses.map(
-      (sc) => sc['@documentation']?.['@comment']
-    )
-
-    const superClassDocProp = superClasses.map(
-      (sc) => sc['@documentation']?.['@properties']
-    )
-    return {
-      ...superClassProps.reduce((a, b) => ({ ...a, ...b }), {}),
-      ...doctype,
-      '@documentation': {
-        ...doctype['@documentation'],
-        '@comment': JSON.stringify({
-          ...JSON.parse(superClassDocComment.reduce((a, b) => (JSON.stringify(
-            Object.fromEntries(Object.entries({ ...JSON.parse(a || '{}'), ...JSON.parse(b || '{}') }).filter(d => d[0] !== 'label'))
-          )), '{}')
-          ),
-          ...JSON.parse(doctype['@documentation']?.['@comment'] || '{}')
-        }),
-        '@properties': {
-          ...superClassDocProp.reduce((a, b) => ({ ...a, ...b }), {}),
-          ...doctype['@documentation']?.['@properties']
-        }
-      }
-    }
-  }
-  return doctype
 }
 
 // function fold (doc, { clone = false } = {}) {
@@ -457,129 +460,129 @@ function makeSchemaFrame (doctype, doctypes) {
 
 // }
 
-function isProperty (key) {
-  // check if a key is a property and not a keyword starting with '_'
-  return /^(?!_)/.test(key)
-}
+// function isProperty (key) {
+//   // check if a key is a property and not a keyword starting with '_'
+//   return /^(?!_)/.test(key)
+// }
 
-function isLinkedProperty (key, doctype) {
-  return isProperty(key) && Object.keys(doctypes).includes(doctypes[doctype][key]._class || doctypes[doctype][key])
-}
+// function isLinkedProperty (key, doctype) {
+//   return isProperty(key) && Object.keys(doctypes).includes(doctypes[doctype][key]._class || doctypes[doctype][key])
+// }
 
-function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
-  const properties = []
-  for (const key in doctypes[doctype]) {
-    if (isProperty(key)) {
-      const prop = doctypes[doctype][key]
-      const className = prop._class || prop
-      const meta = doctypes[doctype]._metadata?._properties?.[key]
-      properties.push({
-        label: meta?.inverse ? meta?.inverseLabel?.[lang] : meta?.label?.[lang] || key,
-        priority: meta?.priority || 0,
-        _id: key,
-        class: className,
-        supportedClasses: [className, ...getSubClasses(className)],
-        set: prop._type === 'Set',
-        // inverse: meta?.inverse === true,
-        linkProperty: isLinkedProperty(key, doctype),
-        source: prop,
-        meta
-      })
-    }
-  }
-  if (inverse) {
-    for (const doctypeKey in doctypes) {
-      for (const propKey in doctypes[doctypeKey]) {
-        const prop = doctypes[doctypeKey][propKey]
-        const className = prop._class || prop
-        if ((className === doctype || getSubClasses(className).includes(doctype)) && isLinkedProperty(propKey, doctypeKey)) {
-          if (properties.find(p => p.inverse && p._id === propKey)) {
-            properties.find(p => p.inverse && p._id === propKey).supportedClasses.push(doctypeKey)
-          } else {
-            const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
-            properties.push({
-              label: meta?.inverse ? meta?.label?.[lang] : meta?.inverseLabel?.[lang] || `${propKey} (inverse)`,
-              priority: meta?.inversePriority || meta?.priority || 0,
-              _id: propKey,
-              supportedClasses: [doctypeKey],
-              set: prop._type === 'Set',
-              // inverse: meta?.inverse !== true,
-              inverse: true,
-              linkProperty: isLinkedProperty(propKey, doctypeKey),
-              source: prop,
-              meta
-            })
-          }
-        }
-      }
-    }
-    properties.filter(({ inverse }) => inverse).forEach(prop => {
-      prop.class = getSuperiorClass(prop.supportedClasses)
-    })
-  }
-  // priority based sorting disabled in favour of sorting by P roperty number
-  // return properties.sort((a, b) => a.priority === b.priority ? a.label > b.label : a.priority < b.priority)
-  return properties.sort((a, b) => +(a._id.match(/P([0-9]+)/)?.[1] || 9999) - +(b._id.match(/P([0-9]+)/)?.[1] || 9999))
-}
+// function getDoctypeProperties (doctype, { inverse = true, lang = 'en' } = {}) {
+//   const properties = []
+//   for (const key in doctypes[doctype]) {
+//     if (isProperty(key)) {
+//       const prop = doctypes[doctype][key]
+//       const className = prop._class || prop
+//       const meta = doctypes[doctype]._metadata?._properties?.[key]
+//       properties.push({
+//         label: meta?.inverse ? meta?.inverseLabel?.[lang] : meta?.label?.[lang] || key,
+//         priority: meta?.priority || 0,
+//         _id: key,
+//         class: className,
+//         supportedClasses: [className, ...getSubClasses(className)],
+//         set: prop._type === 'Set',
+//         // inverse: meta?.inverse === true,
+//         linkProperty: isLinkedProperty(key, doctype),
+//         source: prop,
+//         meta
+//       })
+//     }
+//   }
+//   if (inverse) {
+//     for (const doctypeKey in doctypes) {
+//       for (const propKey in doctypes[doctypeKey]) {
+//         const prop = doctypes[doctypeKey][propKey]
+//         const className = prop._class || prop
+//         if ((className === doctype || getSubClasses(className).includes(doctype)) && isLinkedProperty(propKey, doctypeKey)) {
+//           if (properties.find(p => p.inverse && p._id === propKey)) {
+//             properties.find(p => p.inverse && p._id === propKey).supportedClasses.push(doctypeKey)
+//           } else {
+//             const meta = doctypes[doctypeKey]._metadata?._properties?.[propKey]
+//             properties.push({
+//               label: meta?.inverse ? meta?.label?.[lang] : meta?.inverseLabel?.[lang] || `${propKey} (inverse)`,
+//               priority: meta?.inversePriority || meta?.priority || 0,
+//               _id: propKey,
+//               supportedClasses: [doctypeKey],
+//               set: prop._type === 'Set',
+//               // inverse: meta?.inverse !== true,
+//               inverse: true,
+//               linkProperty: isLinkedProperty(propKey, doctypeKey),
+//               source: prop,
+//               meta
+//             })
+//           }
+//         }
+//       }
+//     }
+//     properties.filter(({ inverse }) => inverse).forEach(prop => {
+//       prop.class = getSuperiorClass(prop.supportedClasses)
+//     })
+//   }
+//   // priority based sorting disabled in favour of sorting by P roperty number
+//   // return properties.sort((a, b) => a.priority === b.priority ? a.label > b.label : a.priority < b.priority)
+//   return properties.sort((a, b) => +(a._id.match(/P([0-9]+)/)?.[1] || 9999) - +(b._id.match(/P([0-9]+)/)?.[1] || 9999))
+// }
 
 // async function getLabels (values) {
 //   if (values.length === 0) return 'bla'
 //   return values
 // }
 
-async function getProperties (id, languages = ['en', 'de', 'pt', 'es']) {
-  const res = await Client.query(
-    WOQL
-      // .limit(100)
-      .or(
-        WOQL.triple(id, 'v:prop', 'v:_id')
-          .opt(
-            WOQL.once(WOQL.or(
-              ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
-            ))
-          )
-          .opt(WOQL
-            .triple('v:_id', 'label', 'v:dict')
-            .once(WOQL.or(
-              ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            ))
-          )
-          .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path')),
-        WOQL // .limit(100)
-          .and(
-            WOQL.triple('v:_id', 'v:prop', id),
-            WOQL.evaluate(WOQL.plus(1, 0), 'v:inverse')
-          )
-          .opt(
-            WOQL.once(WOQL.or(
-              ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
-            ))
-          )
-          .opt(WOQL
-            .triple('v:_id', 'label', 'v:dict')
-            .once(WOQL.or(
-              ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            ))
-          )
-          .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path'))
-      )
-      // WOQL.opt(WOQL.triple(id, 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover_image_path'))
-  ).catch((err) => {
-    throw err
-  })
+// async function getProperties (id, languages = ['en', 'de', 'pt', 'es']) {
+//   const res = await Client.query(
+//     WOQL
+//       // .limit(100)
+//       .or(
+//         WOQL.triple(id, 'v:prop', 'v:_id')
+//           .opt(
+//             WOQL.once(WOQL.or(
+//               ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
+//             ))
+//           )
+//           .opt(WOQL
+//             .triple('v:_id', 'label', 'v:dict')
+//             .once(WOQL.or(
+//               ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+//             ))
+//           )
+//           .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path')),
+//         WOQL // .limit(100)
+//           .and(
+//             WOQL.triple('v:_id', 'v:prop', id),
+//             WOQL.evaluate(WOQL.plus(1, 0), 'v:inverse')
+//           )
+//           .opt(
+//             WOQL.once(WOQL.or(
+//               ...languages.map(lang => WOQL.triple('v:_id', lang, 'v:label'))
+//             ))
+//           )
+//           .opt(WOQL
+//             .triple('v:_id', 'label', 'v:dict')
+//             .once(WOQL.or(
+//               ...languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+//             ))
+//           )
+//           .opt(WOQL.eq('v:prop', '@schema:cover').triple('v:_id', 'path', 'v:path'))
+//       )
+//       // WOQL.opt(WOQL.triple(id, 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover_image_path'))
+//   ).catch((err) => {
+//     throw err
+//   })
 
-  return flattenBindings(res.bindings).map(({ prop, _id, label, path, inverse }) => {
-    return {
-      _id: prop.replace(/@schema:/, ''),
-      value: {
-        _id,
-        label: label || _id
-      },
-      ...(path != null && { path }),
-      ...(inverse != null && { inverse: true })
-    }
-  })
-}
+//   return flattenBindings(res.bindings).map(({ prop, _id, label, path, inverse }) => {
+//     return {
+//       _id: prop.replace(/@schema:/, ''),
+//       value: {
+//         _id,
+//         label: label || _id
+//       },
+//       ...(path != null && { path }),
+//       ...(inverse != null && { inverse: true })
+//     }
+//   })
+// }
 
 function isArray (value) {
   return Array.isArray(value)
@@ -589,33 +592,33 @@ function isObject (value) {
   return Object.prototype.toString.call(value) === '[object Object]'
 }
 
-function getSubClasses (className) {
-  const subClasses = []
-  for (const key in doctypes) {
-    const inherits = doctypes[key]._inherits
-    if (isArray(inherits) ? inherits.includes(className) : inherits === className) {
-      subClasses.push(key, ...getSubClasses(key))
-    }
-  }
-  return unique(subClasses)
-}
+// function getSubClasses (className) {
+//   const subClasses = []
+//   for (const key in doctypes) {
+//     const inherits = doctypes[key]._inherits
+//     if (isArray(inherits) ? inherits.includes(className) : inherits === className) {
+//       subClasses.push(key, ...getSubClasses(key))
+//     }
+//   }
+//   return unique(subClasses)
+// }
 
-function getSuperClasses (className) {
-  const superClasses = []
-  const inherits = doctypes[className]._inherits
-  if (inherits != null) {
-    [inherits].flat().forEach(superClass => {
-      superClasses.push(superClass, ...getSuperClasses(superClass))
-    })
-  }
-  return unique(superClasses)
-}
+// function getSuperClasses (className) {
+//   const superClasses = []
+//   const inherits = doctypes[className]._inherits
+//   if (inherits != null) {
+//     [inherits].flat().forEach(superClass => {
+//       superClasses.push(superClass, ...getSuperClasses(superClass))
+//     })
+//   }
+//   return unique(superClasses)
+// }
 
-function getSuperiorClass (classNames) {
-  const superClasses = classNames.map(className => getSuperClasses(className))
-  return classNames.find(className => superClasses.find(superClassNames => superClassNames.includes(className) === undefined))
-}
+// function getSuperiorClass (classNames) {
+//   const superClasses = classNames.map(className => getSuperClasses(className))
+//   return classNames.find(className => superClasses.find(superClassNames => superClassNames.includes(className) === undefined))
+// }
 
-function unique (arr) {
-  return [...new Set(arr)]
-}
+// function unique (arr) {
+//   return [...new Set(arr)]
+// }

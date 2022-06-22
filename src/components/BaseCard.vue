@@ -1,5 +1,5 @@
 <template>
-  <div class="card"
+  <div v-if="entity != null" class="card"
     :class="{ collapsed, 'context-search': context === 'search', note: isNote }" :style="{...colors, transform}"
     v-drop="{
       filter: ['connect'],
@@ -11,7 +11,7 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="label" :doctype="doctype?._id" @click="toggleCollapse">
+    <CardHeader :label="entity.label ? getLabel(entity.label) : ''" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
       <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
         collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',
@@ -32,8 +32,8 @@
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
-      <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d._id === 'text')"/>
-      <card-property v-for="(prop, i) in properties" :key="i"
+      <card-note v-if="isNote" :entity="_id" :prop="properties.find(d => d.id === 'text')"/>
+      <card-property v-for="(prop, i) in entityProperties" :key="i"
         :prop="prop" :represents="_id"/>
     </main>
     <base-modal v-if="sub != null" @close="closePropSelect">
@@ -66,8 +66,9 @@ export default {
   emits: ['drag', 'toggleCollapse', 'removeProp', 'setTempEdge', 'clearTempEdge'],
   props: {
     _id: String,
-    label: String,
-    doctype: Object,
+    // label: String,
+    // doctype: Object,
+    entity: Object,
     properties: Object,
     cover: String,
     cardId: String,
@@ -92,20 +93,38 @@ export default {
   },
   computed: {
     ...mapState('config', ['fileServer']),
-    ...mapGetters('data', ['getProperties']),
+    ...mapState('data', ['classes', 'props']),
+    ...mapGetters('data', ['getProperties', 'getClass']),
+    ...mapGetters('config', ['getLabel']),
     colors () {
-      if (this.doctype?.secondary == null) return
-      const { secondary, primary } = this.doctype
+      if (this.doctype?.metadata?.secondary == null) return
+      const { secondary, primary } = this.doctype.metadata
       return {
         '--primary': /-[0-9]+/.test(primary) ? `var(--${primary})` : `var(--${primary}-2)`,
         '--secondary': /-[0-9]+/.test(secondary) ? `var(--${secondary})` : `var(--${secondary}-9)`
       }
+    },
+    doctype () {
+      return this.getClass(this.entity.doctype)
+    },
+    label () {
+      // console.log(this.entity)
+      return this.getLabel(this.entity?.label)
     },
     isNote () {
       return this.doctype?._id === 'Note'
     },
     hasOutgoingConnections () {
       return this.properties?.find(p => p.linkProperty && !p.inverse && p.value.length > 0) != null
+    },
+    entityProperties () {
+      return this.entity.properties.map(d => {
+        const prop = this.props.find(p => p._id === d.id)
+        return {
+          ...d,
+          ...prop
+        }
+      }).filter(d => d.metadata != null && !d.metadata.hidden)
     }
   },
   methods: {
@@ -117,8 +136,11 @@ export default {
       if (detail.data.sub == null) return
       e.stopPropagation()
       if (detail.data.prop == null) {
-        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }))
-        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(({ prop }) => prop)
+        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id })[0])
+        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => ({
+          value: prop,
+          label: this.getLabel(prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label)
+        }))
         this.sub = detail.data.sub
       } else {
         this.addProp([detail.data.sub, detail.data.prop, this._id])
@@ -128,7 +150,8 @@ export default {
       this.sub = null
     },
     selectProperty (prop) {
-      this.addProp([this.sub, prop, this._id])
+      if (prop.metadata.inverse) this.addProp([this._id, prop._id, this.sub])
+      else this.addProp([this.sub, prop._id, this._id])
       this.closePropSelect()
     },
     toggleCollapse () {

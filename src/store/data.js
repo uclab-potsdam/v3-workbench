@@ -1,5 +1,4 @@
 // refactor: replace `card` with `entity`
-import * as schema from '@/assets/js/helper/schema'
 
 export default {
   namespaced: true,
@@ -8,16 +7,16 @@ export default {
     labels: {},
     searchResults: [],
     remoteSearchResults: [],
-    types: [],
-    doctypes: {},
-    prefixes: {}
+    prefixes: {},
+    classes: [],
+    props: []
   },
   getters: {
     getEntity: (state) => (id) => {
       return state.cards.find(card => card._id === id)
     },
-    getType: (state) => (id) => {
-      return state.types.find(d => d._id === id)
+    getClass: (state) => (id) => {
+      return state.classes.find(d => d._id === id)
     },
     getLabel: (state) => (_id) => {
       if (_id == null) return null
@@ -27,7 +26,12 @@ export default {
       }
     },
     getProperties: (state) => ({ sub, obj }) => {
-      return schema.propsBetween(state.doctypes, sub, obj)
+      return state.props.filter(({ domain, range, metadata }) => {
+        if (metadata?.inverse) {
+          return domain.includes(obj) && range.includes(sub)
+        }
+        return domain.includes(sub) && range.includes(obj)
+      })
     }
   },
   mutations: {
@@ -41,6 +45,8 @@ export default {
       state.cards.push(entity)
     },
     storeEntities (state, entities) {
+      const ids = entities.map(e => e._id)
+      state.cards = state.cards.filter(({ _id }) => !ids.includes(_id))
       state.cards.push(...entities)
     },
     storeEntityLabel (state, card) {
@@ -52,53 +58,47 @@ export default {
     }
   },
   actions: {
-    async init ({ dispatch, commit }, id) {
-      const { types, doctypes, prefixes } = await dispatch('api/getTypes', id, { root: true })
-      commit('set', { types })
-      commit('set', { doctypes })
-      commit('set', { prefixes })
-    },
-    async fetchEntity ({ state, dispatch, commit, getters }, id) {
-      let card = state.cards.find(card => card._id === id)
-      if (card != null) return card
-      card = await dispatch('api/getEntity', id, { root: true })
-      commit('storeEntity', card)
-      commit('storeEntityLabel', card)
-      // get Labels for linked properties
-      const type = getters.getType(card._type)
-      for (const prop in type) {
-        // skip terminus properties
-        if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {
-          dispatch('fetchLabels', card[prop])
-          // type[prop].isLinkedProperty = (type[prop]._class || type[prop]).match(/:/) == null
-          // props.push({
-          //   _id: prop,
-          //   label: prop, // TODO replace with actual label
-          //   value: this.card[prop],
-          //   ...t[prop]
-          // })
-        }
-      }
-      return card
-    },
-    async fetchLabels ({ state, dispatch, commit }, ids) {
-      // const wasArray = Array.isArray(ids)
-      for (const _id of [ids].flat()) {
-        if (state.labels[_id] != null) return state.labels[_id]
-        // const label = await dispatch('api/getLabel', _id, { root: true })
-        // commit('storeEntityLabel', { _id, label })
-      }
-      // return wasArray ? labels : labels[0]
-    },
+    // async fetchEntity ({ state, dispatch, commit, getters }, id) {
+    //   let card = state.cards.find(card => card._id === id)
+    //   if (card != null) return card
+    //   card = await dispatch('api/getEntity', id, { root: true })
+    //   commit('storeEntity', card)
+    //   commit('storeEntityLabel', card)
+    //   // get Labels for linked properties
+    //   const type = getters.getClass(card._type)
+    //   for (const prop in type) {
+    //     // skip terminus properties
+    //     if (prop.match(/^_/) == null && card[prop] != null && (type[prop]._class || type[prop]).match(/:/) == null) {
+    //       dispatch('fetchLabels', card[prop])
+    //       // type[prop].isLinkedProperty = (type[prop]._class || type[prop]).match(/:/) == null
+    //       // props.push({
+    //       //   _id: prop,
+    //       //   label: prop, // TODO replace with actual label
+    //       //   value: this.card[prop],
+    //       //   ...t[prop]
+    //       // })
+    //     }
+    //   }
+    //   return card
+    // },
+    // async fetchLabels ({ state, dispatch, commit }, ids) {
+    //   // const wasArray = Array.isArray(ids)
+    //   for (const _id of [ids].flat()) {
+    //     if (state.labels[_id] != null) return state.labels[_id]
+    //     // const label = await dispatch('api/getLabel', _id, { root: true })
+    //     // commit('storeEntityLabel', { _id, label })
+    //   }
+    //   // return wasArray ? labels : labels[0]
+    // },
     async addProp ({ dispatch }, triple) {
       await dispatch('api/addTriple', triple, { root: true })
-      dispatch('api/getEntity', triple[0], { root: true })
-      dispatch('api/getEntity', triple[2], { root: true })
+      dispatch('api/getEntities', [triple[0]], { root: true })
+      dispatch('api/getEntities', [triple[2]], { root: true })
     },
     async removeProp ({ dispatch, getters, commit }, triple) {
       await dispatch('api/removeTriple', triple, { root: true })
-      dispatch('api/getEntity', triple[0], { root: true })
-      dispatch('api/getEntity', triple[2], { root: true })
+      dispatch('api/getEntities', [triple[0]], { root: true })
+      dispatch('api/getEntities', [triple[2]], { root: true })
     },
     async deleteEntity ({ dispatch }, id) {
       await dispatch('api/deleteDocument', id, { root: true })

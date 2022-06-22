@@ -58,7 +58,7 @@ export default {
   mounted () {
     // this.setOffsets()
     // if (this.prop.value[0] != null) {
-    this.text = this.prop.value[0]?._id || ''
+    this.text = this.prop.values[0]?.value._value || ''
     // }
   }
 }

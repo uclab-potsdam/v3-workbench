@@ -1,37 +1,25 @@
 <template>
-  <section v-if="!prop.meta?.hidden && prop.value.length > 0" class="property">
+  <section v-if="!prop.meta?.hidden && prop.values.length > 0" class="property">
     <div class="label" @click="logOffset">
       <div class="overflow-wrap">
-        <BaseTraverseLabel>{{ prop.label }}</BaseTraverseLabel>
+        <BaseTraverseLabel>{{ displayProperty }}</BaseTraverseLabel>
       </div>
     </div>
-    <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value._id} }" :class="{ inverse: prop.inverse }" v-for="(value, i) in prop.value || []" :key="i">
+    <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value.value._value || value.value} }" :class="{ inverse: displayInverse }" v-for="(value, i) in prop.values || []" :key="i">
       <div class="overflow-wrap">
-        <BaseTraverseLabel>{{ value.label }}</BaseTraverseLabel>
+        <BaseTraverseLabel>{{ getDisplayValue(value) }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getColors(value._id)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value._id) ? {
+      <icon scale="1" :color="getColors(value.value)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value.value) ? {
         mode: 'remove-prop',
-        data: [prop.inverse ? value._id : represents, prop._id, prop.inverse ? represents : value._id]
+        data: [prop.inverse ? value.value : represents, prop._id, prop.inverse ? represents : value.value]
       } : {
         mode: 'move-card',
-        data: { _id: value._id }
+        data: { _id: value.value }
       }"/>
-      <a v-if="url && prefixes[value.label.split(':')[0]]" :href="value.label.replace(/^([^:]+):/, (a, b, c) => prefixes[b])" target="_blank">
-        <icon scale="1" :color="getColors(value._id)" data="@icon/property-external-link.svg"/>
+      <a v-if="url && prefixes[getDisplayValue(value).split(':')[0]]" :href="getDisplayValue(value).replace(/^([^:]+):/, (a, b, c) => prefixes[b])" target="_blank">
+        <icon scale="1" :color="getColors(value.value)" data="@icon/property-external-link.svg"/>
       </a>
     </div>
-    <!-- <div class="add" v-if="(prop.set || prop.value.length === 0) && !prop.inverse">
-      <div class="overflow-wrap fade">
-        <BaseTraverseLabel>{{prop.class}}</BaseTraverseLabel>
-      </div>
-      <icon v-if="!primitive" scale="1" :color="getAddColors()" data="@icon/property-add-l.svg" v-drag="{
-        mode: 'connect',
-        data: {
-          sub: represents,
-          prop: prop._id,
-        }
-      }"/>
-    </div> -->
   </section>
 </template>
 
@@ -56,13 +44,25 @@ export default {
   },
   computed: {
     ...mapGetters('view', ['hasCardWithEntity']),
+    ...mapGetters('config', ['getLabel']),
     ...mapState('data', ['prefixes']),
+    displayProperty () {
+      const dict = this.prop.metadata[this.prop.inverse && this.prop.metadata.inverseLabel ? 'inverseLabel' : 'label']
+      return this.getLabel(dict)
+    },
     primitive () {
-      return !this.prop.linkProperty
+      return this.prop.primitive
     },
     url () {
-      return this.prop.class === 'xdd:url'
+      return this.prop._class === 'xdd:url'
+    },
+    displayInverse () {
+      return this.prop.metadata?.inverse ? !this.prop.inverse : this.prop.inverse
     }
+    // propLabel () {
+    //   const dictionary = this.prop.inverse && ? this.prop.metadata.
+    //   return this.getLabel()
+    // }
   },
   methods: {
     ...mapActions('view', ['updatePropertyOffsets']),
@@ -73,6 +73,10 @@ export default {
         inverse: this.prop.inverse,
         value: Object.fromEntries(this.refs.map(ref => [ref._id, ref.el.offsetTop]))
       })
+    },
+    getDisplayValue (value) {
+      if (value.label) return this.getLabel(value.label)
+      return value.value._value || value.value
     },
     beforeUpdate () {
       this.refs = []
@@ -98,7 +102,7 @@ export default {
     this.setOffsets()
   },
   watch: {
-    'prop.value.length' () {
+    'prop.values.length' () {
       this.$nextTick(() => {
         this.setOffsets()
       })

@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid'
 import { transformSchema, flattenBindings, underscorify } from '@/assets/js/helper/terminus'
 
 let Client = null
-const doctypes = {}
+// const doctypes = {}
 
 export default {
   namespaced: true,
@@ -195,9 +195,12 @@ export default {
           .order_by(['v:dist', 'desc'])
           .and(
             WOQL.triple('v:_id', 'label', 'v:dict'),
-            WOQL.once(WOQL.or(
+            // WOQL.once(WOQL.or(
+            //   ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+            // )),
+            WOQL.or(
               ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            )),
+            ),
             WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
             WOQL.like(term, 'v:label', 'v:dist'),
             WOQL.greater('v:dist', 0.6)
@@ -209,13 +212,11 @@ export default {
         const dt = doctype || _type.replace('@schema:', '')
         return {
           _id,
-          label,
+          label: {
+            universal: label
+          },
           cover,
-          doctype: {
-            _id: dt,
-            label: dt,
-            ...doctypes[dt]?._metadata
-          }
+          doctype: dt
         }
       })
       // commit('data/storeEntities', entities2, { root: true })

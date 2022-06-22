@@ -15,6 +15,7 @@
             v-for="card in searchResults"
             :key="card._id"
             v-bind="card"
+            :entity="card"
             :collapsed="card.cover == null"
             context="search"/>
         </div>
@@ -79,7 +80,7 @@ export default {
       'lang'
     ]),
     doctypeOptions () {
-      return [{ label: 'All', value: null }, ...this.classes.filter(d => d._abstract == null).map(t => {
+      return [{ label: 'All', value: null }, ...this.classes.filter(d => !d.hidden).map(t => {
         return { label: t._metadata?.label?.[this.lang] || t._id, value: t._id }
       })]
     },

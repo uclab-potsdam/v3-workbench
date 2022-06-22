@@ -11,7 +11,7 @@
       data: { _id, offset: true }
     }"
     @dropped="onDrop">
-    <CardHeader :label="getLabel(entity.label)" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
+    <CardHeader :label="entity.label ? getLabel(entity.label) : ''" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
       <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
         collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',

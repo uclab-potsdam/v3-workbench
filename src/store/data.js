@@ -26,7 +26,12 @@ export default {
       }
     },
     getProperties: (state) => ({ sub, obj }) => {
-      return state.props.filter(({ domain, range }) => domain.includes(sub) && range.includes(obj))
+      return state.props.filter(({ domain, range, metadata }) => {
+        if (metadata?.inverse) {
+          return domain.includes(obj) && range.includes(sub)
+        }
+        return domain.includes(sub) && range.includes(obj)
+      })
     }
   },
   mutations: {

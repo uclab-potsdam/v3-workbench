@@ -66,7 +66,7 @@ export default {
                   target: target._id,
                   x2: target.x,
                   y2: target.y + targetOffset,
-                  label: rootGetters['config/getLabel'](prop.metadata.label),
+                  label: rootGetters['config/getLabel'](prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label),
                   prop
                 })
               }

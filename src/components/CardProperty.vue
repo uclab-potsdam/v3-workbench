@@ -5,7 +5,7 @@
         <BaseTraverseLabel>{{ displayProperty }}</BaseTraverseLabel>
       </div>
     </div>
-    <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value.value._value || value.value} }" :class="{ inverse: prop.inverse }" v-for="(value, i) in prop.values || []" :key="i">
+    <div class="value" :ref="el => { if (el) refs[i] = {el, _id: value.value._value || value.value} }" :class="{ inverse: displayInverse }" v-for="(value, i) in prop.values || []" :key="i">
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ getDisplayValue(value) }}</BaseTraverseLabel>
       </div>
@@ -55,6 +55,9 @@ export default {
     },
     url () {
       return this.prop._class === 'xdd:url'
+    },
+    displayInverse () {
+      return this.prop.metadata?.inverse ? !this.prop.inverse : this.prop.inverse
     }
     // propLabel () {
     //   const dictionary = this.prop.inverse && ? this.prop.metadata.

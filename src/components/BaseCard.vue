@@ -119,9 +119,10 @@ export default {
     },
     entityProperties () {
       return this.entity.properties.map(d => {
+        const prop = this.props.find(p => p._id === d.id)
         return {
           ...d,
-          ...this.props.find(p => p._id === d.id)
+          ...prop
         }
       }).filter(d => d.metadata != null && !d.metadata.hidden)
     }
@@ -137,8 +138,8 @@ export default {
       if (detail.data.prop == null) {
         // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id })[0])
         this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => ({
-          value: prop._id,
-          label: this.getLabel(prop.metadata.label)
+          value: prop,
+          label: this.getLabel(prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label)
         }))
         this.sub = detail.data.sub
       } else {
@@ -149,7 +150,8 @@ export default {
       this.sub = null
     },
     selectProperty (prop) {
-      this.addProp([this.sub, prop, this._id])
+      if (prop.metadata.inverse) this.addProp([this._id, prop._id, this.sub])
+      else this.addProp([this.sub, prop._id, this._id])
       this.closePropSelect()
     },
     toggleCollapse () {

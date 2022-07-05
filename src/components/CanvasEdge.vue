@@ -46,8 +46,8 @@ export default {
       return '.'.repeat(occurances).split('').map((d, i) => 100 / (occurances + 1) * (i + 1))
     },
     arrow () {
-      const positioning = (this.x1 + 180) < this.x2
-      return (this.inverse ? !positioning : positioning) ? '→' : '←'
+      const positioning = this.inverse ? (this.x2 + 180) < this.x1 : (this.x1 + 180) < this.x2
+      return positioning ? '→' : '←'
     },
     inverse () {
       return this.prop.metadata.inverse

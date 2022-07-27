@@ -31,8 +31,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  // console.log(to.name === 'S', store)
-  // const authStatus = store.getters['auth/isAuthenticated']
   if (store.getters['auth/isAuthenticated'] || to.name === 'Sign in') return
   if (!store.getters['auth/hasCredentials']) return { replace: true, name: 'Sign in' }
   const authStatus = await store.dispatch('auth/authenticate', null, { root: true })

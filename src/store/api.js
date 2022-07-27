@@ -87,7 +87,6 @@ export default {
       commit('view/set', { cards: [] }, { root: true })
       commit('data/clearEntities', null, { root: true })
       const canvas = rootState.view.canvas
-      // console.log(id)
       // const view = underscorify(await Client.getDocument({ id }))
       // const cards = view.cards?.filter(card => card.represents != null) || []
       const res = await Client.query(
@@ -101,7 +100,6 @@ export default {
     async getEntities ({ dispatch, state, rootState, commit }, ids) {
       const refs = rootState.data.branches.map(d => d.ref)
       const canvas = rootState.view.canvas
-      // console.log(ids)
       const res = await Client.query(
         WOQL.select('props', 'id', 'position')
           .using(`branch/${canvas}`).triple('v:id', '@schema:position', 'v:positionId').read_document('v:positionId', 'v:position')

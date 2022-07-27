@@ -39,12 +39,6 @@
     </div>
     <div class="notifications">
       <div class="drag-options" v-if="drag?.options?.mode === 'move'" >
-        <!-- <div class="remove" v-drop="{dropEffect: 'move', handler: onRemoveCard}">
-          remove card
-        </div>
-        <div class="delete danger" v-drop="{dropEffect: 'move', handler: onDeleteEntity}">
-          delete entity
-        </div> -->
       </div>
     </div>
     <CanvasControls
@@ -209,13 +203,6 @@ export default {
         // })
       }
     },
-    onRemoveCard (e) {
-      this.drag = null
-      // find a card with matching ids
-      // console.log(e, this.cards)
-      // console.log(this.cards.find(c => c.represents === e._id))
-      this.removeCard(this.cards.find(c => c.represents === e._id)._id)
-    },
     onDeleteEntity (e) {
       this.drag = null
       // find a card with matching ids
@@ -230,23 +217,11 @@ export default {
       this.addProp([doc, prop, value])
     },
     onRemoveProp (e) {
-      // console.log([e.doc, e.prop, e.value])
       this.removeProp(e)
     },
     onScroll (e, _id) {
       this.setCardScroll({ _id, value: e.target.scrollTop })
     }
-    // onSetTempEdge (e) {
-    //   this.tempEdge = {
-    //     x1: e.x0,
-    //     y1: e.y0,
-    //     x2: e.x,
-    //     y2: e.y
-    //   }
-    // },
-    // onClearTempEdge (e) {
-    //   // this.tempEdge = null
-    // }
   },
   watch: {
     'transform.k' (zoom) {

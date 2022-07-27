@@ -31,7 +31,6 @@ export default {
         for (const prop of entityProperties) {
           if (!prop.primitive && !prop.metadata?.hidden && !prop.inverse && prop.values != null) {
             [prop.values].flat().forEach(value => {
-              // console.log(value)
               const target = rootGetters['data/getEntity'](value.value)
               if (target != null) {
                 let cardOffset = 30
@@ -142,7 +141,6 @@ export default {
     },
     async dropCard ({ commit, state, dispatch, rootState }, options) {
       const card = rootState.data.cards.find(card => card._id === options._id)
-      // // console.log(options, card?.represents)
       if (card != null) {
         // commit('moveCard', { ...card, ...options })
         const position = {
@@ -161,8 +159,6 @@ export default {
     async removeCard ({ commit, dispatch }, _id) {
       commit('removeCard', _id)
       await dispatch('data/removeEntity', _id, { root: true })
-      // console.log(_id)
-      // await dispatch('api/deleteDocument', _id, { root: true })
     },
     async init ({ dispatch, commit, state }, canvas) {
       commit('set', { canvas: canvas })

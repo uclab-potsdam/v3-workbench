@@ -37,7 +37,6 @@ export default {
   },
   watch: {
     el (el) {
-      // console.log(el)
       if (this.clone != null) {
         this.clone.remove()
       }

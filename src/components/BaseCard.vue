@@ -25,10 +25,7 @@
       }"/>
     </CardHeader>
     <card-footer v-if="!collapsed && context !== 'search'">
-       <!-- <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/> -->
        <icon @click="confirmDeleteEntity = true" scale="1" data="@icon/delete.svg"/>
-       <!-- <template #right>
-       </template> -->
     </card-footer>
     <main v-if="!collapsed">
       <card-cover v-if="cover" :path="cover"/>
@@ -108,7 +105,6 @@ export default {
       return this.getClass(this.entity.doctype)
     },
     label () {
-      // console.log(this.entity)
       return this.getLabel(this.entity?.label)
     },
     isNote () {
@@ -136,7 +132,6 @@ export default {
       if (detail.data.sub == null) return
       e.stopPropagation()
       if (detail.data.prop == null) {
-        // console.log(this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id })[0])
         this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => ({
           value: prop,
           label: this.getLabel(prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label)
@@ -158,10 +153,6 @@ export default {
       this.collapsed = !this.collapsed
       this.$emit('toggleCollapse')
     },
-    // onRemoveCard () {
-    //   this.removeCard(this.cardId)
-    //   this.deleteDocument(this.cardId)
-    // },
     onDeleteEntity () {
       this.removeCard(this._id)
       this.deleteDocument(this._id)

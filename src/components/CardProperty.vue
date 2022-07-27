@@ -9,7 +9,7 @@
       <div class="overflow-wrap">
         <BaseTraverseLabel>{{ getDisplayValue(value) }}</BaseTraverseLabel>
       </div>
-      <icon scale="1" :color="getColors(value.value)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasCardWithEntity(value.value) ? {
+      <icon scale="1" :color="getColors(value.value)" v-if="!primitive" data="@icon/property-expand-l.svg" v-drag="hasEntity(value.value) ? {
         mode: 'remove-prop',
         data: [prop.inverse ? value.value : represents, prop._id, prop.inverse ? represents : value.value]
       } : {
@@ -43,7 +43,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('view', ['hasCardWithEntity']),
+    ...mapGetters('data', ['hasEntity']),
     ...mapGetters('config', ['getLabel']),
     ...mapState('data', ['prefixes']),
     displayProperty () {
@@ -83,7 +83,7 @@ export default {
     },
     getColors (id) {
       const colors = [
-        this.hasCardWithEntity(id) ? 'var(--edges)' : 'none',
+        this.hasEntity(id) ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',
         'currentColor'
       ]

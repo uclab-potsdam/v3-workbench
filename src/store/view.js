@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid'
-
 export default {
   namespaced: true,
   state: {
@@ -7,7 +5,8 @@ export default {
     canvas: null,
     zoom: 1,
     cardScrolls: {},
-    propertyOffsets: {}
+    propertyOffsets: {},
+    unfolded: []
   },
   getters: {
     getCard: (state) => (id) => {
@@ -16,13 +15,11 @@ export default {
     getCardByEntity: (state) => (id) => {
       return state.cards.find(card => card.represents === id)
     },
-    hasCardWithEntity: (state) => (id) => {
-      return state.cards.find(card => card.represents === id) != null
-    },
     edges (state, getters, rootState, rootGetters) {
+      const canvas = `branch/${state.canvas}`
       const edges = []
-      state.cards.forEach(card => {
-        const entity = rootGetters['data/getEntity'](card.represents)
+      rootState.data.cards.forEach(card => {
+        const entity = card
         if (entity == null) return
 
         const entityProperties = entity.properties.map(d => {
@@ -34,11 +31,12 @@ export default {
         for (const prop of entityProperties) {
           if (!prop.primitive && !prop.metadata?.hidden && !prop.inverse && prop.values != null) {
             [prop.values].flat().forEach(value => {
-              const target = getters.getCardByEntity(value.value)
+              // console.log(value)
+              const target = rootGetters['data/getEntity'](value.value)
               if (target != null) {
                 let cardOffset = 30
-                if (!card.collapsed) {
-                  const offset = state.propertyOffsets[card.represents]?.[prop._id]?.default?.[value.value]
+                if (state.unfolded.find(id => card._id === id)) {
+                  const offset = state.propertyOffsets[card._id]?.[prop._id]?.default?.[value.value]
                   // const offset = 0
                   const scroll = state.cardScrolls[card._id] || 0
                   if (offset != null) {
@@ -49,8 +47,8 @@ export default {
                 }
 
                 let targetOffset = 30
-                if (!target.collapsed) {
-                  const offset = state.propertyOffsets[value.value]?.[prop._id]?.inverse?.[card.represents]
+                if (state.unfolded.find(id => target._id === id)) {
+                  const offset = state.propertyOffsets[value.value]?.[prop._id]?.inverse?.[card._id]
                   const scroll = state.cardScrolls[target._id] || 0
                   if (offset != null) {
                     targetOffset = offset - scroll + 12.5
@@ -61,12 +59,13 @@ export default {
 
                 edges.push({
                   source: card._id,
-                  x1: card.x,
-                  y1: card.y + cardOffset,
+                  x1: card.position.x,
+                  y1: card.position.y + cardOffset,
                   target: target._id,
-                  x2: target.x,
-                  y2: target.y + targetOffset,
+                  x2: target.position.x,
+                  y2: target.position.y + targetOffset,
                   label: rootGetters['config/getLabel'](prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label),
+                  local: value.ref === canvas,
                   prop
                 })
               }
@@ -108,22 +107,21 @@ export default {
     insertCard (state, card) {
       state.cards.push(card)
     },
-    toggleCollapse (state, id) {
-      const card = state.cards.find(card => card._id === id)
-      card.collapsed = !card.collapsed
+    toggleCollapse (state, _id) {
+      const index = state.unfolded.findIndex(id => id === _id)
+      if (index === -1) state.unfolded.push(_id)
+      else state.unfolded.splice(index, 1)
+      // const card = state.cards.find(card => card._id === id)
+      // card.collapsed = !card.collapsed
     },
     moveCard (state, { _id, x, y }) {
       const card = state.cards.find(card => card._id === _id)
       card.x = x
       card.y = y
     },
-    translateCard (state, { id, x, y }) {
-      const card = state.cards.find(card => card.id === id)
-      card.x += x
-      card.y += y
-    },
     removeCard (state, id) {
-      state.cards = state.cards.filter(card => card._id !== id)
+      // remove card from unfolded list
+      state.unfolded = state.unfolded.filter(u => u !== id)
     },
     setCardScroll (state, { _id, value }) {
       state.cardScrolls[_id] = value
@@ -141,36 +139,33 @@ export default {
   actions: {
     toggleCollapse ({ commit, dispatch }, id) {
       commit('toggleCollapse', id)
-      // dispatch('updateCard', id)
     },
-    translateCard ({ commit, dispatch }, options) {
-      commit('translateCard', options)
-      dispatch('updateCard', options.id)
-      // update view in db if drop event ended successfully
-    },
-    async dropCard ({ commit, state, dispatch }, options) {
-      let card = state.cards.find(card => card.represents === options.represents)
-      // console.log(options, card?.represents)
+    async dropCard ({ commit, state, dispatch, rootState }, options) {
+      const card = rootState.data.cards.find(card => card._id === options._id)
+      // // console.log(options, card?.represents)
       if (card != null) {
-        commit('moveCard', { ...card, ...options })
-        await dispatch('api/updateCard', card, { root: true })
+        // commit('moveCard', { ...card, ...options })
+        const position = {
+          _id: card.position._id,
+          ...options.position
+        }
+        commit('data/updatePosition', { entity: card._id, position }, { root: true })
+        await dispatch('api/updatePosition', position, { root: true })
       } else {
-        card = { _id: `Card/${uuid()}`, ...options }
-        commit('insertCard', card)
-        await dispatch('api/addCard', card, { root: true })
+        // card = { _id: `Card/${uuid()}`, ...options }
+        // commit('insertCard', card)
+        // await dispatch('api/addCard', card, { root: true })
+        await dispatch('api/insertCard', options, { root: true })
       }
     },
     async removeCard ({ commit, dispatch }, _id) {
       commit('removeCard', _id)
+      await dispatch('data/removeEntity', _id, { root: true })
       // console.log(_id)
       // await dispatch('api/deleteDocument', _id, { root: true })
     },
-    async updateCard ({ dispatch, state }, _id) {
-      const card = state.cards.find(card => card._id === _id)
-      await dispatch('api/updateCard', card, { root: true })
-    },
     async init ({ dispatch, commit, state }, canvas) {
-      commit('set', { canvas: `Canvas/${canvas}` })
+      commit('set', { canvas: canvas })
       await dispatch('api/getView', null, { root: true })
     },
     setZoom ({ commit }, zoom) {

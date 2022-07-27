@@ -6,43 +6,21 @@
         @input="search({ term, doctype })">
     </header>
     <main>
-      <template v-if="view === 'search'">
-        <BaseRadioGroup class="doctype" :options="doctypeOptions"
-          v-model="doctype"
-          @update:modelValue="search({ term, doctype })"/>
-        <div class="grid results" v-if="term?.length > 0">
-          <BaseCard
-            v-for="card in searchResults"
-            :key="card._id"
-            v-bind="card"
-            :entity="card"
-            :collapsed="card.cover == null"
-            context="search"/>
-        </div>
-      </template>
-      <template  v-if="view === 'types'">
-        <div class="grid">
-          <button v-for="t in types" :key="t.id" @click="create(t.id)">
-            {{t.label}}
-          </button>
-          <!-- <button
-            v-for="d in remoteSearchResults"
-            :key="d.wd" @click="importEntity(d)">
-            <b>{{ d.label }}</b><br> {{ d.description }}
-          </button> -->
-          <button class="cancel" @click="view = 'search'">
-            CANCEL
-          </button>
-          <!-- <BaseCard
-            v-for="card in remoteSearchResults"
-            :key="card.id"
-            v-bind="card"
-            collapsed/> -->
-        </div>
-      </template>
+      <BaseRadioGroup class="doctype" :options="doctypeOptions"
+        v-model="doctype"
+        @update:modelValue="search({ term, doctype })"/>
+      <div class="grid results" v-if="term?.length > 0">
+        <BaseCard
+          v-for="card in searchResults"
+          :key="card._id"
+          v-bind="card"
+          :entity="card"
+          :collapsed="card.cover == null"
+          context="search"/>
+      </div>
     </main>
     <footer>
-      <template v-if="view === 'search' && term?.length > 0">
+      <template v-if="term?.length > 0">
         <div @click="createEntity" :class="{disabled: doctype === null}">
           Create new {{ doctypeLabel }} <strong>{{ term }}</strong> →
         </div>
@@ -65,7 +43,6 @@ export default {
   },
   data () {
     return {
-      view: 'search',
       term: null,
       doctype: null
     }
@@ -109,9 +86,6 @@ export default {
         }
       })
       this.search({ term: this.term, doctype: this.doctype })
-    },
-    importEntity (item) {
-      this.insert(item)
     }
   },
   watch: {

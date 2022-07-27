@@ -8,7 +8,7 @@
     v-drag="{
       mode: 'move-card',
       trigger: '.drag-trigger',
-      data: { _id, offset: true }
+      data: { _id, _type: doctype?._id, offset: true }
     }"
     @dropped="onDrop">
     <CardHeader :label="entity.label ? getLabel(entity.label) : ''" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
@@ -25,7 +25,7 @@
       }"/>
     </CardHeader>
     <card-footer v-if="!collapsed && context !== 'search'">
-       <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/>
+       <!-- <icon @click="onRemoveCard" scale="1" data="@icon/remove.svg"/> -->
        <icon @click="confirmDeleteEntity = true" scale="1" data="@icon/delete.svg"/>
        <!-- <template #right>
        </template> -->
@@ -40,7 +40,7 @@
       <card-select :options="propOptions" @select="selectProperty"/>
     </base-modal>
     <base-modal v-if="confirmDeleteEntity" @close="confirmDeleteEntity = false">
-      <card-select :options="['Permanently Delete Entity']" @select="onDeleteEntity"/>
+      <card-select :options="['Delete Entity and Local Connections']" @select="onDeleteEntity"/>
     </base-modal>
   </div>
 </template>
@@ -158,13 +158,14 @@ export default {
       this.collapsed = !this.collapsed
       this.$emit('toggleCollapse')
     },
-    onRemoveCard () {
-      this.removeCard(this.cardId)
-      this.deleteDocument(this.cardId)
-    },
+    // onRemoveCard () {
+    //   this.removeCard(this.cardId)
+    //   this.deleteDocument(this.cardId)
+    // },
     onDeleteEntity () {
-      this.removeCard(this.cardId)
+      this.removeCard(this._id)
       this.deleteDocument(this._id)
+      this.confirmDeleteEntity = false
     }
   }
 }

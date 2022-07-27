@@ -1,5 +1,5 @@
 <template>
-  <g class="edge">
+  <g class="edge" :class="{local}">
     <!-- <path class="shadow" :d="path" :stroke-width="12"
       @mouseenter="showLabel = true" @mouseleave="showLabel = false"/> -->
     <!-- <path :d="path" :stroke-width="strokeWidth * 15"/> -->
@@ -32,7 +32,8 @@ export default {
     target: String,
     strokeWidth: Number,
     pathId: Number,
-    prop: Object
+    prop: Object,
+    local: Boolean
   },
   data () {
     return {
@@ -72,7 +73,7 @@ export default {
   pointer-events: none;
   // mix-blend-mode: var(--blend-mode);
   path {
-    stroke: var(--edges);
+    stroke: var(--edges-label);
     fill: none;
     &.outline {
       stroke: var(--background);
@@ -82,10 +83,14 @@ export default {
   text {
     text-anchor: middle;
     font-size: var(--font-size);
-    fill: var(--edges-label);
-
-    .shadow {
-      stroke: var(--edges);;
+    fill: var(--edges);
+  }
+  &.local {
+    path {
+      stroke: var(--edges);
+    }
+    text {
+      fill: var(--edges-label);
     }
   }
 }

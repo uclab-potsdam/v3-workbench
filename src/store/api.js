@@ -44,8 +44,36 @@ export default {
       Client = null
     },
     async init ({ commit }) {
+      const branchNames = await Client.query(
+        WOQL.using('_commits')
+          .triple('v:Branch', 'rdf:type', '@schema:Branch')
+          .triple('v:Branch', '@schema:name', 'v:name')
+      )
+
+      const refs = branchNames.bindings.map((d) => `branch/${d.name['@value']}`)
+
+      const branches = underscorify(flattenBindings((await Client.query(
+        WOQL.or(
+          ...refs.map((ref) =>
+            WOQL.using(ref)
+              .member('v:ref', [ref])
+              .triple('v:graph_id', 'rdf:type', '@schema:Graph')
+              .read_document('v:graph_id', 'v:graph')
+              .opt(
+                WOQL.triple('v:graph_id', 'label', 'v:label_id').read_document(
+                  'v:label_id',
+                  'v:label'
+                )
+              )
+          )
+        )
+      )).bindings)).map(b => ({
+        ...b.graph,
+        ref: b.ref,
+        label: b.label
+      }))
       const { prefixes, classes, props } = transformSchema(await Client.getSchema())
-      commit('data/set', { prefixes, classes, props }, { root: true })
+      commit('data/set', { prefixes, classes, props, branches }, { root: true })
     },
     async query (_, { query, msg }) {
       return await Client.query(query, msg)
@@ -56,46 +84,59 @@ export default {
         })
     },
     async getView ({ dispatch, commit, state, rootState }) {
-      const id = rootState.view.canvas
-      const view = underscorify(await Client.getDocument({ id }))
-      const cards = view.cards?.filter(card => card.represents != null) || []
+      commit('view/set', { cards: [] }, { root: true })
+      commit('data/clearEntities', null, { root: true })
+      const canvas = rootState.view.canvas
+      // console.log(id)
+      // const view = underscorify(await Client.getDocument({ id }))
+      // const cards = view.cards?.filter(card => card.represents != null) || []
+      const res = await Client.query(
+        WOQL.using(`branch/${canvas}`).select('v:id').triple('v:id', '@schema:position', 'v:positionId').read_document('v:positionId', 'v:position'))
+      const cards = flattenBindings(res.bindings)
+      if (cards.length === 0) return
       // cards.forEach(card => dispatch('getEntity', card.represents))
-      await dispatch('getEntities', cards.map(c => c.represents))
-      cards.forEach(card => { card.collapsed = true })
+      await dispatch('getEntities', cards.map(c => c.id))
       commit('view/set', { cards: cards }, { root: true })
     },
     async getEntities ({ dispatch, state, rootState, commit }, ids) {
+      const refs = rootState.data.branches.map(d => d.ref)
+      const canvas = rootState.view.canvas
+      // console.log(ids)
       const res = await Client.query(
-        WOQL.select('props', 'id')
-          .group_by('v:id', ['sub', 'prop', 'obj', 'label'], 'v:props')
-          .or(
-            ...ids.map((id) =>
-              WOQL.trim(id, 'v:id').or(
-                WOQL.triple(id, 'label', 'v:l').read_document('v:l', 'v:label'),
-                WOQL.triple(id, 'v:prop', 'v:obj').opt(
-                  WOQL.triple('v:obj', 'label', 'v:l').read_document(
-                    'v:l',
-                    'v:label'
-                  )
-                ),
-                WOQL.triple('v:sub', 'v:prop', id).opt(
-                  WOQL.triple('v:sub', 'label', 'v:l').read_document(
-                    'v:l',
-                    'v:label'
+        WOQL.select('props', 'id', 'position')
+          .using(`branch/${canvas}`).triple('v:id', '@schema:position', 'v:positionId').read_document('v:positionId', 'v:position')
+          .group_by('v:id', ['ref', 'sub', 'prop', 'obj', 'label'], 'v:props').or(
+            ...refs.map(ref =>
+              ids.map(id =>
+                WOQL.using(ref).member('v:id', [id]).member('v:ref', [ref]).or(
+                  WOQL.triple(id, 'label', 'v:l').read_document('v:l', 'v:label'),
+                  WOQL.triple(id, 'v:prop', 'v:obj').opt(
+                    WOQL.triple('v:obj', 'label', 'v:l').read_document(
+                      'v:l',
+                      'v:label'
+                    )
+                  ),
+                  WOQL.triple('v:sub', 'v:prop', id).opt(
+                    WOQL.triple('v:sub', 'label', 'v:l').read_document(
+                      'v:l',
+                      'v:label'
+                    )
                   )
                 )
               )
-            )
+            ).flat()
           )
       )
 
       const entities = underscorify(flattenBindings(res.bindings)).map(binding => {
         const props = binding.props.map(p => {
-          const sub = p[0]
-          const prop = p[1]
-          const obj = p[2]
-          const label = p[3]
+          const ref = p[0]
+          const sub = p[1]
+          const prop = p[2]
+          const obj = p[3]
+          const label = p[4]
           return {
+            ref,
             id: prop?.replace(/^@schema:/, '') || null,
             inverse: sub !== null,
             value: sub || obj,
@@ -117,7 +158,8 @@ export default {
             return {
               id: d[0],
               inverse,
-              values: d[1].map(({ value, label }) => ({
+              values: d[1].map(({ value, label, ref }) => ({
+                ref,
                 value,
                 label
               }))
@@ -129,7 +171,8 @@ export default {
           _id: binding.id,
           label: label,
           properties: groupedProps,
-          doctype
+          doctype,
+          position: binding.position
         }
         return entity
       })
@@ -138,7 +181,6 @@ export default {
     },
     async getEntity ({ dispatch, state, rootState, commit }, id) {
       const entity = await Client.query(WOQL.read_document(id, 'v:entity'))
-      console.log(entity)
 
       // const properties = await getProperties(id, rootState.config.languages)
       // const doctype = properties.find(p => p._id === 'rdf:type').value._id.replace(/@schema:/, '')
@@ -188,25 +230,51 @@ export default {
     },
     async search ({ commit, dispatch, rootState }, { term, doctype = null }) {
       if (term == null || term.trim() === '') return
-      const res = await dispatch('query', {
-        query: WOQL
-          .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover')
-          .limit(16)
-          .order_by(['v:dist', 'desc'])
-          .and(
-            WOQL.triple('v:_id', 'label', 'v:dict'),
-            // WOQL.once(WOQL.or(
-            //   ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            // )),
-            WOQL.or(
-              ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
-            ),
-            WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
-            WOQL.like(term, 'v:label', 'v:dist'),
-            WOQL.greater('v:dist', 0.6)
+      const baseRefs = rootState.data.branches.filter(b => b.type === 'base').map(b => b.ref)
+      const res = await Client.query(WOQL
+        .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover', 'v:ref')
+        .limit(16)
+        .order_by(['v:dist', 'desc'])
+        .or(
+          ...baseRefs.map((ref) =>
+            WOQL.using(ref)
+              .member('v:ref', [ref])
+              .and(
+                WOQL.triple('v:_id', 'label', 'v:dict'),
+                // WOQL.once(WOQL.or(
+                //   ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+                // )),
+                WOQL.or(
+                  ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+                ),
+                WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
+                WOQL.like(term, 'v:label', 'v:dist'),
+                WOQL.greater('v:dist', 0.6)
+              )
           )
-          .opt(WOQL.triple('v:_id', 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover'))
+        )
+      ).then((res) => {
+        return flattenBindings(res.bindings)
       })
+      // const res = await dispatch('query', {
+      //   query: WOQL
+      //     .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover')
+      //     .limit(16)
+      //     .order_by(['v:dist', 'desc'])
+      //     .and(
+      //       WOQL.triple('v:_id', 'label', 'v:dict'),
+      //       // WOQL.once(WOQL.or(
+      //       //   ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+      //       // )),
+      //       WOQL.or(
+      //         ...rootState.config.languages.map(lang => WOQL.triple('v:dict', lang, 'v:label'))
+      //       ),
+      //       WOQL.triple('v:_id', 'rdf:type', doctype ? `@schema:${doctype}` : 'v:_type'),
+      //       WOQL.like(term, 'v:label', 'v:dist'),
+      //       WOQL.greater('v:dist', 0.6)
+      //     )
+      //     .opt(WOQL.triple('v:_id', 'cover', 'v:cover_image').triple('v:cover_image', 'path', 'v:cover'))
+      // })
 
       const searchResults = res.map(({ _id, _type, label, cover }) => {
         const dt = doctype || _type.replace('@schema:', '')
@@ -281,6 +349,16 @@ export default {
         id: `doc:item_${data.wd.replace('wd:', '')}`
       }, { root: true })
     },
+    async insertCard ({ state, dispatch, rootState, rootGetters }, card) {
+      await Client.query(WOQL
+        .using(`branch/${rootState.view.canvas}`)
+        .insert_document(WOQL.doc(atFrom_(card)))
+        // .add_triple(card._id, 'rdf:type', `@schema:${card._type}`)
+        // .add_triple(card._id, '@schema:x', card.x)
+        // .add_triple(card._id, '@schema:y', card.y)
+      )
+      dispatch('getEntities', [card._id])
+    },
     async addCard ({ state, dispatch, rootState, rootGetters }, card) {
       const view = rootState.view.canvas
       // await Client.addDocument(atFrom_({
@@ -324,17 +402,29 @@ export default {
     async updateDocument ({ state }, document) {
       await Client.updateDocument(atFrom_(document))
     },
-    async updateCard ({ state, dispatch, rootState }, data) {
-      const view = rootState.view.canvas
+    async updatePosition ({ state, dispatch, rootState }, position) {
+      const canvas = rootState.view.canvas
       // const id = data.card || `Card/${uuid()}`
 
-      await Client.updateDocument(atFrom_({
-        _type: 'Card',
-        ...data
-      }))
-      await dispatch('query', {
-        query: WOQL.add_triple(view, 'cards', data._id)
-      })
+      await Client.query(
+        WOQL
+          .using(`branch/${canvas}`)
+          // .delete_triple(position._id, '@schema:x', 'v:oldX')
+          // .delete_triple(position._id, '@schema:y', 'v:oldY')
+          .update_triple(position._id, '@schema:x', Math.round(position.x), 'v:1')
+          .update_triple(position._id, '@schema:y', Math.round(position.y), 'v:2')
+          // .delete_triple(position._id, '@schema:x', 'v:oldX')
+          // .delete_triple(position._id, '@schema:y', 'v:oldY')
+          // .add_triple(position._id, '@schema:x', Math.round(position.x))
+          // .add_triple(position._id, '@schema:y', Math.round(position.y))
+      )
+      // await Client.updateDocument(atFrom_({
+      //   _type: 'Card',
+      //   ...data
+      // }))
+      // await dispatch('query', {
+      //   query: WOQL.add_triple(view, 'cards', data._id)
+      // })
 
       // await dispatch('query', {
       //   query: WOQL
@@ -348,18 +438,22 @@ export default {
       //     .add_triple(view, 'scm:cards', { '@id': id })
       // })
     },
-    async deleteDocument ({ state }, id) {
+    async deleteDocument ({ state, rootState }, id) {
+      const canvas = rootState.view.canvas
+      Client.checkout(canvas)
       await Client.deleteDocument({ id })
     },
-    async addTriple ({ state, commit, dispatch }, triple) {
+    async addTriple ({ state, commit, dispatch, rootState }, triple) {
+      const canvas = rootState.view.canvas
       await dispatch('query', {
-        query: WOQL.add_triple(...triple),
+        query: WOQL.using(`branch/${canvas}`).add_triple(...triple),
         msg: 'add prop'
       })
     },
-    async removeTriple ({ state, commit, dispatch }, triple) {
+    async removeTriple ({ state, commit, dispatch, rootState }, triple) {
+      const canvas = rootState.view.canvas
       await dispatch('query', {
-        query: WOQL.delete_triple(...triple),
+        query: WOQL.using(`branch/${canvas}`).delete_triple(...triple),
         msg: 'remove prop'
       })
     },
@@ -379,21 +473,26 @@ export default {
 
       return bindings
     },
-    async getCanvases ({ dispatch, state }) {
+    async getCanvases ({ dispatch, state, rootState }) {
       return underscorify(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
     },
-    async createCanvas ({ dispatch, state, rootState }, { label, _id }) {
+    async createCanvas ({ dispatch, state, rootState }, { label, branch }) {
+      Client.checkout('schema-default')
+      await Client.branch(branch)
+      Client.checkout(branch)
+
       const res = await Client.addDocument(atFrom_({
-        _type: 'Canvas',
+        _type: 'Graph',
         label: {
           _type: 'Dictionary',
           [rootState.config.lang]: label
         },
-        _id
+        type: 'canvas'
       }))
       return res
     },
     async addDocument ({ dispatch, state }, data) {
+      Client.checkout('base-user')
       return await Client.addDocument(atFrom_(data))
     },
     async updateNote (_, data) {

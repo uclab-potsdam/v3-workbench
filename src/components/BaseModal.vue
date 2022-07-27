@@ -11,6 +11,7 @@
 <script>
 export default {
   data () {
+    return {}
   },
   methods: {
     stopPropagation (e) {

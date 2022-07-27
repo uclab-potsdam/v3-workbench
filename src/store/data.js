@@ -9,7 +9,8 @@ export default {
     remoteSearchResults: [],
     prefixes: {},
     classes: [],
-    props: []
+    props: [],
+    branches: []
   },
   getters: {
     getEntity: (state) => (id) => {
@@ -24,6 +25,9 @@ export default {
         _id,
         label: state.labels[_id] || _id
       }
+    },
+    hasEntity: (state) => (id) => {
+      return state.cards.find(card => card._id === id) != null
     },
     getProperties: (state) => ({ sub, obj }) => {
       return state.props.filter(({ domain, range, metadata }) => {
@@ -49,12 +53,23 @@ export default {
       state.cards = state.cards.filter(({ _id }) => !ids.includes(_id))
       state.cards.push(...entities)
     },
+    clearEntities (state) {
+      state.cards = []
+    },
     storeEntityLabel (state, card) {
       state.labels[card._id] = card.label
     },
     updateDocument (state, entity) {
       state.cards = state.cards.filter(({ _id }) => _id !== entity._id)
       state.cards.push(entity)
+    },
+    updatePosition (state, { entity, position }) {
+      const card = state.cards.find(({ _id }) => _id === entity)
+      card.position = position
+      // state.cards.push(entity)
+    },
+    removeEntity (state, id) {
+      state.cards = state.cards.filter(({ _id }) => _id !== id)
     }
   },
   actions: {
@@ -92,16 +107,17 @@ export default {
     // },
     async addProp ({ dispatch }, triple) {
       await dispatch('api/addTriple', triple, { root: true })
-      dispatch('api/getEntities', [triple[0]], { root: true })
-      dispatch('api/getEntities', [triple[2]], { root: true })
+      dispatch('api/getEntities', [triple[0], triple[2]], { root: true })
     },
     async removeProp ({ dispatch, getters, commit }, triple) {
       await dispatch('api/removeTriple', triple, { root: true })
-      dispatch('api/getEntities', [triple[0]], { root: true })
-      dispatch('api/getEntities', [triple[2]], { root: true })
+      dispatch('api/getEntities', [triple[0], triple[2]], { root: true })
     },
     async deleteEntity ({ dispatch }, id) {
       await dispatch('api/deleteDocument', id, { root: true })
+    },
+    removeEntity ({ commit }, id) {
+      commit('removeEntity', id)
     }
   },
   modules: {

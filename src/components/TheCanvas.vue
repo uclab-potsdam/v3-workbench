@@ -25,14 +25,12 @@
       <BaseCard
         v-for="card in cards"
         :key="card._id"
-        :_id="card.represents"
-        :card-id="card._id"
         :allow-drop="drag?.options?.mode === 'connect'"
-        :style="{transform: `translate(${card.x}px, ${card.y}px)`}"
+        :style="{transform: `translate(${card.position.x}px, ${card.position.y}px)`}"
         :scale="transform.k"
-        v-bind="getEntity(card.represents)"
+        v-bind="card"
         :card="card"
-        :entity="getEntity(card.represents)"
+        :entity="card"
         @toggleCollapse="toggleCollapse(card._id)"
         @drag="onDrag"
         @addProp="onAddProp"
@@ -98,7 +96,7 @@ export default {
     this.initZoom()
   },
   computed: {
-    ...mapState('view', [
+    ...mapState('data', [
       'cards'
     ]),
     ...mapGetters('view', [
@@ -133,7 +131,6 @@ export default {
   methods: {
     ...mapActions('view', [
       'toggleCollapse',
-      'translateCard',
       'dropCard',
       'removeCard',
       'init',
@@ -187,21 +184,19 @@ export default {
     },
     onDrag (e) {
       this.drag = e
-      // this.translateCard({
-      //   id: e.id,
-      //   x: e.x / this.transform.k,
-      //   y: e.y / this.transform.k
-      // })
     },
     onDrop (e) {
       e.stopPropagation()
       const { detail } = e
       if (detail.mode === 'move-card') {
         this.dropCard({
-          represents: detail.data._id,
-          x: (detail.x - this.transform.x) / this.transform.k,
-          y: (detail.y - this.transform.y) / this.transform.k,
-          collapsed: true
+          _id: detail.data._id,
+          _type: detail.data._type,
+          position: {
+            _type: 'Position',
+            x: (detail.x - this.transform.x) / this.transform.k,
+            y: (detail.y - this.transform.y) / this.transform.k
+          }
         })
       }
       if (detail.mode === 'remove-prop') {

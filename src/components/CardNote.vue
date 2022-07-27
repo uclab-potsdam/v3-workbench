@@ -20,7 +20,7 @@ export default {
   },
 
   computed: {
-    // ...mapGetters('view', ['hasCardWithEntity'])
+    // ...mapGetters('data', ['hasEntity'])
   },
   methods: {
     update () {
@@ -40,7 +40,7 @@ export default {
     // },
     // getColors (id) {
     //   const colors = [
-    //     this.hasCardWithEntity(id) ? 'var(--edges)' : 'none',
+    //     this.hasEntity(id) ? 'var(--edges)' : 'none',
     //     'rgb(var(--secondary))',
     //     'currentColor'
     //   ]

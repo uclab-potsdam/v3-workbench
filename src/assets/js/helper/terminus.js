@@ -64,7 +64,7 @@ function getMetadata (c) {
 }
 
 function getPropMetadata (c, prop) {
-  return JSON.parse(c._documentation?._properties[prop] || null)
+  return JSON.parse(c._documentation?._properties[prop] || null) || {}
 }
 
 function getRelations (c, classes) {

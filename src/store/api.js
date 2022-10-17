@@ -2,7 +2,7 @@ import { WOQLClient, WOQL } from '@terminusdb/terminusdb-client'
 import { WikidataSearch, QueryWikidata, WikidataProps } from '@/assets/js/query/wikidata'
 import { v4 as uuid } from 'uuid'
 import { transformSchema, flattenBindings, underscorify } from '@/assets/js/helper/terminus'
-import localSchema from '@/assets/js/schema/localSchema'
+// import localSchema from '@/assets/js/schema/localSchema'
 
 let Client = null
 // const doctypes = {}
@@ -73,8 +73,8 @@ export default {
         ref: b.ref,
         label: b.label
       }))
-      // const { prefixes, classes, props } = transformSchema(await Client.getSchema())
-      const { prefixes, classes, props } = transformSchema(localSchema)
+      const { prefixes, classes, props } = transformSchema(await Client.getSchema())
+      // const { prefixes, classes, props } = transformSchema(localSchema)
       commit('data/set', { prefixes, classes, props, branches }, { root: true })
     },
     async query (_, { query, msg }) {

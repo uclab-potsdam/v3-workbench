@@ -7,7 +7,7 @@ function transformSchema (s) {
     .map((c, i, classes) => {
       return {
         _id: c._id,
-        hidden: c._abstract != null,
+        hidden: c._abstract != null || c._subdocument != null || c._type === 'Enum',
         source: c,
         metadata: getMetadata(c),
         ...getRelations(c, classes)

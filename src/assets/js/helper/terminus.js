@@ -90,7 +90,6 @@ function getParents (id, classes) {
 
 function getChildren (id, classes) {
   const c = classes.find((c) => c._id === id)
-  if (c._inherits == null) return []
   const children = classes
     .filter(({ _inherits }) => [_inherits].flat().find((id) => id === c._id))
     .map((child) => [child._id, getChildren(child._id, classes)])

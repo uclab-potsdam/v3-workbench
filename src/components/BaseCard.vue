@@ -12,6 +12,11 @@
     }"
     @dropped="onDrop">
     <CardHeader :label="entity.label ? getLabel(entity.label) : ''" :doctype="getLabel(doctype.metadata.label) || doctype._id" @click="toggleCollapse">
+      <icon scale="1" v-if="context !== 'search'" data="@icon/property-copy-l.svg" :color="[
+        collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
+        'rgb(var(--secondary))',
+        'currentColor'
+      ]" @click="copyId"/>
       <icon scale="1" v-if="context !== 'search'" data="@icon/property-add-l.svg" :color="[
         collapsed && hasOutgoingConnections ? 'var(--edges)' : 'none',
         'rgb(var(--secondary))',
@@ -38,6 +43,7 @@
     </base-modal>
     <base-modal v-if="confirmDeleteEntity" @close="confirmDeleteEntity = false">
       <card-select :options="['Delete Entity and Local Connections']" @select="onDeleteEntity"/>
+      <card-select :options="['Delete Fully']" @select="onDeleteEntity(true)"/>
     </base-modal>
   </div>
 </template>
@@ -132,10 +138,14 @@ export default {
       if (detail.data.sub == null) return
       e.stopPropagation()
       if (detail.data.prop == null) {
-        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => ({
-          value: prop,
-          label: this.getLabel(prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label)
-        }))
+        this.propOptions = this.getProperties({ sub: detail.data.doctype, obj: this.doctype._id }).map(prop => {
+          const label = this.getLabel(prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label)
+          console.log(label)
+          return {
+            value: prop,
+            label: label == null ? prop._id : label
+          }
+        })
         this.sub = detail.data.sub
       } else {
         this.addProp([detail.data.sub, detail.data.prop, this._id])
@@ -153,10 +163,13 @@ export default {
       this.collapsed = !this.collapsed
       this.$emit('toggleCollapse')
     },
-    onDeleteEntity () {
+    onDeleteEntity (full) {
       this.removeCard(this._id)
-      this.deleteDocument(this._id)
+      this.deleteDocument({ id: this._id, full: this._id })
       this.confirmDeleteEntity = false
+    },
+    copyId () {
+      navigator.clipboard.writeText(`"${this.label}",\n\t\t"${this._id}",`)
     }
   }
 }

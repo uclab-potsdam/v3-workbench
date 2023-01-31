@@ -72,7 +72,8 @@ export default {
         ...b.graph,
         ref: b.ref,
         label: b.label
-      }))
+      })).filter(branch => branch.ref !== 'branch/canvas-pottery-copy')
+      Client.checkout('template-production')
       const { prefixes, classes, props } = transformSchema(await Client.getSchema())
       // const { prefixes, classes, props } = transformSchema(localSchema)
       commit('data/set', { prefixes, classes, props, branches }, { root: true })
@@ -232,7 +233,7 @@ export default {
       if (term == null || term.trim() === '') return
       const baseRefs = rootState.data.branches.filter(b => b.type === 'base').map(b => b.ref)
       const res = await Client.query(WOQL
-        .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:cover', 'v:ref')
+        .select('v:label', 'v:_id', 'v:_type', 'v:dist', 'v:ref')
         .limit(16)
         .order_by(['v:dist', 'desc'])
         .or(
@@ -438,9 +439,11 @@ export default {
       //     .add_triple(view, 'scm:cards', { '@id': id })
       // })
     },
-    async deleteDocument ({ state, rootState }, id) {
+    async deleteDocument ({ state, rootState }, { id, full }) {
       const canvas = rootState.view.canvas
       Client.checkout(canvas)
+      await Client.deleteDocument({ id })
+      Client.checkout('dictionary-main')
       await Client.deleteDocument({ id })
     },
     async addTriple ({ state, commit, dispatch, rootState }, triple) {
@@ -477,7 +480,7 @@ export default {
       return underscorify(await Client.getDocument({ type: 'Canvas', unfold: false, as_list: true }))
     },
     async createCanvas ({ dispatch, state, rootState }, { label, branch }) {
-      Client.checkout('schema-default')
+      Client.checkout('template-production')
       await Client.branch(branch)
       Client.checkout(branch)
 
@@ -492,7 +495,7 @@ export default {
       return res
     },
     async addDocument ({ dispatch, state }, data) {
-      Client.checkout('base-user')
+      Client.checkout('dictionary-main')
       return await Client.addDocument(atFrom_(data))
     },
     async updateNote (_, data) {

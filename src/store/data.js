@@ -113,9 +113,9 @@ export default {
       await dispatch('api/removeTriple', triple, { root: true })
       dispatch('api/getEntities', [triple[0], triple[2]], { root: true })
     },
-    async deleteEntity ({ dispatch }, id) {
-      await dispatch('api/deleteDocument', id, { root: true })
-    },
+    // async deleteEntity ({ dispatch }, id) {
+    //   await dispatch('api/deleteDocument', id, { root: true })
+    // },
     removeEntity ({ commit }, id) {
       commit('removeEntity', id)
     }

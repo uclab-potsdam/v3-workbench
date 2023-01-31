@@ -203,12 +203,12 @@ export default {
         // })
       }
     },
-    onDeleteEntity (e) {
-      this.drag = null
-      // find a card with matching ids
-      this.removeCard(this.cards.find(c => c.represents === e._id)._id)
-      this.deleteDocument(e._id)
-    },
+    // onDeleteEntity (e) {
+    //   this.drag = null
+    //   // find a card with matching ids
+    //   this.removeCard(this.cards.find(c => c.represents === e._id)._id)
+    //   this.deleteDocument(e._id)
+    // },
     onAddProp (e) {
       if (this.drag?.options?.mode !== 'connect') return
       const doc = this.drag.options.doc

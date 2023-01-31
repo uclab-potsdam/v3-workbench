@@ -1,7 +1,7 @@
 <template>
   <div class="options">
     <base-button v-for="(option, i) in options" :key="i" @click="$emit('select', option.value != null ? option.value : option)">
-      {{option.label || option}}
+      {{option.label == null ? option : option.label }}
     </base-button>
   </div>
 </template>

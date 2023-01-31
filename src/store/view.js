@@ -56,6 +56,8 @@ export default {
                   }
                 }
 
+                const label = rootGetters['config/getLabel'](prop.metadata?.inverse ? prop.metadata.inverseLabel : prop.metadata?.label)
+
                 edges.push({
                   source: card._id,
                   x1: card.position.x,
@@ -63,7 +65,7 @@ export default {
                   target: target._id,
                   x2: target.position.x,
                   y2: target.position.y + targetOffset,
-                  label: rootGetters['config/getLabel'](prop.metadata.inverse ? prop.metadata.inverseLabel : prop.metadata.label),
+                  label: label == null ? prop._id : label,
                   local: value.ref === canvas,
                   prop
                 })

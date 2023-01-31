@@ -13,7 +13,7 @@
         {{ label }}
       </textPath> -->
       <textPath v-for="(l, i) in labels" :key="i" :href="`#path-${pathId}`" :startOffset="`${l}%`" dominant-baseline="middle">
-        {{ i % 2 ? label : arrow }}
+        {{ i % 2 ? label.replaceAll('_', ' ') : arrow }}
       </textPath>
     </text>
   </g>
@@ -88,6 +88,9 @@ export default {
   &.local {
     path {
       stroke: var(--edges);
+      &.outline {
+         stroke: var(--background);
+      }
     }
     text {
       fill: var(--edges-label);

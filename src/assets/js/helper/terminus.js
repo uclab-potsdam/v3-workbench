@@ -59,12 +59,12 @@ function transformSchema (s) {
 
 function getMetadata (c) {
   return {
-    ...JSON.parse(c._documentation?._comment || null)
+    ...JSON.parse(c._documentation?._comment?.replace(/\\/g, '') || null)
   }
 }
 
 function getPropMetadata (c, prop) {
-  return JSON.parse(c._documentation?._properties[prop] || null) || {}
+  return JSON.parse(c._documentation?._properties[prop]?.replace(/\\/g, '') || null) || {}
 }
 
 function getRelations (c, classes) {

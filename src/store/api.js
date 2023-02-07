@@ -73,7 +73,7 @@ export default {
         ref: b.ref,
         label: b.label
       })).filter(branch => branch.ref !== 'branch/canvas-pottery-copy')
-      Client.checkout('template-production')
+      Client.checkout('canvas-pottery')
       const { prefixes, classes, props } = transformSchema(await Client.getSchema())
       // const { prefixes, classes, props } = transformSchema(localSchema)
       commit('data/set', { prefixes, classes, props, branches }, { root: true })
